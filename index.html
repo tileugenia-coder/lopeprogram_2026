@@ -120,6 +120,7 @@ main{padding:20px 24px;max-width:1400px}
   </div>
   <div class="hdr-sub">10 km · 17. oktober · Mål: 55 min</div>
   <div class="cd" id="cd"></div>
+  <div id="sync-status" style="font-size:10px;color:var(--m);margin-top:2px">● Kobler til...</div>
 </div>
 <nav>
   <button class="active" onclick="nav('reg',this)">Registrering</button>
@@ -197,14 +198,20 @@ const USER_ID = "maria";
 
 // Save to Firestore
 async function saveToFirebase(){
+  const st=document.getElementById('sync-status');
+  if(st) st.textContent='● Lagrer...';
   try {
     await db.collection("logg").doc(USER_ID).set({
       lopp: JSON.stringify(loggL),
       styrke: JSON.stringify(loggS),
       oppdatert: new Date().toISOString()
     });
+    if(st){st.textContent='● Synkronisert';st.style.color='var(--a2)';}
     console.log("Saved to Firebase");
-  } catch(e){ console.error("Firebase save error:", e); }
+  } catch(e){
+    if(st){st.textContent='● Feil – ikke lagret';st.style.color='var(--or)';}
+    console.error("Firebase save error:", e);
+  }
 }
 
 // Load from Firestore
@@ -222,15 +229,21 @@ async function loadFromFirebase(){
 
 // Listen for real-time updates from other devices
 function listenFirebase(){
+  const st=document.getElementById('sync-status');
+  if(st){st.textContent='● Tilkoblet';st.style.color='var(--a2)';}
   db.collection("logg").doc(USER_ID).onSnapshot((snap) => {
     if(snap.exists()){
       const data = snap.data();
       if(data.lopp) loggL = JSON.parse(data.lopp);
       if(data.styrke) loggS = JSON.parse(data.styrke);
-      // Refresh views
+      // Also update localStorage
+      localStorage.setItem('hpm_l', JSON.stringify(loggL));
+      localStorage.setItem('hpm_s', JSON.stringify(loggS));
+      // Refresh all views
       document.getElementById('ugrid').innerHTML='';
       renderUkesplan();
       renderStats();
+      renderReg();
     }
   });
 }
@@ -932,6 +945,7 @@ function ikkeUtfort(key, msgId){
   loggL[key]['var']='';loggL[key].sn='';loggL[key].km='';
   try{
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    saveToFirebase();
     const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
     document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
@@ -951,6 +965,7 @@ function ikkeUtfortStr(uke, okt, msgId){
   });
   try{
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    saveToFirebase();
     const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
     document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
