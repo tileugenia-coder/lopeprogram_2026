@@ -201,6 +201,25 @@ async function saveToFirebase(){
   const st=document.getElementById('sync-status');
   if(st) st.textContent='● Lagrer...';
   try {
+    // Fetch latest from Firebase first, then merge
+    const snap = await db.collection("logg").doc(USER_ID).get();
+    let mergedL = {...loggL};
+    let mergedS = {...loggS};
+    if(snap.exists()){
+      const remote = snap.data();
+      if(remote.lopp){
+        const remoteL = JSON.parse(remote.lopp);
+        mergedL = {...remoteL, ...loggL}; // local wins for keys present locally
+      }
+      if(remote.styrke){
+        const remoteS = JSON.parse(remote.styrke);
+        mergedS = {...remoteS, ...loggS};
+      }
+    }
+    loggL = mergedL;
+    loggS = mergedS;
+    localStorage.setItem('hpm_l', JSON.stringify(loggL));
+    localStorage.setItem('hpm_s', JSON.stringify(loggS));
     await db.collection("logg").doc(USER_ID).set({
       lopp: JSON.stringify(loggL),
       styrke: JSON.stringify(loggS),
