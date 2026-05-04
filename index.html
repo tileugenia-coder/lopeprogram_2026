@@ -241,22 +241,10 @@ function nullstillUke(){
 }
 
 // ── Firebase ─────────────────────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
-  authDomain: "lopeprogram2026.firebaseapp.com",
-  projectId: "lopeprogram2026",
-  storageBucket: "lopeprogram2026.firebasestorage.app",
-  messagingSenderId: "549758402251",
-  appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
-};
-if(typeof firebase === 'undefined'){
-  document.getElementById('sync-status').textContent = '● Firebase ikke lastet – sjekk internett';
-  document.getElementById('sync-status').style.color = 'var(--or)';
-} else {
-  firebase.initializeApp(firebaseConfig);
-}
-const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
-const DOC = db ? db.collection("logg").doc("maria") : null;
+// Firebase REST API — ingen script-avhengighet
+const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
+const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
+const DOC = true; // always available
 
 function setSyncStatus(txt, col){
   const el=document.getElementById('sync-status');
@@ -265,14 +253,19 @@ function setSyncStatus(txt, col){
 
 // Save ALL data to Firebase (simple overwrite — single user)
 async function fbSave(){
-  if(!DOC){ setSyncStatus('● Ikke tilkoblet','var(--or)'); return; }
   setSyncStatus('● Lagrer...','var(--or)');
   try{
-    await DOC.set({
-      l: JSON.stringify(loggL),
-      s: JSON.stringify(loggS),
-      ts: Date.now()
+    const body={fields:{
+      l:{stringValue:JSON.stringify(loggL)},
+      s:{stringValue:JSON.stringify(loggS)},
+      ts:{integerValue:Date.now()}
+    }};
+    const res=await fetch(FB_URL+'?key='+FB_KEY,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
     });
+    if(!res.ok) throw new Error('HTTP '+res.status);
     setSyncStatus('● Synkronisert','var(--a2)');
   }catch(e){
     setSyncStatus('● Feil: '+e.message,'var(--or)');
@@ -282,45 +275,49 @@ async function fbSave(){
 
 // Load from Firebase on startup
 async function fbLoad(){
-  if(!DOC){ setSyncStatus('● Firebase ikke tilgjengelig','var(--or)'); return; }
   setSyncStatus('● Henter data...','var(--m)');
   try{
-    const snap = await DOC.get();
-    if(snap.exists()){
-      const d=snap.data();
-      if(d.l) loggL=JSON.parse(d.l);
-      if(d.s) loggS=JSON.parse(d.s);
-      localStorage.setItem('hpm_l',JSON.stringify(loggL));
-      localStorage.setItem('hpm_s',JSON.stringify(loggS));
-      setSyncStatus('● Lastet fra sky','var(--a2)');
-    } else {
-      setSyncStatus('● Ingen data i sky','var(--m)');
-    }
+    const res=await fetch(FB_URL+'?key='+FB_KEY);
+    if(res.status===404){setSyncStatus('● Klar – ingen data ennå','var(--a2)');return;}
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    const fields=d.fields||{};
+    if(fields.l) loggL=JSON.parse(fields.l.stringValue);
+    if(fields.s) loggS=JSON.parse(fields.s.stringValue);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    setSyncStatus('● Lastet fra sky','var(--a2)');
   }catch(e){
-    setSyncStatus('● Offline – bruker lokal data ('+e.code+')','var(--or)');
-    console.error('Firebase error:', e.code, e.message);
+    setSyncStatus('● Offline ('+e.message+')','var(--or)');
+    console.error(e);
   }
 }
 
 // Listen for real-time changes from other devices
 function fbListen(){
-  DOC.onSnapshot(snap=>{
-    if(!snap.exists()) return;
-    const d=snap.data();
-    // Only update if remote is newer than what we have
-    const remoteTs=d.ts||0;
-    if(d.l) loggL=JSON.parse(d.l);
-    if(d.s) loggS=JSON.parse(d.s);
-    localStorage.setItem('hpm_l',JSON.stringify(loggL));
-    localStorage.setItem('hpm_s',JSON.stringify(loggS));
-    // Refresh UI
-    document.getElementById('ugrid').innerHTML='';
-    renderUkesplan();
-    renderStats();
-    const rv=document.getElementById('v-reg');
-    if(rv&&rv.classList.contains('active')) renderReg();
-    setSyncStatus('● Synkronisert','var(--a2)');
-  });
+  // Poll every 15 seconds for updates from other devices
+  setInterval(async()=>{
+    try{
+      const res=await fetch(FB_URL+'?key='+FB_KEY);
+      if(!res.ok) return;
+      const d=await res.json();
+      const fields=d.fields||{};
+      const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+      if(fields.l){
+        const remoteL=JSON.parse(fields.l.stringValue);
+        const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        loggL=remoteL; loggS=remoteS;
+        localStorage.setItem('hpm_l',JSON.stringify(loggL));
+        localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        document.getElementById('ugrid').innerHTML='';
+        renderUkesplan(); renderStats();
+        const rv=document.getElementById('v-reg');
+        if(rv&&rv.classList.contains('active')) renderReg();
+        setSyncStatus('● Synkronisert','var(--a2)');
+      }
+    }catch(e){ console.warn('Poll error:',e); }
+  },15000);
+  setSyncStatus('● Tilkoblet','var(--a2)');
 }
 
 // Patch all save functions to also call fbSave
@@ -417,22 +414,10 @@ function nullstillUke(){
 }
 
 // ── Firebase ─────────────────────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
-  authDomain: "lopeprogram2026.firebaseapp.com",
-  projectId: "lopeprogram2026",
-  storageBucket: "lopeprogram2026.firebasestorage.app",
-  messagingSenderId: "549758402251",
-  appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
-};
-if(typeof firebase === 'undefined'){
-  document.getElementById('sync-status').textContent = '● Firebase ikke lastet – sjekk internett';
-  document.getElementById('sync-status').style.color = 'var(--or)';
-} else {
-  firebase.initializeApp(firebaseConfig);
-}
-const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
-const DOC = db ? db.collection("logg").doc("maria") : null;
+// Firebase REST API — ingen script-avhengighet
+const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
+const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
+const DOC = true; // always available
 
 function setSyncStatus(txt, col){
   const el=document.getElementById('sync-status');
@@ -441,14 +426,19 @@ function setSyncStatus(txt, col){
 
 // Save ALL data to Firebase (simple overwrite — single user)
 async function fbSave(){
-  if(!DOC){ setSyncStatus('● Ikke tilkoblet','var(--or)'); return; }
   setSyncStatus('● Lagrer...','var(--or)');
   try{
-    await DOC.set({
-      l: JSON.stringify(loggL),
-      s: JSON.stringify(loggS),
-      ts: Date.now()
+    const body={fields:{
+      l:{stringValue:JSON.stringify(loggL)},
+      s:{stringValue:JSON.stringify(loggS)},
+      ts:{integerValue:Date.now()}
+    }};
+    const res=await fetch(FB_URL+'?key='+FB_KEY,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
     });
+    if(!res.ok) throw new Error('HTTP '+res.status);
     setSyncStatus('● Synkronisert','var(--a2)');
   }catch(e){
     setSyncStatus('● Feil: '+e.message,'var(--or)');
@@ -458,45 +448,49 @@ async function fbSave(){
 
 // Load from Firebase on startup
 async function fbLoad(){
-  if(!DOC){ setSyncStatus('● Firebase ikke tilgjengelig','var(--or)'); return; }
   setSyncStatus('● Henter data...','var(--m)');
   try{
-    const snap = await DOC.get();
-    if(snap.exists()){
-      const d=snap.data();
-      if(d.l) loggL=JSON.parse(d.l);
-      if(d.s) loggS=JSON.parse(d.s);
-      localStorage.setItem('hpm_l',JSON.stringify(loggL));
-      localStorage.setItem('hpm_s',JSON.stringify(loggS));
-      setSyncStatus('● Lastet fra sky','var(--a2)');
-    } else {
-      setSyncStatus('● Ingen data i sky','var(--m)');
-    }
+    const res=await fetch(FB_URL+'?key='+FB_KEY);
+    if(res.status===404){setSyncStatus('● Klar – ingen data ennå','var(--a2)');return;}
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    const fields=d.fields||{};
+    if(fields.l) loggL=JSON.parse(fields.l.stringValue);
+    if(fields.s) loggS=JSON.parse(fields.s.stringValue);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    setSyncStatus('● Lastet fra sky','var(--a2)');
   }catch(e){
-    setSyncStatus('● Offline – bruker lokal data ('+e.code+')','var(--or)');
-    console.error('Firebase error:', e.code, e.message);
+    setSyncStatus('● Offline ('+e.message+')','var(--or)');
+    console.error(e);
   }
 }
 
 // Listen for real-time changes from other devices
 function fbListen(){
-  DOC.onSnapshot(snap=>{
-    if(!snap.exists()) return;
-    const d=snap.data();
-    // Only update if remote is newer than what we have
-    const remoteTs=d.ts||0;
-    if(d.l) loggL=JSON.parse(d.l);
-    if(d.s) loggS=JSON.parse(d.s);
-    localStorage.setItem('hpm_l',JSON.stringify(loggL));
-    localStorage.setItem('hpm_s',JSON.stringify(loggS));
-    // Refresh UI
-    document.getElementById('ugrid').innerHTML='';
-    renderUkesplan();
-    renderStats();
-    const rv=document.getElementById('v-reg');
-    if(rv&&rv.classList.contains('active')) renderReg();
-    setSyncStatus('● Synkronisert','var(--a2)');
-  });
+  // Poll every 15 seconds for updates from other devices
+  setInterval(async()=>{
+    try{
+      const res=await fetch(FB_URL+'?key='+FB_KEY);
+      if(!res.ok) return;
+      const d=await res.json();
+      const fields=d.fields||{};
+      const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+      if(fields.l){
+        const remoteL=JSON.parse(fields.l.stringValue);
+        const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        loggL=remoteL; loggS=remoteS;
+        localStorage.setItem('hpm_l',JSON.stringify(loggL));
+        localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        document.getElementById('ugrid').innerHTML='';
+        renderUkesplan(); renderStats();
+        const rv=document.getElementById('v-reg');
+        if(rv&&rv.classList.contains('active')) renderReg();
+        setSyncStatus('● Synkronisert','var(--a2)');
+      }
+    }catch(e){ console.warn('Poll error:',e); }
+  },15000);
+  setSyncStatus('● Tilkoblet','var(--a2)');
 }
 
 // Patch all save functions to also call fbSave
@@ -1371,22 +1365,10 @@ function nullstillUke(){
 }
 
 // ── Firebase ─────────────────────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
-  authDomain: "lopeprogram2026.firebaseapp.com",
-  projectId: "lopeprogram2026",
-  storageBucket: "lopeprogram2026.firebasestorage.app",
-  messagingSenderId: "549758402251",
-  appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
-};
-if(typeof firebase === 'undefined'){
-  document.getElementById('sync-status').textContent = '● Firebase ikke lastet – sjekk internett';
-  document.getElementById('sync-status').style.color = 'var(--or)';
-} else {
-  firebase.initializeApp(firebaseConfig);
-}
-const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
-const DOC = db ? db.collection("logg").doc("maria") : null;
+// Firebase REST API — ingen script-avhengighet
+const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
+const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
+const DOC = true; // always available
 
 function setSyncStatus(txt, col){
   const el=document.getElementById('sync-status');
@@ -1395,14 +1377,19 @@ function setSyncStatus(txt, col){
 
 // Save ALL data to Firebase (simple overwrite — single user)
 async function fbSave(){
-  if(!DOC){ setSyncStatus('● Ikke tilkoblet','var(--or)'); return; }
   setSyncStatus('● Lagrer...','var(--or)');
   try{
-    await DOC.set({
-      l: JSON.stringify(loggL),
-      s: JSON.stringify(loggS),
-      ts: Date.now()
+    const body={fields:{
+      l:{stringValue:JSON.stringify(loggL)},
+      s:{stringValue:JSON.stringify(loggS)},
+      ts:{integerValue:Date.now()}
+    }};
+    const res=await fetch(FB_URL+'?key='+FB_KEY,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
     });
+    if(!res.ok) throw new Error('HTTP '+res.status);
     setSyncStatus('● Synkronisert','var(--a2)');
   }catch(e){
     setSyncStatus('● Feil: '+e.message,'var(--or)');
@@ -1412,45 +1399,49 @@ async function fbSave(){
 
 // Load from Firebase on startup
 async function fbLoad(){
-  if(!DOC){ setSyncStatus('● Firebase ikke tilgjengelig','var(--or)'); return; }
   setSyncStatus('● Henter data...','var(--m)');
   try{
-    const snap = await DOC.get();
-    if(snap.exists()){
-      const d=snap.data();
-      if(d.l) loggL=JSON.parse(d.l);
-      if(d.s) loggS=JSON.parse(d.s);
-      localStorage.setItem('hpm_l',JSON.stringify(loggL));
-      localStorage.setItem('hpm_s',JSON.stringify(loggS));
-      setSyncStatus('● Lastet fra sky','var(--a2)');
-    } else {
-      setSyncStatus('● Ingen data i sky','var(--m)');
-    }
+    const res=await fetch(FB_URL+'?key='+FB_KEY);
+    if(res.status===404){setSyncStatus('● Klar – ingen data ennå','var(--a2)');return;}
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    const fields=d.fields||{};
+    if(fields.l) loggL=JSON.parse(fields.l.stringValue);
+    if(fields.s) loggS=JSON.parse(fields.s.stringValue);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    setSyncStatus('● Lastet fra sky','var(--a2)');
   }catch(e){
-    setSyncStatus('● Offline – bruker lokal data ('+e.code+')','var(--or)');
-    console.error('Firebase error:', e.code, e.message);
+    setSyncStatus('● Offline ('+e.message+')','var(--or)');
+    console.error(e);
   }
 }
 
 // Listen for real-time changes from other devices
 function fbListen(){
-  DOC.onSnapshot(snap=>{
-    if(!snap.exists()) return;
-    const d=snap.data();
-    // Only update if remote is newer than what we have
-    const remoteTs=d.ts||0;
-    if(d.l) loggL=JSON.parse(d.l);
-    if(d.s) loggS=JSON.parse(d.s);
-    localStorage.setItem('hpm_l',JSON.stringify(loggL));
-    localStorage.setItem('hpm_s',JSON.stringify(loggS));
-    // Refresh UI
-    document.getElementById('ugrid').innerHTML='';
-    renderUkesplan();
-    renderStats();
-    const rv=document.getElementById('v-reg');
-    if(rv&&rv.classList.contains('active')) renderReg();
-    setSyncStatus('● Synkronisert','var(--a2)');
-  });
+  // Poll every 15 seconds for updates from other devices
+  setInterval(async()=>{
+    try{
+      const res=await fetch(FB_URL+'?key='+FB_KEY);
+      if(!res.ok) return;
+      const d=await res.json();
+      const fields=d.fields||{};
+      const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+      if(fields.l){
+        const remoteL=JSON.parse(fields.l.stringValue);
+        const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        loggL=remoteL; loggS=remoteS;
+        localStorage.setItem('hpm_l',JSON.stringify(loggL));
+        localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        document.getElementById('ugrid').innerHTML='';
+        renderUkesplan(); renderStats();
+        const rv=document.getElementById('v-reg');
+        if(rv&&rv.classList.contains('active')) renderReg();
+        setSyncStatus('● Synkronisert','var(--a2)');
+      }
+    }catch(e){ console.warn('Poll error:',e); }
+  },15000);
+  setSyncStatus('● Tilkoblet','var(--a2)');
 }
 
 // Patch all save functions to also call fbSave
