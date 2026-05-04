@@ -120,7 +120,7 @@ main{padding:20px 24px;max-width:1400px}
   </div>
   <div class="hdr-sub">10 km · 17. oktober · Mål: 55 min</div>
   <div class="cd" id="cd"></div>
-  <div id="sync-status" style="font-size:10px;color:var(--m);margin-top:2px"></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:2px"><div id="sync-status" style="font-size:10px;color:var(--m)"></div><button onclick="fbLoad().then(()=>fbListen())" style="font-size:10px;background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;padding:0">↻ Prøv igjen</button></div>
 </div>
 <nav>
   <button class="active" onclick="nav('reg',this)">Registrering</button>
@@ -290,8 +290,8 @@ async function fbLoad(){
       setSyncStatus('● Ingen data i sky','var(--m)');
     }
   }catch(e){
-    setSyncStatus('● Offline – bruker lokal data','var(--or)');
-    console.warn(e);
+    setSyncStatus('● Offline – bruker lokal data ('+e.code+')','var(--or)');
+    console.error('Firebase error:', e.code, e.message);
   }
 }
 
@@ -459,8 +459,8 @@ async function fbLoad(){
       setSyncStatus('● Ingen data i sky','var(--m)');
     }
   }catch(e){
-    setSyncStatus('● Offline – bruker lokal data','var(--or)');
-    console.warn(e);
+    setSyncStatus('● Offline – bruker lokal data ('+e.code+')','var(--or)');
+    console.error('Firebase error:', e.code, e.message);
   }
 }
 
@@ -1406,8 +1406,8 @@ async function fbLoad(){
       setSyncStatus('● Ingen data i sky','var(--m)');
     }
   }catch(e){
-    setSyncStatus('● Offline – bruker lokal data','var(--or)');
-    console.warn(e);
+    setSyncStatus('● Offline – bruker lokal data ('+e.code+')','var(--or)');
+    console.error('Firebase error:', e.code, e.message);
   }
 }
 
