@@ -249,9 +249,14 @@ const firebaseConfig = {
   messagingSenderId: "549758402251",
   appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const DOC = db.collection("logg").doc("maria");
+if(typeof firebase === 'undefined'){
+  document.getElementById('sync-status').textContent = '● Firebase ikke lastet – sjekk internett';
+  document.getElementById('sync-status').style.color = 'var(--or)';
+} else {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
+const DOC = db ? db.collection("logg").doc("maria") : null;
 
 function setSyncStatus(txt, col){
   const el=document.getElementById('sync-status');
@@ -260,6 +265,7 @@ function setSyncStatus(txt, col){
 
 // Save ALL data to Firebase (simple overwrite — single user)
 async function fbSave(){
+  if(!DOC){ setSyncStatus('● Ikke tilkoblet','var(--or)'); return; }
   setSyncStatus('● Lagrer...','var(--or)');
   try{
     await DOC.set({
@@ -276,6 +282,7 @@ async function fbSave(){
 
 // Load from Firebase on startup
 async function fbLoad(){
+  if(!DOC){ setSyncStatus('● Firebase ikke tilgjengelig','var(--or)'); return; }
   setSyncStatus('● Henter data...','var(--m)');
   try{
     const snap = await DOC.get();
@@ -418,9 +425,14 @@ const firebaseConfig = {
   messagingSenderId: "549758402251",
   appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const DOC = db.collection("logg").doc("maria");
+if(typeof firebase === 'undefined'){
+  document.getElementById('sync-status').textContent = '● Firebase ikke lastet – sjekk internett';
+  document.getElementById('sync-status').style.color = 'var(--or)';
+} else {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
+const DOC = db ? db.collection("logg").doc("maria") : null;
 
 function setSyncStatus(txt, col){
   const el=document.getElementById('sync-status');
@@ -429,6 +441,7 @@ function setSyncStatus(txt, col){
 
 // Save ALL data to Firebase (simple overwrite — single user)
 async function fbSave(){
+  if(!DOC){ setSyncStatus('● Ikke tilkoblet','var(--or)'); return; }
   setSyncStatus('● Lagrer...','var(--or)');
   try{
     await DOC.set({
@@ -445,6 +458,7 @@ async function fbSave(){
 
 // Load from Firebase on startup
 async function fbLoad(){
+  if(!DOC){ setSyncStatus('● Firebase ikke tilgjengelig','var(--or)'); return; }
   setSyncStatus('● Henter data...','var(--m)');
   try{
     const snap = await DOC.get();
@@ -1365,9 +1379,14 @@ const firebaseConfig = {
   messagingSenderId: "549758402251",
   appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const DOC = db.collection("logg").doc("maria");
+if(typeof firebase === 'undefined'){
+  document.getElementById('sync-status').textContent = '● Firebase ikke lastet – sjekk internett';
+  document.getElementById('sync-status').style.color = 'var(--or)';
+} else {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
+const DOC = db ? db.collection("logg").doc("maria") : null;
 
 function setSyncStatus(txt, col){
   const el=document.getElementById('sync-status');
@@ -1376,6 +1395,7 @@ function setSyncStatus(txt, col){
 
 // Save ALL data to Firebase (simple overwrite — single user)
 async function fbSave(){
+  if(!DOC){ setSyncStatus('● Ikke tilkoblet','var(--or)'); return; }
   setSyncStatus('● Lagrer...','var(--or)');
   try{
     await DOC.set({
@@ -1392,6 +1412,7 @@ async function fbSave(){
 
 // Load from Firebase on startup
 async function fbLoad(){
+  if(!DOC){ setSyncStatus('● Firebase ikke tilgjengelig','var(--or)'); return; }
   setSyncStatus('● Henter data...','var(--m)');
   try{
     const snap = await DOC.get();
