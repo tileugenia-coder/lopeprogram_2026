@@ -120,7 +120,7 @@ main{padding:20px 24px;max-width:1400px}
   </div>
   <div class="hdr-sub">10 km · 17. oktober · Mål: 55 min</div>
   <div class="cd" id="cd"></div>
-  <div id="sync-status" style="font-size:10px;color:var(--m);margin-top:2px">● Kobler til...</div>
+  <div id="sync-status" style="font-size:10px;color:var(--m);margin-top:2px"></div>
 </div>
 <nav>
   <button class="active" onclick="nav('reg',this)">Registrering</button>
@@ -179,10 +179,68 @@ main{padding:20px 24px;max-width:1400px}
   <div id="stats-body"></div>
 </div>
 </main>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+// ── Nullstill ────────────────────────────────────────────────────────────
+function nullstillOkt(key, msgId){
+  // Delete all data for this specific session
+  delete loggL[key];
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
 
+function nullstillStrOkt(uke, okt, msgId){
+  const src=okt==='A'?SA:SB;
+  const ovs=src[String(uke)]||[];
+  ovs.forEach((ov,i)=>{
+    for(let s=1;s<=4;s++){
+      delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+    }
+  });
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillUke(){
+  const uv=document.getElementById('reg-uke').value;
+  if(!uv) return;
+  const uke=parseInt(uv);
+  if(!confirm('Nullstille all logging for uke '+uke+'?')) return;
+  // Delete all running sessions
+  ['intervall','roligLop','tempo','langtur','race'].forEach(k=>{
+    delete loggL[uke+'_'+k];
+  });
+  // Delete all strength sessions
+  ['A','B'].forEach(okt=>{
+    const src=okt==='A'?SA:SB;
+    const ovs=src[String(uke)]||[];
+    ovs.forEach((ov,i)=>{
+      for(let s=1;s<=4;s++){
+        delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+      }
+    });
+  });
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+// ── Firebase ─────────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
   authDomain: "lopeprogram2026.firebaseapp.com",
@@ -191,81 +249,283 @@ const firebaseConfig = {
   messagingSenderId: "549758402251",
   appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const USER_ID = "maria";
+const DOC = db.collection("logg").doc("maria");
 
-// Save to Firestore
-async function saveToFirebase(){
-  const st=document.getElementById('sync-status');
-  if(st) st.textContent='● Lagrer...';
-  try {
-    // Fetch latest from Firebase first, then merge
-    const snap = await db.collection("logg").doc(USER_ID).get();
-    let mergedL = {...loggL};
-    let mergedS = {...loggS};
-    if(snap.exists()){
-      const remote = snap.data();
-      if(remote.lopp){
-        const remoteL = JSON.parse(remote.lopp);
-        mergedL = {...remoteL, ...loggL}; // local wins for keys present locally
-      }
-      if(remote.styrke){
-        const remoteS = JSON.parse(remote.styrke);
-        mergedS = {...remoteS, ...loggS};
-      }
-    }
-    loggL = mergedL;
-    loggS = mergedS;
-    localStorage.setItem('hpm_l', JSON.stringify(loggL));
-    localStorage.setItem('hpm_s', JSON.stringify(loggS));
-    await db.collection("logg").doc(USER_ID).set({
-      lopp: JSON.stringify(loggL),
-      styrke: JSON.stringify(loggS),
-      oppdatert: new Date().toISOString()
+function setSyncStatus(txt, col){
+  const el=document.getElementById('sync-status');
+  if(el){el.textContent=txt;el.style.color=col||'var(--m)';}
+}
+
+// Save ALL data to Firebase (simple overwrite — single user)
+async function fbSave(){
+  setSyncStatus('● Lagrer...','var(--or)');
+  try{
+    await DOC.set({
+      l: JSON.stringify(loggL),
+      s: JSON.stringify(loggS),
+      ts: Date.now()
     });
-    if(st){st.textContent='● Synkronisert';st.style.color='var(--a2)';}
-    console.log("Saved to Firebase");
-  } catch(e){
-    if(st){st.textContent='● Feil – ikke lagret';st.style.color='var(--or)';}
-    console.error("Firebase save error:", e);
+    setSyncStatus('● Synkronisert','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Feil: '+e.message,'var(--or)');
+    console.error(e);
   }
 }
 
-// Load from Firestore
-async function loadFromFirebase(){
-  try {
-    const snap = await db.collection("logg").doc(USER_ID).get();
+// Load from Firebase on startup
+async function fbLoad(){
+  setSyncStatus('● Henter data...','var(--m)');
+  try{
+    const snap = await DOC.get();
     if(snap.exists()){
-      const data = snap.data();
-      if(data.lopp) loggL = JSON.parse(data.lopp);
-      if(data.styrke) loggS = JSON.parse(data.styrke);
-      console.log("Loaded from Firebase");
+      const d=snap.data();
+      if(d.l) loggL=JSON.parse(d.l);
+      if(d.s) loggS=JSON.parse(d.s);
+      localStorage.setItem('hpm_l',JSON.stringify(loggL));
+      localStorage.setItem('hpm_s',JSON.stringify(loggS));
+      setSyncStatus('● Lastet fra sky','var(--a2)');
+    } else {
+      setSyncStatus('● Ingen data i sky','var(--m)');
     }
-  } catch(e){ console.error("Firebase load error:", e); }
+  }catch(e){
+    setSyncStatus('● Offline – bruker lokal data','var(--or)');
+    console.warn(e);
+  }
 }
 
-// Listen for real-time updates from other devices
-function listenFirebase(){
-  const st=document.getElementById('sync-status');
-  if(st){st.textContent='● Tilkoblet';st.style.color='var(--a2)';}
-  db.collection("logg").doc(USER_ID).onSnapshot((snap) => {
-    if(snap.exists()){
-      const data = snap.data();
-      if(data.lopp) loggL = JSON.parse(data.lopp);
-      if(data.styrke) loggS = JSON.parse(data.styrke);
-      // Also update localStorage
-      localStorage.setItem('hpm_l', JSON.stringify(loggL));
-      localStorage.setItem('hpm_s', JSON.stringify(loggS));
-      // Refresh all views
-      document.getElementById('ugrid').innerHTML='';
-      renderUkesplan();
-      renderStats();
-      renderReg();
-    }
+// Listen for real-time changes from other devices
+function fbListen(){
+  DOC.onSnapshot(snap=>{
+    if(!snap.exists()) return;
+    const d=snap.data();
+    // Only update if remote is newer than what we have
+    const remoteTs=d.ts||0;
+    if(d.l) loggL=JSON.parse(d.l);
+    if(d.s) loggS=JSON.parse(d.s);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    // Refresh UI
+    document.getElementById('ugrid').innerHTML='';
+    renderUkesplan();
+    renderStats();
+    const rv=document.getElementById('v-reg');
+    if(rv&&rv.classList.contains('active')) renderReg();
+    setSyncStatus('● Synkronisert','var(--a2)');
   });
 }
+
+// Patch all save functions to also call fbSave
+const _origSaveOkt=saveOkt;
+window.saveOkt=function(key,msgId){
+  _origSaveOkt(key,msgId);
+  fbSave();
+};
+const _origSavelReg=savelReg;
+window.savelReg=function(){
+  _origSavelReg();
+  fbSave();
+};
+const _origIkke=ikkeUtfort;
+window.ikkeUtfort=function(key,msgId){
+  _origIkke(key,msgId);
+  fbSave();
+};
+const _origIkkeStr=ikkeUtfortStr;
+window.ikkeUtfortStr=function(uke,okt,msgId){
+  _origIkkeStr(uke,okt,msgId);
+  fbSave();
+};
+
+// Init: load then listen
+fbLoad().then(()=>{
+  renderUkesplan();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  fbListen();
+});
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+// ── Nullstill ────────────────────────────────────────────────────────────
+function nullstillOkt(key, msgId){
+  // Delete all data for this specific session
+  delete loggL[key];
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillStrOkt(uke, okt, msgId){
+  const src=okt==='A'?SA:SB;
+  const ovs=src[String(uke)]||[];
+  ovs.forEach((ov,i)=>{
+    for(let s=1;s<=4;s++){
+      delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+    }
+  });
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillUke(){
+  const uv=document.getElementById('reg-uke').value;
+  if(!uv) return;
+  const uke=parseInt(uv);
+  if(!confirm('Nullstille all logging for uke '+uke+'?')) return;
+  // Delete all running sessions
+  ['intervall','roligLop','tempo','langtur','race'].forEach(k=>{
+    delete loggL[uke+'_'+k];
+  });
+  // Delete all strength sessions
+  ['A','B'].forEach(okt=>{
+    const src=okt==='A'?SA:SB;
+    const ovs=src[String(uke)]||[];
+    ovs.forEach((ov,i)=>{
+      for(let s=1;s<=4;s++){
+        delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+      }
+    });
+  });
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+// ── Firebase ─────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
+  authDomain: "lopeprogram2026.firebaseapp.com",
+  projectId: "lopeprogram2026",
+  storageBucket: "lopeprogram2026.firebasestorage.app",
+  messagingSenderId: "549758402251",
+  appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const DOC = db.collection("logg").doc("maria");
+
+function setSyncStatus(txt, col){
+  const el=document.getElementById('sync-status');
+  if(el){el.textContent=txt;el.style.color=col||'var(--m)';}
+}
+
+// Save ALL data to Firebase (simple overwrite — single user)
+async function fbSave(){
+  setSyncStatus('● Lagrer...','var(--or)');
+  try{
+    await DOC.set({
+      l: JSON.stringify(loggL),
+      s: JSON.stringify(loggS),
+      ts: Date.now()
+    });
+    setSyncStatus('● Synkronisert','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Feil: '+e.message,'var(--or)');
+    console.error(e);
+  }
+}
+
+// Load from Firebase on startup
+async function fbLoad(){
+  setSyncStatus('● Henter data...','var(--m)');
+  try{
+    const snap = await DOC.get();
+    if(snap.exists()){
+      const d=snap.data();
+      if(d.l) loggL=JSON.parse(d.l);
+      if(d.s) loggS=JSON.parse(d.s);
+      localStorage.setItem('hpm_l',JSON.stringify(loggL));
+      localStorage.setItem('hpm_s',JSON.stringify(loggS));
+      setSyncStatus('● Lastet fra sky','var(--a2)');
+    } else {
+      setSyncStatus('● Ingen data i sky','var(--m)');
+    }
+  }catch(e){
+    setSyncStatus('● Offline – bruker lokal data','var(--or)');
+    console.warn(e);
+  }
+}
+
+// Listen for real-time changes from other devices
+function fbListen(){
+  DOC.onSnapshot(snap=>{
+    if(!snap.exists()) return;
+    const d=snap.data();
+    // Only update if remote is newer than what we have
+    const remoteTs=d.ts||0;
+    if(d.l) loggL=JSON.parse(d.l);
+    if(d.s) loggS=JSON.parse(d.s);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    // Refresh UI
+    document.getElementById('ugrid').innerHTML='';
+    renderUkesplan();
+    renderStats();
+    const rv=document.getElementById('v-reg');
+    if(rv&&rv.classList.contains('active')) renderReg();
+    setSyncStatus('● Synkronisert','var(--a2)');
+  });
+}
+
+// Patch all save functions to also call fbSave
+const _origSaveOkt=saveOkt;
+window.saveOkt=function(key,msgId){
+  _origSaveOkt(key,msgId);
+  fbSave();
+};
+const _origSavelReg=savelReg;
+window.savelReg=function(){
+  _origSavelReg();
+  fbSave();
+};
+const _origIkke=ikkeUtfort;
+window.ikkeUtfort=function(key,msgId){
+  _origIkke(key,msgId);
+  fbSave();
+};
+const _origIkkeStr=ikkeUtfortStr;
+window.ikkeUtfortStr=function(uke,okt,msgId){
+  _origIkkeStr(uke,okt,msgId);
+  fbSave();
+};
+
+// Init: load then listen
+fbLoad().then(()=>{
+  renderUkesplan();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  fbListen();
+});
+
+</script>
+<script>
+
+
+
+// Save to Firestore
+
+// Load from Firestore
+
+// Listen for real-time updates from other devices
 
 const W=[{"uke": 1, "kaluke": "U19", "dato": "04.05 – 10.05", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →6×4 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×8\nSeated row – 3×12\nSingle-arm shoulder press – 3×10\nCalf raise – 3×20\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n20 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Backyard Ultra 18 km\n09.05.2026", "son": "Hvile"}, {"uke": 2, "kaluke": "U20", "dato": "11.05 – 17.05", "fase": "Basis", "man": "Hvile", "tir": "Styrke B\nLat pulldown – 3×8\nSeated row – 3×12\nSingle-arm shoulder press – 3×10\nCalf raise – 3×20\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n22 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+10 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×8\nRomanian deadlift (RDL) – 4×8\nBulgarian split squat – 3×10\nSingle-leg RDL – 3×10\nLeg extension – 3×12\nSingle-leg calf raise – 3×15\nPallof press – 3×10\nDead bug – 3×10", "son": "Rolig langtur\n65 min\n130–150 bpm"}, {"uke": 3, "kaluke": "U21", "dato": "18.05 – 24.05", "fase": "Basis", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×8 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×8\nSeated row – 3×12\nSingle-arm shoulder press – 3×10\nCalf raise – 3×20\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n25 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+12 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×8\nRomanian deadlift (RDL) – 4×8\nBulgarian split squat – 3×10\nSingle-leg RDL – 3×10\nLeg extension – 3×12\nSingle-leg calf raise – 3×15\nPallof press – 3×10\nDead bug – 3×10", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 4, "kaluke": "U22", "dato": "25.05 – 31.05", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall + Styrke B\n50–40 min\n[DELOAD –40%] 15 min oppvarming →4×4 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8\nSeated row – 2×12\nSingle-arm shoulder press – 2×10\nCalf raise – 2×20\nSuperman – 2×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n15 min\n130–155 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+10 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×8\nRomanian deadlift (RDL) – 3×8\nBulgarian split squat – 2×10\nSingle-leg RDL – 2×10\nLeg extension – 2×12\nSingle-leg calf raise – 2×15\nPallof press – 2×10\nDead bug – 2×10", "son": "Rolig langtur\n40 min\n130–150 bpm"}, {"uke": 5, "kaluke": "U23", "dato": "01.06 – 07.06", "fase": "Basis", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →18×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×8\nSeated row – 3×12\nSingle-arm shoulder press – 3×10\nCalf raise – 3×20\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n27 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+14 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×8\nRomanian deadlift (RDL) – 4×8\nBulgarian split squat – 3×10\nSingle-leg RDL – 3×10\nLeg extension – 3×12\nSingle-leg calf raise – 3×15\nPallof press – 3×10\nDead bug – 3×10", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 6, "kaluke": "U24", "dato": "08.06 – 14.06", "fase": "Basis", "man": "Hvile", "tir": "Intervall + Styrke B\n50–30 min\n[TAPER –50%] 15 min oppvarming →7×4 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×8\nSeated row – 3×12\nSingle-arm shoulder press – 3×10\nCalf raise – 3×20\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n30 min\n130–155 bpm\n[TAPER –50%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+16 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×8\nRomanian deadlift (RDL) – 4×8\nBulgarian split squat – 3×10\nSingle-leg RDL – 3×10\nLeg extension – 3×12\nSingle-leg calf raise – 3×15\nPallof press – 3×10\nDead bug – 3×10", "son": "Rolig langtur\n75 min\n130–150 bpm"}, {"uke": 7, "kaluke": "U25", "dato": "15.06 – 21.06", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×8 (tyngre)\nSeated row – 3×10 (tyngre)\nSingle-arm shoulder press – 3×8 (tyngre)\nCalf raise – 3×15 (tyngre)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n33 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Sommernattsløpet 5 km\n20.06.2026", "son": "Hvile"}, {"uke": 8, "kaluke": "U26", "dato": "22.06 – 28.06", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–40 min\n[DELOAD –40%] 15 min oppvarming →4×4 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8 (tyngre)\nSeated row – 2×10 (tyngre)\nSingle-arm shoulder press – 2×8 (tyngre)\nCalf raise – 2×15 (tyngre)\nSuperman – 2×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n20 min\n130–155 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 EcoTrail Bergen 12 km\n27.06.2026", "son": "Hvile"}, {"uke": 9, "kaluke": "U27", "dato": "29.06 – 05.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×8 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×8 (tyngre)\nSeated row – 3×10 (tyngre)\nSingle-arm shoulder press – 3×8 (tyngre)\nCalf raise – 3×15 (tyngre)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n35 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+20 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×6 (tyngre)\nRomanian deadlift (RDL) – 4×6 (tyngre)\nBulgarian split squat – 3×8 (tyngre)\nSingle-leg RDL – 3×8 (tyngre)\nLeg extension – 3×10 (tyngre)\nSingle-leg calf raise – 3×12 (tyngre)\nPallof press – 3×12\nDead bug – 3×12", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 10, "kaluke": "U28", "dato": "06.07 – 12.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×8 (tyngre)\nSeated row – 3×10 (tyngre)\nSingle-arm shoulder press – 3×8 (tyngre)\nCalf raise – 3×15 (tyngre)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n38 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+22 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×6 (tyngre)\nRomanian deadlift (RDL) – 4×6 (tyngre)\nBulgarian split squat – 3×8 (tyngre)\nSingle-leg RDL – 3×8 (tyngre)\nLeg extension – 3×10 (tyngre)\nSingle-leg calf raise – 3×12 (tyngre)\nPallof press – 3×12\nDead bug – 3×12", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 11, "kaluke": "U29", "dato": "13.07 – 19.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →5×6 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×8 (tyngre)\nSeated row – 3×10 (tyngre)\nSingle-arm shoulder press – 3×8 (tyngre)\nCalf raise – 3×15 (tyngre)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n40 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+24 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×6 (tyngre)\nRomanian deadlift (RDL) – 4×6 (tyngre)\nBulgarian split squat – 3×8 (tyngre)\nSingle-leg RDL – 3×8 (tyngre)\nLeg extension – 3×10 (tyngre)\nSingle-leg calf raise – 3×12 (tyngre)\nPallof press – 3×12\nDead bug – 3×12", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 12, "kaluke": "U30", "dato": "20.07 – 26.07", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall + Styrke B\n50–40 min\n[DELOAD –40%] 15 min oppvarming →3×5 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8 (tyngre)\nSeated row – 2×10 (tyngre)\nSingle-arm shoulder press – 2×8 (tyngre)\nCalf raise – 2×15 (tyngre)\nSuperman – 2×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n25 min\n130–155 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+15 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6 (tyngre)\nRomanian deadlift (RDL) – 3×6 (tyngre)\nBulgarian split squat – 2×8 (tyngre)\nSingle-leg RDL – 2×8 (tyngre)\nLeg extension – 2×10 (tyngre)\nSingle-leg calf raise – 2×12 (tyngre)\nPallof press – 2×12\nDead bug – 2×12", "son": "Rolig langtur\n55 min\n130–150 bpm"}, {"uke": 13, "kaluke": "U31", "dato": "27.07 – 02.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×6 (maks)\nSeated row – 3×8 (maks)\nSingle-arm shoulder press – 3×6 (maks)\nCalf raise – 3×12 (maks)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n42 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+26 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×5 (maks)\nRomanian deadlift (RDL) – 4×5 (maks)\nBulgarian split squat – 3×6 (maks)\nSingle-leg RDL – 3×6 (maks)\nLeg extension – 3×8 (maks)\nSingle-leg calf raise – 3×10 (maks)\nPallof press – 3×12\nDead bug – 3×12", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 14, "kaluke": "U32", "dato": "03.08 – 09.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×8 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×6 (maks)\nSeated row – 3×8 (maks)\nSingle-arm shoulder press – 3×6 (maks)\nCalf raise – 3×12 (maks)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n45 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+28 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×5 (maks)\nRomanian deadlift (RDL) – 4×5 (maks)\nBulgarian split squat – 3×6 (maks)\nSingle-leg RDL – 3×6 (maks)\nLeg extension – 3×8 (maks)\nSingle-leg calf raise – 3×10 (maks)\nPallof press – 3×12\nDead bug – 3×12", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 15, "kaluke": "U33", "dato": "10.08 – 16.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×6 (maks)\nSeated row – 3×8 (maks)\nSingle-arm shoulder press – 3×6 (maks)\nCalf raise – 3×12 (maks)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n45 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+30 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×5 (maks)\nRomanian deadlift (RDL) – 4×5 (maks)\nBulgarian split squat – 3×6 (maks)\nSingle-leg RDL – 3×6 (maks)\nLeg extension – 3×8 (maks)\nSingle-leg calf raise – 3×10 (maks)\nPallof press – 3×12\nDead bug – 3×12", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 16, "kaluke": "U34", "dato": "17.08 – 23.08", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall + Styrke B\n50–40 min\n[DELOAD –40%] 15 min oppvarming →3×5 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×6 (maks)\nSeated row – 2×8 (maks)\nSingle-arm shoulder press – 2×6 (maks)\nCalf raise – 2×12 (maks)\nSuperman – 2×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n27 min\n130–155 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+18 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×5 (maks)\nRomanian deadlift (RDL) – 3×5 (maks)\nBulgarian split squat – 2×6 (maks)\nSingle-leg RDL – 2×6 (maks)\nLeg extension – 2×8 (maks)\nSingle-leg calf raise – 2×10 (maks)\nPallof press – 2×12\nDead bug – 2×12", "son": "Rolig langtur\n55 min\n130–150 bpm"}, {"uke": 17, "kaluke": "U35", "dato": "24.08 – 30.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×8 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×6 (maks)\nSeated row – 3×8 (maks)\nSingle-arm shoulder press – 3×6 (maks)\nCalf raise – 3×12 (maks)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n45 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+32 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 4×5 (maks)\nRomanian deadlift (RDL) – 4×5 (maks)\nBulgarian split squat – 3×6 (maks)\nSingle-leg RDL – 3×6 (maks)\nLeg extension – 3×8 (maks)\nSingle-leg calf raise – 3×10 (maks)\nPallof press – 3×12\nDead bug – 3×12", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 18, "kaluke": "U36", "dato": "31.08 – 06.09", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–30 min\n[TAPER –50%] 15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 3×6 (maks)\nSeated row – 3×8 (maks)\nSingle-arm shoulder press – 3×6 (maks)\nCalf raise – 3×12 (maks)\nSuperman – 3×12\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n45 min\n130–155 bpm\n[TAPER –50%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Jentemila 5 km\n05.09.2026\n\n10–15 min oppvarming 130–150 bpm → løp → 10 min nedkjøling", "son": "Hvile"}, {"uke": 19, "kaluke": "U37", "dato": "07.09 – 13.09", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →4×7 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8\nSeated row – 2×10\nSingle-arm shoulder press – 2×8\nCalf raise – 2×15\nSuperman – 2×10\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n35 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Oslo Maraton 10 km\n12.09.2026", "son": "Hvile"}, {"uke": 20, "kaluke": "U38", "dato": "14.09 – 20.09", "fase": "Nedtrapping", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →16×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8\nSeated row – 2×10\nSingle-arm shoulder press – 2×8\nCalf raise – 2×15\nSuperman – 2×10\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n30 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+20 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6\nRomanian deadlift (RDL) – 3×6\nBulgarian split squat – 2×8\nSingle-leg RDL – 2×8\nLeg extension – 2×10\nSingle-leg calf raise – 2×12\nPallof press – 2×8\nDead bug – 2×8", "son": "Rolig langtur\n60 min\n130–150 bpm"}, {"uke": 21, "kaluke": "U39", "dato": "21.09 – 27.09", "fase": "Nedtrapping", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →4×5 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8\nSeated row – 2×10\nSingle-arm shoulder press – 2×8\nCalf raise – 2×15\nSuperman – 2×10\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n25 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+15 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6\nRomanian deadlift (RDL) – 3×6\nBulgarian split squat – 2×8\nSingle-leg RDL – 2×8\nLeg extension – 2×10\nSingle-leg calf raise – 2×12\nPallof press – 2×8\nDead bug – 2×8", "son": "Rolig langtur\n45 min\n130–150 bpm"}, {"uke": 22, "kaluke": "U40", "dato": "28.09 – 04.10", "fase": "Nedtrapping", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →12×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8\nSeated row – 2×10\nSingle-arm shoulder press – 2×8\nCalf raise – 2×15\nSuperman – 2×10\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n22 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+12 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6\nRomanian deadlift (RDL) – 3×6\nBulgarian split squat – 2×8\nSingle-leg RDL – 2×8\nLeg extension – 2×10\nSingle-leg calf raise – 2×12\nPallof press – 2×8\nDead bug – 2×8", "son": "Rolig langtur\n30 min\n130–150 bpm"}, {"uke": 23, "kaluke": "U41", "dato": "05.10 – 11.10", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–30 min\n[TAPER –50%] 15 min oppvarming →3×5 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8\nSeated row – 2×10\nSingle-arm shoulder press – 2×8\nCalf raise – 2×15\nSuperman – 2×10\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n20 min\n130–155 bpm\n[TAPER –50%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+10 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6\nRomanian deadlift (RDL) – 3×6\nBulgarian split squat – 2×8\nSingle-leg RDL – 2×8\nLeg extension – 2×10\nSingle-leg calf raise – 2×12\nPallof press – 2×8\nDead bug – 2×8", "son": "Rolig langtur\n15 min\n130–150 bpm"}, {"uke": 24, "kaluke": "U42", "dato": "12.10 – 18.10", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×4 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\n \nStyrke B\nLat pulldown – 2×8\nSeated row – 2×10\nSingle-arm shoulder press – 2×8\nCalf raise – 2×15\nSuperman – 2×10\nPlank – 3×maks sek", "ons": "Rolig løpetur + SL\n15 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Hytteplanmila 10 km\n17.10.2026", "son": "Hvile"}];
 
@@ -828,6 +1088,7 @@ function renderReg(){
         <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:4px">
           <button class="sbtn" onclick="saveOkt('${key}','msg_${key}')" style="padding:6px 14px">Lagre økt</button>
           <button onclick="ikkeUtfort('${key}','msg_${key}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
+          <button onclick="nullstillOkt('${key}','msg_${key}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">↩ Angre</button>
           <span class="smsg" id="msg_${key}"></span>
         </div>
       </div>
@@ -883,6 +1144,7 @@ function renderReg(){
         <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:4px">
           <button class="sbtn" onclick="saveOkt('${rKey}','msg_${rKey}')" style="padding:6px 14px">Lagre løp</button>
           <button onclick="ikkeUtfort('${rKey}','msg_${rKey}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
+          <button onclick="nullstillOkt('${rKey}','msg_${rKey}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">↩ Angre</button>
           <span class="smsg" id="msg_${rKey}"></span>
         </div>
       </div>
@@ -944,7 +1206,11 @@ function renderReg(){
     saveMsgEl.className='smsg';saveMsgEl.id='msg_str_'+uke+'_'+okt;
     saveBtnEl.onclick=()=>saveOkt(null,'msg_str_'+uke+'_'+okt);
     ikkeBtn.onclick=()=>ikkeUtfortStr(uke,okt,'msg_str_'+uke+'_'+okt);
-    saveRow.appendChild(saveBtnEl);saveRow.appendChild(ikkeBtn);saveRow.appendChild(saveMsgEl);
+    const angreBtn=document.createElement('button');
+    angreBtn.textContent='↩ Angre';
+    angreBtn.style.cssText='background:none;border:1px solid var(--b);color:var(--m);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer';
+    angreBtn.onclick=()=>nullstillStrOkt(uke,okt,'msg_str_'+uke+'_'+okt);
+    saveRow.appendChild(saveBtnEl);saveRow.appendChild(ikkeBtn);saveRow.appendChild(angreBtn);saveRow.appendChild(saveMsgEl);
     card.appendChild(saveRow);
     sSection.appendChild(card);
   });
@@ -964,8 +1230,7 @@ function ikkeUtfort(key, msgId){
   loggL[key]['var']='';loggL[key].sn='';loggL[key].km='';
   try{
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
-    saveToFirebase();
-    const el=document.getElementById(msgId);
+        const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
     document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
   }catch(e){}
@@ -984,8 +1249,7 @@ function ikkeUtfortStr(uke, okt, msgId){
   });
   try{
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
-    saveToFirebase();
-    const el=document.getElementById(msgId);
+        const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
     document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
   }catch(e){}
@@ -995,8 +1259,7 @@ function saveOkt(key, msgId){
   try{
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
-    saveToFirebase();
-    const el=document.getElementById(msgId);
+        const el=document.getElementById(msgId);
     if(el){el.textContent='✓ Lagret';setTimeout(()=>el.textContent='',2000);}
     // Refresh views and checkmarks
     
@@ -1010,8 +1273,7 @@ function savelReg(){
   try{
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
-    saveToFirebase();
-    sm('regmsg');
+        sm('regmsg');
     // Sync week selection in other views
     const regUke=document.getElementById('reg-uke').value;
     if(regUke){
@@ -1029,10 +1291,176 @@ function savelReg(){
 }
 
 
-// Load from Firebase then render
-loadFromFirebase().then(() => {
+
   renderUkesplan();initWsel();renderWeek(1);renderIntervall();renderRaces();initReg();renderStats();
-  listenFirebase();
+
+
+
+// ── Nullstill ────────────────────────────────────────────────────────────
+function nullstillOkt(key, msgId){
+  // Delete all data for this specific session
+  delete loggL[key];
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillStrOkt(uke, okt, msgId){
+  const src=okt==='A'?SA:SB;
+  const ovs=src[String(uke)]||[];
+  ovs.forEach((ov,i)=>{
+    for(let s=1;s<=4;s++){
+      delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+    }
+  });
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillUke(){
+  const uv=document.getElementById('reg-uke').value;
+  if(!uv) return;
+  const uke=parseInt(uv);
+  if(!confirm('Nullstille all logging for uke '+uke+'?')) return;
+  // Delete all running sessions
+  ['intervall','roligLop','tempo','langtur','race'].forEach(k=>{
+    delete loggL[uke+'_'+k];
+  });
+  // Delete all strength sessions
+  ['A','B'].forEach(okt=>{
+    const src=okt==='A'?SA:SB;
+    const ovs=src[String(uke)]||[];
+    ovs.forEach((ov,i)=>{
+      for(let s=1;s<=4;s++){
+        delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+      }
+    });
+  });
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+// ── Firebase ─────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
+  authDomain: "lopeprogram2026.firebaseapp.com",
+  projectId: "lopeprogram2026",
+  storageBucket: "lopeprogram2026.firebasestorage.app",
+  messagingSenderId: "549758402251",
+  appId: "1:549758402251:web:fcce3f7ed9a8529078254e"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const DOC = db.collection("logg").doc("maria");
+
+function setSyncStatus(txt, col){
+  const el=document.getElementById('sync-status');
+  if(el){el.textContent=txt;el.style.color=col||'var(--m)';}
+}
+
+// Save ALL data to Firebase (simple overwrite — single user)
+async function fbSave(){
+  setSyncStatus('● Lagrer...','var(--or)');
+  try{
+    await DOC.set({
+      l: JSON.stringify(loggL),
+      s: JSON.stringify(loggS),
+      ts: Date.now()
+    });
+    setSyncStatus('● Synkronisert','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Feil: '+e.message,'var(--or)');
+    console.error(e);
+  }
+}
+
+// Load from Firebase on startup
+async function fbLoad(){
+  setSyncStatus('● Henter data...','var(--m)');
+  try{
+    const snap = await DOC.get();
+    if(snap.exists()){
+      const d=snap.data();
+      if(d.l) loggL=JSON.parse(d.l);
+      if(d.s) loggS=JSON.parse(d.s);
+      localStorage.setItem('hpm_l',JSON.stringify(loggL));
+      localStorage.setItem('hpm_s',JSON.stringify(loggS));
+      setSyncStatus('● Lastet fra sky','var(--a2)');
+    } else {
+      setSyncStatus('● Ingen data i sky','var(--m)');
+    }
+  }catch(e){
+    setSyncStatus('● Offline – bruker lokal data','var(--or)');
+    console.warn(e);
+  }
+}
+
+// Listen for real-time changes from other devices
+function fbListen(){
+  DOC.onSnapshot(snap=>{
+    if(!snap.exists()) return;
+    const d=snap.data();
+    // Only update if remote is newer than what we have
+    const remoteTs=d.ts||0;
+    if(d.l) loggL=JSON.parse(d.l);
+    if(d.s) loggS=JSON.parse(d.s);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    // Refresh UI
+    document.getElementById('ugrid').innerHTML='';
+    renderUkesplan();
+    renderStats();
+    const rv=document.getElementById('v-reg');
+    if(rv&&rv.classList.contains('active')) renderReg();
+    setSyncStatus('● Synkronisert','var(--a2)');
+  });
+}
+
+// Patch all save functions to also call fbSave
+const _origSaveOkt=saveOkt;
+window.saveOkt=function(key,msgId){
+  _origSaveOkt(key,msgId);
+  fbSave();
+};
+const _origSavelReg=savelReg;
+window.savelReg=function(){
+  _origSavelReg();
+  fbSave();
+};
+const _origIkke=ikkeUtfort;
+window.ikkeUtfort=function(key,msgId){
+  _origIkke(key,msgId);
+  fbSave();
+};
+const _origIkkeStr=ikkeUtfortStr;
+window.ikkeUtfortStr=function(uke,okt,msgId){
+  _origIkkeStr(uke,okt,msgId);
+  fbSave();
+};
+
+// Init: load then listen
+fbLoad().then(()=>{
+  renderUkesplan();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  fbListen();
 });
 
 </script>
