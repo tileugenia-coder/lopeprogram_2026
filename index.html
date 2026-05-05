@@ -112,12 +112,13 @@ main{padding:20px 24px;max-width:1400px}
 ::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
 
 
-.collapsed-card .card-body{display:none}
-.collapsed-card .card-preview{display:flex}
-.card-preview{display:none;padding:10px 14px;align-items:center;justify-content:space-between;cursor:pointer;font-size:11px;color:var(--m);border-top:1px solid var(--b)}
-.card-preview:hover{background:var(--s2)}
-.card-done{border-left:3px solid var(--a2)!important}
-.card-ikk{border-left:3px solid var(--or)!important}
+
+.hpm-collapsed .hpm-body{display:none}
+.hpm-preview{display:none;padding:10px 14px;align-items:center;justify-content:space-between;cursor:pointer;font-size:11px;gap:8px}
+.hpm-preview:hover{background:var(--s2)}
+.hpm-collapsed .hpm-preview{display:flex}
+.hpm-done{border-left:3px solid var(--a2)!important}
+.hpm-ikke{border-left:3px solid var(--or)!important}
 </style>
 </head>
 <body>
@@ -1150,26 +1151,28 @@ function renderReg(){
     const dayLabels={man:'Man',tir:'Tir',ons:'Ons',tor:'Tor',fre:'Fre',lor:'Lør',son:'Søn'};
     const isToday2=(o.day===todayKey);
     const card=document.createElement('div');
-    const ck=`${uke}_${o.k}`;
-    const cksv=loggL[ck]||{};
-    const ckLogged=cksv['var']||cksv.tid||cksv.sn||cksv.km;
-    const ckIkke=cksv.ikkeUtfort;
-    card.className='scard'+(ckLogged?' card-done':ckIkke?' card-ikk':'');
-    card.setAttribute('data-key',ck);
+    card.className='scard';
     card.style.marginBottom='12px';
     if(!isToday2) card.style.border='1px dashed var(--b)';
-    const ckParts=[];
-    if(cksv.km) ckParts.push(cksv.km+' km');
-    if(cksv.tempo) ckParts.push(cksv.tempo+' min/km');
-    if(cksv.sn) ckParts.push(cksv.sn+' bpm');
-    if(cksv['var']) ckParts.push(cksv['var']+' min');
-    if(cksv.tid) ckParts.push(cksv.tid);
+    const cardId='hpm_'+((`${uke}_${o.k}`).replace(/_/g,'-'));
+    card.id=cardId;
+    const cksv2=loggL[`${uke}_${o.k}`]||{};
+    const ckLogged2=cksv2['var']||cksv2.tid||cksv2.sn||cksv2.km;
+    const ckIkke2=cksv2.ikkeUtfort;
+    if(ckLogged2) card.classList.add('hpm-collapsed','hpm-done');
+    if(ckIkke2) card.classList.add('hpm-collapsed','hpm-ikke');
+    const ckSum=[];
+    if(cksv2.km) ckSum.push(cksv2.km+' km');
+    if(cksv2.tempo) ckSum.push(cksv2.tempo+'/km');
+    if(cksv2.sn) ckSum.push(cksv2.sn+' bpm');
+    if(cksv2['var']) ckSum.push(cksv2['var']+' min');
+    if(cksv2.tid) ckSum.push(cksv2.tid);
     card.innerHTML=`
-      <div class="card-preview" onclick="cardExpand(this.closest('.scard'))">
-        <span class="prev-text">${ckIkke?'✗ Ikke utført':ckParts.join(' · ')||'✓ Lagret'}</span>
-        <span style="color:var(--a)">↕ Rediger</span>
+      <div class="hpm-preview" onclick="hpmExpand(this)">
+        <span>${ckIkke2?'✗ Ikke utført':ckSum.join(' · ')||'✓ Lagret'}</span>
+        <span style="color:var(--a);white-space:nowrap">↕ Rediger</span>
       </div>
-      <div class="card-body">
+      <div class="hpm-body">
       <div class="scardh" style="background:var(--s2)">
         <h3 style="color:var(--a2)">${o.l} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isToday2?'var(--a)':'var(--b)'};color:${isToday2?'#000':'var(--m)'};">${isToday2?'Planlagt i dag':'Planlagt '+dayLabels[o.day]}</span></h3>
         <span>${w.dato}</span>
@@ -1224,10 +1227,8 @@ function renderReg(){
           <span class="smsg" id="msg_${key}"></span>
         </div>
       </div>
+      </div>
     `;
-    // close card-body
-    card.innerHTML += '</div>';
-    if(ckLogged||ckIkke) card.classList.add('collapsed-card');
     lSection.appendChild(card);
   });
   // If no running session today, show message
@@ -1256,7 +1257,8 @@ function renderReg(){
     raceTitle.style.cssText='font-size:16px;font-weight:500;color:var(--or);margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
     raceTitle.textContent='Løpsresultat';
     rb.appendChild(raceTitle);
-    const raceCard=document.createElement('div');raceCard.className='scard';raceCard.style.marginBottom='16px';
+    const raceCard=document.createElement('div');
+    raceCard.className='scard';raceCard.style.marginBottom='16px';
     raceCard.style.borderColor='var(--or)';
     if(!isRaceDay) raceCard.style.border='1px dashed var(--or)';
     const rKey=`${uke}_race`;const rsv=loggL[rKey]||{};
@@ -1284,7 +1286,7 @@ function renderReg(){
           <button onclick="nullstillOkt('${rKey}','msg_${rKey}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">↩ Angre</button>
           <span class="smsg" id="msg_${rKey}"></span>
         </div>
-      </div>
+      </div></div>
     `;
     rb.appendChild(raceCard);
   }
@@ -1302,7 +1304,14 @@ function renderReg(){
     const strDay=okt==='A'?'lor':'tir';
     const isStrToday=(strDay===todayKey);
     if(!isStrToday) card.style.border='1px dashed var(--b)';
-    card.innerHTML=`<div class="scardh" style="background:var(--s2)"><h3>Styrke ${okt} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isStrToday?'var(--pu)':'var(--b)'};color:${isStrToday?'#fff':'var(--m)'};">${isStrToday?'Planlagt i dag':okt==='A'?'Planlagt Lør':'Planlagt Tir'}</span></h3><span>${okt==='A'?'Styrke A':'Styrke B'}</span></div>`;
+    const strId='hpm-str-'+uke+'-'+okt;
+    card.id=strId;
+    const strSv2=loggS[uke+'_'+okt+'_0_s1']||{};
+    const strLogged2=!!(strSv2.vekt||strSv2.reps);
+    if(strLogged2) card.classList.add('hpm-collapsed','hpm-done');
+    const strSum=strSv2.vekt?strSv2.vekt+' kg':'✓ Logget';
+    card.innerHTML=(strLogged2?`<div class="hpm-preview" onclick="hpmExpand(this)"><span>${strSum}</span><span style="color:var(--a)">↕ Rediger</span></div>`:'')
+      +`<div class="hpm-body"><div class="scardh" style="background:var(--s2)"><h3>Styrke ${okt} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isStrToday?'var(--pu)':'var(--b)'};color:${isStrToday?'#fff':'var(--m)'};">${isStrToday?'Planlagt i dag':okt==='A'?'Planlagt Lør':'Planlagt Tir'}</span></h3><span>${okt==='A'?'Styrke A':'Styrke B'}</span></div>`;
 
     const tbl=document.createElement('table');tbl.className='stbl';
     tbl.innerHTML=`<thead><tr><th>Øvelse</th><th>Plan</th><th>Sett</th><th>Vekt (kg)</th><th>Reps / Sek</th></tr></thead>`;
@@ -1348,9 +1357,27 @@ function renderReg(){
     angreBtn.style.cssText='background:none;border:1px solid var(--b);color:var(--m);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer';
     angreBtn.onclick=()=>nullstillStrOkt(uke,okt,'msg_str_'+uke+'_'+okt);
     saveRow.appendChild(saveBtnEl);saveRow.appendChild(ikkeBtn);saveRow.appendChild(angreBtn);saveRow.appendChild(saveMsgEl);
-    card.appendChild(tbl);
-    card.appendChild(saveRow);
-    saveBtnEl.onclick=()=>saveOkt(null,'msg_str_'+uke+'_'+okt);
+    card.querySelector('.hpm-body').appendChild(tbl);
+    card.querySelector('.hpm-body').appendChild(saveRow);
+    saveBtnEl.onclick=(function(c,uid,o2){return function(){
+      saveOkt(null,'msg_str_'+uid+'_'+o2);
+      setTimeout(()=>{
+        const v=loggS[uid+'_'+o2+'_0_s1']||{};
+        c.classList.add('hpm-collapsed','hpm-done');
+        const pv=c.querySelector('.hpm-preview');
+        if(!pv){
+          const d=document.createElement('div');
+          d.className='hpm-preview';
+          d.onclick=function(){hpmExpand(this);};
+          d.innerHTML='<span>'+(v.vekt?v.vekt+' kg':'✓ Logget')+'</span><span style="color:var(--a)">↕ Rediger</span>';
+          c.insertBefore(d,c.firstChild);
+        } else {
+          const s=pv.querySelector('span');
+          if(s) s.textContent=v.vekt?v.vekt+' kg':'✓ Logget';
+          c.classList.add('hpm-collapsed','hpm-done');
+        }
+      },1200);
+    };})(card,uke,okt);
     sSection.appendChild(card);
   });
   // If no strength session today, show message
@@ -1396,16 +1423,16 @@ function ikkeUtfortStr(uke, okt, msgId){
 }
 
 
-function cardCollapse(key, summary){
-  const card = document.querySelector('[data-key="'+key+'"]');
-  if(!card) return;
-  card.classList.add('collapsed-card','card-done');
-  const prev = card.querySelector('.card-preview');
-  if(prev) prev.querySelector('.prev-text').textContent = summary||'✓ Logget';
+function hpmCollapse(id, text, isIkke){
+  const el=document.getElementById('hpm_'+id);
+  if(!el) return;
+  el.classList.add('hpm-collapsed');
+  el.classList.add(isIkke?'hpm-ikke':'hpm-done');
+  const prev=el.querySelector('.hpm-preview span');
+  if(prev) prev.textContent=text||'✓ Lagret';
 }
-
-function cardExpand(card){
-  card.classList.remove('collapsed-card');
+function hpmExpand(el){
+  el.closest('.scard').classList.remove('hpm-collapsed');
 }
 function saveOkt(key, msgId){
   try{
@@ -1418,11 +1445,11 @@ function saveOkt(key, msgId){
       const sv=loggL[key]||{};
       const parts=[];
       if(sv.km) parts.push(sv.km+' km');
-      if(sv.tempo) parts.push(sv.tempo+' min/km');
+      if(sv.tempo) parts.push(sv.tempo+'/km');
       if(sv.sn) parts.push(sv.sn+' bpm');
       if(sv['var']) parts.push(sv['var']+' min');
       if(sv.tid) parts.push(sv.tid);
-      setTimeout(()=>cardCollapse(key, parts.join(' · ')||'✓ Lagret'), 1000);
+      setTimeout(()=>hpmCollapse(key.replace(/_/g,'-'), parts.join(' · ')||'✓ Lagret', false), 1200);
     }
     document.getElementById('ugrid').innerHTML='';
     renderUkesplan();
