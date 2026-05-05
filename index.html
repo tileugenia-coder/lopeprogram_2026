@@ -1083,11 +1083,22 @@ function renderReg(){
     card.className='scard';
     card.style.marginBottom='12px';
     if(!isToday2) card.style.border='1px dashed var(--b)';
+    const loggKey2=`${uke}_${o.k}`;
+    const existSv=loggL[loggKey2]||{};
+    const wasLogged=existSv['var']||existSv.tid||existSv.sn||existSv.km;
+    const wasIkke=existSv.ikkeUtfort;
+    card.setAttribute('data-logg-key', loggKey2);
+    if(wasLogged) card.classList.add('coll-logged');
+    if(wasIkke) card.classList.add('coll-ikke');
     card.innerHTML=`
-      <div class="scardh" style="background:var(--s2)">
+      <div class="scardh coll-hdr ${wasLogged||wasIkke?'is-closed':''}" style="background:var(--s2);cursor:pointer" onclick="toggleCard(this.querySelector('.coll-arrow'))">
         <h3 style="color:var(--a2)">${o.l} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isToday2?'var(--a)':'var(--b)'};color:${isToday2?'#000':'var(--m)'};">${isToday2?'Planlagt i dag':'Planlagt '+dayLabels[o.day]}</span></h3>
-        <span>${w.dato}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="coll-sum" style="font-size:10px;color:var(--a2)">${wasLogged?((existSv.km||'')+' km '+(existSv.tempo||'')).trim():wasIkke?'✗ Ikke utført':''}</span>
+          <span class="coll-arrow">${wasLogged||wasIkke?'▼':'▲'}</span>
+        </div>
       </div>
+      <div class="coll-body ${wasLogged||wasIkke?'hidden':''}">
       <div style="padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
         <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Varighet (min)</div>
@@ -1137,7 +1148,7 @@ function renderReg(){
           <button onclick="nullstillOkt('${key}','msg_${key}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">↩ Angre</button>
           <span class="smsg" id="msg_${key}"></span>
         </div>
-      </div>
+      </div></div>
     `;
     lSection.appendChild(card);
   });
@@ -1213,7 +1224,17 @@ function renderReg(){
     const strDay=okt==='A'?'lor':'tir';
     const isStrToday=(strDay===todayKey);
     if(!isStrToday) card.style.border='1px dashed var(--b)';
-    card.innerHTML=`<div class="scardh"><h3>Styrke ${okt} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isStrToday?'var(--pu)':'var(--b)'};color:${isStrToday?'#fff':'var(--m)'};">${isStrToday?'Planlagt i dag':okt==='A'?'Planlagt Lør':'Planlagt Tir'}</span></h3><span>${okt==='A'?'Styrke A':'Styrke B'}</span></div>`;
+    const strLogged=!!(loggS[uke+'_'+okt+'_0_s1']&&(loggS[uke+'_'+okt+'_0_s1'].vekt||loggS[uke+'_'+okt+'_0_s1'].reps));
+    card.setAttribute('data-logg-key','str_'+uke+'_'+okt);
+    if(strLogged) card.classList.add('coll-logged');
+    card.innerHTML=`<div class="scardh coll-hdr ${strLogged?'is-closed':''}" style="cursor:pointer" onclick="toggleCard(this.querySelector('.coll-arrow'))">
+      <h3>Styrke ${okt} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isStrToday?'var(--pu)':'var(--b)'};color:${isStrToday?'#fff':'var(--m)'};">${isStrToday?'Planlagt i dag':okt==='A'?'Planlagt Lør':'Planlagt Tir'}</span></h3>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="coll-sum" style="font-size:10px;color:var(--a2)">${strLogged?'✓ Logget':''}</span>
+        <span class="coll-arrow">${strLogged?'▼':'▲'}</span>
+      </div>
+    </div>
+    <div class="coll-body ${strLogged?'hidden':''}">`;
 
     const tbl=document.createElement('table');tbl.className='stbl';
     tbl.innerHTML=`<thead><tr><th>Øvelse</th><th>Plan</th><th>Sett</th><th>Vekt (kg)</th><th>Reps / Sek</th></tr></thead>`;
@@ -1240,7 +1261,7 @@ function renderReg(){
         tbody.appendChild(tr);
       }
     });
-    tbl.appendChild(tbody);card.appendChild(tbl);
+    tbl.appendChild(tbody);
     // Save row
     const saveRow=document.createElement('div');
     saveRow.style.cssText='padding:10px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--b)';
@@ -1259,7 +1280,26 @@ function renderReg(){
     angreBtn.style.cssText='background:none;border:1px solid var(--b);color:var(--m);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer';
     angreBtn.onclick=()=>nullstillStrOkt(uke,okt,'msg_str_'+uke+'_'+okt);
     saveRow.appendChild(saveBtnEl);saveRow.appendChild(ikkeBtn);saveRow.appendChild(angreBtn);saveRow.appendChild(saveMsgEl);
-    card.appendChild(saveRow);
+    // Wrap tbl and saveRow in coll-body
+    let collBodyEl=card.querySelector('.coll-body');
+    if(collBodyEl){ collBodyEl.appendChild(tbl); collBodyEl.appendChild(saveRow); }
+    else { card.appendChild(tbl); card.appendChild(saveRow); }
+    // Collapse on save
+    saveBtnEl.onclick=(function(c,u,o2){return function(){
+      saveOkt(null,'msg_str_'+u+'_'+o2);
+      setTimeout(()=>{
+        const b=c.querySelector('.coll-body');
+        const h=c.querySelector('.coll-hdr');
+        const a=c.querySelector('.coll-arrow');
+        const s=c.querySelector('.coll-sum');
+        const v=loggS[u+'_'+o2+'_0_s1'];
+        if(b) b.classList.add('hidden');
+        if(h) h.classList.add('is-closed');
+        if(a) a.textContent='▼';
+        if(s) s.textContent=v&&v.vekt?v.vekt+' kg':'✓ Logget';
+        c.classList.add('coll-logged');
+      },1200);
+    };})(card,uke,okt);
     sSection.appendChild(card);
   });
   // If no strength session today, show message
@@ -1281,6 +1321,7 @@ function ikkeUtfort(key, msgId){
         const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
     document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
+
   }catch(e){}
 }
 
@@ -1301,6 +1342,40 @@ function ikkeUtfortStr(uke, okt, msgId){
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
     document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
   }catch(e){}
+}
+
+function toggleCard(btn){
+  const card=btn.closest('.scard');
+  const body=card.querySelector('.coll-body');
+  const hdr=card.querySelector('.coll-hdr');
+  const isHidden=body.classList.contains('hidden');
+  body.classList.toggle('hidden');
+  hdr.classList.toggle('is-closed');
+  btn.textContent=isHidden?'▲':'▼';
+}
+
+function collapseCardByKey(key, type){
+  const card=document.querySelector('[data-logg-key="'+key+'"]');
+  if(!card) return;
+  const body=card.querySelector('.coll-body');
+  const hdr=card.querySelector('.coll-hdr');
+  const btn=card.querySelector('.coll-arrow');
+  if(body) body.classList.add('hidden');
+  if(hdr) hdr.classList.add('is-closed');
+  if(btn) btn.textContent='▼';
+  const sv=type==='l'?(loggL[key]||{}):{};
+  const sum=card.querySelector('.coll-sum');
+  if(sum){
+    const parts=[];
+    if(sv.km) parts.push(sv.km+' km');
+    if(sv.tempo) parts.push(sv.tempo+' /km');
+    if(sv.sn) parts.push(sv.sn+' bpm');
+    if(sv['var']) parts.push(sv['var']+' min');
+    if(sv.tid) parts.push(sv.tid);
+    sum.textContent=parts.join(' · ');
+    sum.style.color='var(--a2)';
+    card.classList.add('coll-logged');
+  }
 }
 
 function saveOkt(key, msgId){
