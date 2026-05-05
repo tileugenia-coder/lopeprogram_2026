@@ -121,6 +121,7 @@ main{padding:20px 24px;max-width:1400px}
   <div class="hdr-sub">10 km · 17. oktober · Mål: 55 min</div>
   <div class="cd" id="cd"></div>
   <div style="display:flex;align-items:center;gap:8px;margin-top:2px"><div id="sync-status" style="font-size:10px;color:var(--m)"></div><button onclick="fbLoad().then(()=>fbListen())" style="font-size:10px;background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;padding:0">↻ Prøv igjen</button></div>
+  <div id="progress-bar-wrap" style="margin-top:12px;max-width:600px"></div>
 </div>
 <nav>
   <button class="active" onclick="nav('reg',this)">Registrering</button>
@@ -729,6 +730,29 @@ function renderStats(){
   const snittPuls=pulsList.length?Math.round(pulsList.reduce((a,b)=>a+b,0)/pulsList.length):null;
   const snittFol=folList.length?Math.round(folList.reduce((a,b)=>a+b,0)/folList.length*10)/10:null;
 
+  // Streak: consecutive weeks with at least one logged session
+  let streak=0, streakActive=true;
+  const loggedWeekNums=W.map(w=>{
+    const loktK=['intervall','roligLop','tempo','langtur','race'];
+    return loktK.some(k=>{const sv=loggL[w.uke+'_'+k]||{};return sv['var']||sv.tid||sv.sn||sv.km;});
+  });
+  for(let i=loggedWeekNums.length-1;i>=0;i--){
+    if(loggedWeekNums[i]&&streakActive) streak++;
+    else if(!loggedWeekNums[i]&&streak>0){streakActive=false;break;}
+  }
+
+  // Days to race
+  const raceDate=new Date('2026-10-17');
+  const daysLeft=Math.max(0,Math.ceil((raceDate-new Date())/86400000));
+  const weeksLeft=Math.ceil(daysLeft/7);
+
+  // Goal: 55 min on 10 km = 5:30/km
+  // Best race tempo so far
+  const raceTimes=['1','7','8','18','19','24'].map(u=>{
+    const sv=loggL[u+'_race']||{};
+    return sv.tempo||null;
+  }).filter(Boolean);
+
   // Summary cards
   const cards=[
     {l:'Totalt løpt',v:totalKm+' km',c:'var(--a)'},
@@ -736,6 +760,8 @@ function renderStats(){
     {l:'Ikke utført',v:totalIkke+' økter',c:totalIkke>0?'var(--or)':'var(--m)'},
     {l:'Snitt puls',v:snittPuls?snittPuls+' bpm':'–',c:'var(--or)'},
     {l:'Snitt følelse',v:snittFol?snittFol+' / 5':'–',c:'var(--pu)'},
+    {l:'Uker igjen',v:weeksLeft+' uker',c:'var(--a2)'},
+    {l:'Streak',v:streak+' uker',c:streak>=3?'var(--a)':'var(--m)'},
   ];
   const grid=document.createElement('div');
   grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:28px';
