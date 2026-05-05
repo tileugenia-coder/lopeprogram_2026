@@ -110,6 +110,14 @@ main{padding:20px 24px;max-width:1400px}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
+
+.coll-body{overflow:hidden;max-height:2000px;transition:max-height .3s ease,opacity .3s;opacity:1}
+.coll-body.hidden{max-height:0!important;opacity:0}
+.coll-hdr{cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center;width:100%}
+.coll-arrow{font-size:12px;color:var(--m);min-width:16px;text-align:right}
+.coll-logged{border-left:3px solid var(--a2)!important}
+.coll-ikke{border-left:3px solid var(--or)!important}
+.coll-sum{font-size:10px;color:var(--a2)}
 </style>
 </head>
 <body>
@@ -1408,10 +1416,10 @@ function saveOkt(key, msgId){
   try{
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
-        const el=document.getElementById(msgId);
+    fbSave();
+    const el=document.getElementById(msgId);
     if(el){el.textContent='✓ Lagret';setTimeout(()=>el.textContent='',2000);}
-    // Refresh views and checkmarks
-    
+    if(key) setTimeout(()=>collapseCardByKey(key,'l'),1200);
     document.getElementById('ugrid').innerHTML='';
     renderUkesplan();
     renderStats();
