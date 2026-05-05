@@ -1340,7 +1340,22 @@ function savelReg(){
 
 
 
-  renderUkesplan();initWsel();renderWeek(1);renderIntervall();renderRaces();initReg();renderStats();
+  // Progress bar — runs immediately, independent of Firebase
+(function(){
+  const start=new Date('2026-05-04');
+  const end=new Date('2026-10-17');
+  const now=new Date();
+  const total=Math.ceil((end-start)/86400000);
+  const passed=Math.max(0,Math.ceil((now-start)/86400000));
+  const pct=Math.min(100,Math.max(0,Math.round(passed/total*100)));
+  const uke=Math.min(24,Math.max(1,Math.ceil(passed/7)));
+  const fill=document.getElementById('prog-fill');
+  const label=document.getElementById('prog-label');
+  if(fill) fill.style.width=pct+'%';
+  if(label) label.textContent='Uke '+uke+' av 24 · '+pct+'%';
+})();
+
+renderUkesplan();initWsel();renderWeek(1);renderIntervall();renderRaces();initReg();renderStats();
 
 
 
