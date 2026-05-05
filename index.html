@@ -304,21 +304,34 @@ async function fbLoad(){
 }
 
 // Listen for real-time changes from other devices
+let userTyping=false;
+let typingTimer=null;
+document.addEventListener('input',()=>{
+  userTyping=true;
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{ userTyping=false; },5000);
+});
+
 function fbListen(){
-  // Poll every 15 seconds for updates from other devices
   setInterval(async()=>{
+    // Don't overwrite while user is typing
+    if(userTyping) return;
     try{
       const res=await fetch(FB_URL+'?key='+FB_KEY);
       if(!res.ok) return;
       const d=await res.json();
       const fields=d.fields||{};
-      const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
       if(fields.l){
         const remoteL=JSON.parse(fields.l.stringValue);
         const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        // Only update if remote timestamp is newer
+        const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+        const localTs=parseInt(localStorage.getItem('hpm_ts')||'0');
+        if(remoteTs<=localTs) return;
         loggL=remoteL; loggS=remoteS;
         localStorage.setItem('hpm_l',JSON.stringify(loggL));
         localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        localStorage.setItem('hpm_ts',String(remoteTs));
         document.getElementById('ugrid').innerHTML='';
         renderUkesplan(); renderStats();
         const rv=document.getElementById('v-reg');
@@ -477,21 +490,34 @@ async function fbLoad(){
 }
 
 // Listen for real-time changes from other devices
+let userTyping=false;
+let typingTimer=null;
+document.addEventListener('input',()=>{
+  userTyping=true;
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{ userTyping=false; },5000);
+});
+
 function fbListen(){
-  // Poll every 15 seconds for updates from other devices
   setInterval(async()=>{
+    // Don't overwrite while user is typing
+    if(userTyping) return;
     try{
       const res=await fetch(FB_URL+'?key='+FB_KEY);
       if(!res.ok) return;
       const d=await res.json();
       const fields=d.fields||{};
-      const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
       if(fields.l){
         const remoteL=JSON.parse(fields.l.stringValue);
         const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        // Only update if remote timestamp is newer
+        const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+        const localTs=parseInt(localStorage.getItem('hpm_ts')||'0');
+        if(remoteTs<=localTs) return;
         loggL=remoteL; loggS=remoteS;
         localStorage.setItem('hpm_l',JSON.stringify(loggL));
         localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        localStorage.setItem('hpm_ts',String(remoteTs));
         document.getElementById('ugrid').innerHTML='';
         renderUkesplan(); renderStats();
         const rv=document.getElementById('v-reg');
@@ -1548,21 +1574,34 @@ async function fbLoad(){
 }
 
 // Listen for real-time changes from other devices
+let userTyping=false;
+let typingTimer=null;
+document.addEventListener('input',()=>{
+  userTyping=true;
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{ userTyping=false; },5000);
+});
+
 function fbListen(){
-  // Poll every 15 seconds for updates from other devices
   setInterval(async()=>{
+    // Don't overwrite while user is typing
+    if(userTyping) return;
     try{
       const res=await fetch(FB_URL+'?key='+FB_KEY);
       if(!res.ok) return;
       const d=await res.json();
       const fields=d.fields||{};
-      const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
       if(fields.l){
         const remoteL=JSON.parse(fields.l.stringValue);
         const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        // Only update if remote timestamp is newer
+        const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+        const localTs=parseInt(localStorage.getItem('hpm_ts')||'0');
+        if(remoteTs<=localTs) return;
         loggL=remoteL; loggS=remoteS;
         localStorage.setItem('hpm_l',JSON.stringify(loggL));
         localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        localStorage.setItem('hpm_ts',String(remoteTs));
         document.getElementById('ugrid').innerHTML='';
         renderUkesplan(); renderStats();
         const rv=document.getElementById('v-reg');
