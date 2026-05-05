@@ -22,7 +22,7 @@ main{padding:20px 24px;max-width:1400px}
 .view.active{display:block}
 
 .ugrid{display:grid;grid-template-columns:70px 80px 100px repeat(7,1fr);gap:0;background:var(--bg);border:1px solid #c8909a;font-size:11px}
-.ucell{background:var(--s);padding:7px 9px;min-height:34px;display:flex;align-items:center;border-right:1px solid #c8909a;border-bottom:1px solid #c8909a}
+.ucell{background:var(--s);padding:6px 8px;min-height:40px;display:flex;align-items:center;border-right:1px solid #c8909a;border-bottom:1px solid #c8909a}
 .uhdr{background:var(--s2);color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:9px;justify-content:center;text-align:center;border-right:1px solid #c8909a;border-bottom:1px solid #c8909a}
 .uke-n{font-weight:500;color:var(--a);cursor:pointer;justify-content:center;flex-direction:column;align-items:center;gap:0;text-align:center}
 .uke-n:hover{color:#fff}
@@ -630,20 +630,55 @@ function renderUkesplan(){
       const lKey=dayToLoggKey[k];
       const isLogged=lKey&&loggL[lKey]&&(loggL[lKey]['var']||loggL[lKey].tid||loggL[lKey].sn);
       const isIkke=lKey&&loggL[lKey]&&loggL[lKey].ikkeUtfort;
-      // Styrke A (lor) and Styrke B (tir) check
+      // Styrke A (lor only, not race weeks) and Styrke B (tir only)
       const sKeyA=`${w.uke}_A_0_s1`;
       const sKeyB=`${w.uke}_B_0_s1`;
-      const isStrLogged=(k==='lor'&&!![1,7,8,18,19,24].includes(w.uke)===false&&loggS[sKeyA]&&(loggS[sKeyA].vekt||loggS[sKeyA].reps))||
-                        (k==='tir'&&loggS[sKeyB]&&(loggS[sKeyB].vekt||loggS[sKeyB].reps));
-      const logged=isLogged||isStrLogged;
+      const raceUkes=[1,7,8,18,19,24];
+      // lor: show checkmark if Styrke A logged (only non-race weeks)
+      const isStrA=k==='lor'&&!raceUkes.includes(w.uke)&&loggS[sKeyA]&&(loggS[sKeyA].vekt||loggS[sKeyA].reps);
+      // tir: show checkmark for intervall (isLogged) separately from styrke B
+      const isStrB=k==='tir'&&loggS[sKeyB]&&(loggS[sKeyB].vekt||loggS[sKeyB].reps);
+      // For tir: show ✓ only if BOTH intervall AND styrke B are logged
+      const tirBothLogged=k==='tir'&&isLogged&&isStrB;
+      const tirOnlyRun=k==='tir'&&isLogged&&!isStrB;
+      const tirOnlyStr=k==='tir'&&!isLogged&&isStrB;
+      const logged=(k==='tir'?tirBothLogged:isLogged)||isStrA;
       const d=document.createElement('div');
       d.className='ucell'+(isH?' hvile':'')+(isR?' race-c':'');
       const label=isH?'—':txt.split('\n')[0];
-      d.innerHTML=isIkke
-        ?`<span style="color:var(--or)">✗</span> <span style="opacity:.5">${label}</span>`
-        :logged
-        ?`<span style="color:var(--a2)">✓</span> <span style="text-decoration:line-through;opacity:.6">${label}</span>`
-        :label;
+      let display=label;
+      if(isIkke){
+        display=`<span style="color:var(--or)">✗</span> <span style="opacity:.5">${label}</span>`;
+      } else if(logged){
+        display=`<span style="color:var(--a2)">✓</span> <span style="text-decoration:line-through;opacity:.6">${label}</span>`;
+      } else if(tirOnlyRun){
+        display=`<span style="color:var(--a2);font-size:9px">✓løp</span> ${label}`;
+      } else if(tirOnlyStr){
+        display=`<span style="color:var(--pu);font-size:9px">✓str</span> ${label}`;
+      }
+      // For tir: show split status for intervall and styrke B
+      if(k==='tir'){
+        const hasIntervall=txt.startsWith('Intervall');
+        const hasStryrkeB=txt.includes('Styrke B');
+        if(hasIntervall && hasStryrkeB){
+          const intIcon=isIkke?'✗ ':isLogged?'✓ ':'';
+          const intColor=isIkke?'var(--or)':isLogged?'var(--a2)':'var(--t)';
+          const strIcon=isStrB?'✓ ':'';
+          const strColor=isStrB?'var(--a2)':'var(--m)';
+          d.innerHTML=`<div style="line-height:1.5">
+            <div style="color:${intColor}">${intIcon}Intervall</div>
+            <div style="color:${strColor};border-top:1px solid var(--b);margin-top:2px;padding-top:2px">${strIcon}Styrke B</div>
+          </div>`;
+        } else if(hasStryrkeB && !hasIntervall){
+          const strIcon=isStrB?'✓ ':'';
+          const strColor=isStrB?'var(--a2)':'var(--t)';
+          d.innerHTML=`<div style="color:${strColor}">${strIcon}Styrke B</div>`;
+        } else {
+          d.innerHTML=display;
+        }
+      } else {
+        d.innerHTML=display;
+      }
       g.appendChild(d);
     });
   });
