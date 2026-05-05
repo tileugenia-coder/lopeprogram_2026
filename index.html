@@ -1070,6 +1070,10 @@ function renderReg(){
           <input type="number" step="0.1" placeholder="km" value="${sv.km||''}" onchange="upL('${key}','km',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
         </div>
         <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Snitt tempo (min/km)</div>
+          <input type="text" placeholder="f.eks. 5:30" value="${sv.tempo||''}" onchange="upL('${key}','tempo',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+        </div>
+        <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Følelse (1–5)</div>
           <input type="number" min="1" max="5" placeholder="1–5" value="${sv.fol||''}" onchange="upL('${key}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
         </div>
