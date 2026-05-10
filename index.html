@@ -1440,11 +1440,23 @@ function renderReg(){
     raceTitle.textContent='Løpsresultat';
     rb.appendChild(raceTitle);
     const raceCard=document.createElement('div');
-    raceCard.className='scard';raceCard.style.marginBottom='16px';
+    const rKey=`${uke}_race`;const rsv=loggL[rKey]||{};
+    const rcParts=[];
+    if(rcSv.tid) rcParts.push(rcSv.tid);
+    if(rcSv.km) rcParts.push(rcSv.km+' km');
+    if(rcSv.tempo) rcParts.push(rcSv.tempo+'/km');
+    if(rcSv.sn) rcParts.push(rcSv.sn+' bpm');
+    raceCard.id='hpm_'+uke+'-race';
+    raceCard.className='scard'+(rcLogged?' hpm-collapsed hpm-done':rcIkke?' hpm-collapsed hpm-ikke':'');
+    raceCard.style.marginBottom='16px';
     raceCard.style.borderColor='var(--or)';
     if(!isRaceDay) raceCard.style.border='1px dashed var(--or)';
-    const rKey=`${uke}_race`;const rsv=loggL[rKey]||{};
     raceCard.innerHTML=`
+      <div class="hpm-preview" onclick="hpmExpand(this)">
+        <span>${rcIkke?'✗ Ikke utført':rcParts.join(' · ')||'✓ Lagret'}</span>
+        <span style="color:var(--a);white-space:nowrap">↕ Rediger</span>
+      </div>
+      <div class="hpm-body">
       <div class="scardh" style="background:var(--s2)">
         <h3 style="color:var(--or)">🏁 ${todayRace.navn} – ${todayRace.km} km <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isRaceDay?'var(--or)':'var(--b)'};color:${isRaceDay?'#fff':'var(--m)'}">${isRaceDay?'Løpsdag':'Planlagt Lør '+todayRace.dato}</span></h3>
         <span>${todayRace.dato}</span>
@@ -1465,8 +1477,8 @@ function renderReg(){
         <div style="grid-column:1/-1"><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Kommentar</div>
           <input type="text" placeholder="Kommentar..." value="${rsv.kom||''}" onchange="upL('${rKey}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
         <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:4px">
-          <button class="sbtn" onclick="saveOkt('${rKey}','msg_${rKey}')" style="padding:6px 14px">Lagre løp</button>
-          <button onclick="ikkeUtfort('${rKey}','msg_${rKey}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
+          <button class="sbtn" onclick="saveOkt('${rKey}','msg_${rKey}');setTimeout(()=>{const sv=loggL['${rKey}']||{};const p=[];if(sv.tid)p.push(sv.tid);if(sv.km)p.push(sv.km+' km');if(sv.tempo)p.push(sv.tempo+'/km');hpmCollapse('${rKey}'.replace(/_/g,'-'),p.join(' · ')||'✓ Lagret',false);},1200)" style="padding:6px 14px">Lagre løp</button>
+          <button onclick="ikkeUtfort('${rKey}','msg_${rKey}');setTimeout(()=>hpmCollapse('${rKey}'.replace(/_/g,'-'),'✗ Ikke utført',true),1200)" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
           <button onclick="nullstillOkt('${rKey}','msg_${rKey}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">↩ Angre</button>
           <span class="smsg" id="msg_${rKey}"></span>
         </div>
