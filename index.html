@@ -978,6 +978,38 @@ function renderStats(){
   barWrap.appendChild(barInner);
   sb.appendChild(barWrap);
 
+  // Treningstid per uke
+  const timeTitle=document.createElement('h2');
+  timeTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  timeTitle.textContent='Treningstid per uke (min)';
+  sb.appendChild(timeTitle);
+
+  const timeData=W.map(w=>{
+    let secs=0;
+    loktKeys.forEach(k=>{
+      const sv=loggL[w.uke+'_'+k]||{};
+      const t=sv['var']||sv.tid||'';
+      if(t){const p=t.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
+    });
+    return{uke:w.uke,kaluke:w.kaluke,mins:Math.round(secs/60)};
+  });
+  const maxMins=Math.max(...timeData.map(d=>d.mins),1);
+  const timeWrap=document.createElement('div');
+  timeWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:16px;margin-bottom:28px;overflow-x:auto';
+  const timeInner=document.createElement('div');
+  timeInner.style.cssText='display:flex;align-items:flex-end;gap:3px;height:80px;min-width:500px';
+  timeData.forEach(d=>{
+    const pct=d.mins/maxMins*100;
+    const bar=document.createElement('div');
+    bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
+    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.mins>0?d.mins:'')+'</div>'
+      +'<div style="width:100%;background:'+(d.mins>0?'var(--a2)':'var(--b)')+';height:'+pct+'%;border-radius:2px 2px 0 0;min-height:'+(d.mins>0?'2px':'0')+'"></div>'
+      +'<div style="font-size:8px;color:var(--m);text-align:center">'+d.kaluke+'</div>';
+    timeInner.appendChild(bar);
+  });
+  timeWrap.appendChild(timeInner);
+  sb.appendChild(timeWrap);
+
   // Puls over tid
   const t2=document.createElement('h2');
   t2.style.cssText='font-size:16px;font-weight:500;color:var(--or);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
