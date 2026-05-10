@@ -1441,6 +1441,9 @@ function renderReg(){
     rb.appendChild(raceTitle);
     const raceCard=document.createElement('div');
     const rKey=`${uke}_race`;const rsv=loggL[rKey]||{};
+    const rcSv=rsv;
+    const rcLogged=rcSv.tid||rcSv.sn||rcSv.km;
+    const rcIkke=rcSv.ikkeUtfort;
     const rcParts=[];
     if(rcSv.tid) rcParts.push(rcSv.tid);
     if(rcSv.km) rcParts.push(rcSv.km+' km');
