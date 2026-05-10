@@ -828,7 +828,8 @@ function renderStats(){
   sb.innerHTML='';
 
   const loktKeys=['intervall','roligLop','tempo','langtur','race'];
-  let totalKm=0, totalUtfort=0, totalIkke=0, pulsList=[], folList=[];
+  let totalKm=0,totalUtfort=0,totalIkke=0;
+  const roligPulsList=[],intervallPulsList=[],folList=[],roligTempoList=[];
 
   W.forEach(w=>{
     loktKeys.forEach(k=>{
@@ -836,8 +837,21 @@ function renderStats(){
       if(sv['var']||sv.tid||sv.sn||sv.km) totalUtfort++;
       if(sv.ikkeUtfort) totalIkke++;
       if(sv.km) totalKm+=parseFloat(sv.km)||0;
-      if(sv.sn) pulsList.push(parseFloat(sv.sn));
+      // Snitt puls fra rolig løpetur og langtur
+      if((k==='roligLop'||k==='langtur')&&sv.sn) roligPulsList.push(parseFloat(sv.sn));
       if(sv.fol) folList.push(parseFloat(sv.fol));
+      // Intervall puls fra drag-tabellen
+      if(k==='intervall'&&sv.drags){
+        Object.values(sv.drags).forEach(d=>{if(d.puls) intervallPulsList.push(parseFloat(d.puls));});
+      }
+      // Snitt tempo fra rolig løpetur og langtur (format mm:ss)
+      if((k==='roligLop'||k==='langtur')&&sv.tempo){
+        const parts=sv.tempo.split(':');
+        if(parts.length===2){
+          const secs=parseInt(parts[0])*60+parseInt(parts[1]);
+          if(!isNaN(secs)) roligTempoList.push({uke:w.uke,secs});
+        }
+      }
     });
     // Count strength sessions
     ['A','B'].forEach(okt=>{
@@ -852,7 +866,12 @@ function renderStats(){
     });
   });
   totalKm=Math.round(totalKm*10)/10;
-  const snittPuls=pulsList.length?Math.round(pulsList.reduce((a,b)=>a+b,0)/pulsList.length):null;
+  const snittRoligPuls=roligPulsList.length?Math.round(roligPulsList.reduce((a,b)=>a+b,0)/roligPulsList.length):null;
+  // Snitt tempo rolig (sekunder → mm:ss)
+  const snittTempoSecs=roligTempoList.length?Math.round(roligTempoList.reduce((a,b)=>a+b.secs,0)/roligTempoList.length):null;
+  const snittTempoStr=snittTempoSecs?Math.floor(snittTempoSecs/60)+':'+(snittTempoSecs%60).toString().padStart(2,'0')+' min/km':null;
+  const snittIntervallPuls=intervallPulsList.length?Math.round(intervallPulsList.reduce((a,b)=>a+b,0)/intervallPulsList.length):null;
+
   const snittFol=folList.length?Math.round(folList.reduce((a,b)=>a+b,0)/folList.length*10)/10:null;
 
   // Streak: consecutive weeks with at least one logged session
@@ -883,7 +902,9 @@ function renderStats(){
     {l:'Totalt løpt',v:totalKm+' km',c:'var(--a)'},
     {l:'Gjennomført',v:totalUtfort+' økter',c:'var(--a2)'},
     {l:'Ikke utført',v:totalIkke+' økter',c:totalIkke>0?'var(--or)':'var(--m)'},
-    {l:'Snitt puls',v:snittPuls?snittPuls+' bpm':'–',c:'var(--or)'},
+    {l:'Snitt puls (rolig)',v:snittRoligPuls?snittRoligPuls+' bpm':'–',c:'var(--or)'},
+    {l:'Snitt tempo (rolig)',v:snittTempoStr||'–',c:'var(--a2)'},
+    {l:'Snitt puls (intervall)',v:snittIntervallPuls?snittIntervallPuls+' bpm':'–',c:'#e05b00'},
     {l:'Snitt følelse',v:snittFol?snittFol+' / 5':'–',c:'var(--pu)'},
     {l:'Uker igjen',v:weeksLeft+' uker',c:'var(--a2)'},
     {l:'Streak',v:streak+' uker',c:streak>=3?'var(--a)':'var(--m)'},
@@ -918,7 +939,7 @@ function renderStats(){
   const barWrap=document.createElement('div');
   barWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:16px;margin-bottom:28px;overflow-x:auto';
   const barInner=document.createElement('div');
-  barInner.style.cssText='display:flex;align-items:flex-end;gap:3px;height:160px;min-width:500px';
+  barInner.style.cssText='display:flex;align-items:flex-end;gap:3px;height:80px;min-width:500px';
 
   kmData.forEach(d=>{
     const pct=d.km/maxKm*100;
@@ -936,13 +957,13 @@ function renderStats(){
   // Puls over tid
   const t2=document.createElement('h2');
   t2.style.cssText='font-size:16px;font-weight:500;color:var(--or);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
-  t2.textContent='Snitt puls over tid';
+  t2.textContent='Snitt puls over tid (rolig)';
   sb.appendChild(t2);
 
   const pulsData=[];
   W.forEach(w=>{
     let list=[];
-    loktKeys.forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if(sv.sn)list.push(parseFloat(sv.sn));});
+    loktKeys.forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if((k==='roligLop'||k==='langtur')&&sv.sn)list.push(parseFloat(sv.sn));});
     if(list.length) pulsData.push({kaluke:w.kaluke,puls:Math.round(list.reduce((a,b)=>a+b,0)/list.length)});
   });
 
@@ -951,7 +972,7 @@ function renderStats(){
   if(!pulsData.length){
     pulsWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen pulsdata ennå.</p>';
   } else {
-    const W2=500,H2=100;
+    const W2=500,H2=60;
     const minP=Math.min(...pulsData.map(d=>d.puls))-10;
     const maxP=Math.max(...pulsData.map(d=>d.puls))+10;
     const pts=pulsData.map((d,i)=>{
@@ -971,6 +992,53 @@ function renderStats(){
   }
   sb.appendChild(pulsWrap);
 
+  // Snitt tempo over tid (rolig løpetur + langtur)
+  const tempoTitle=document.createElement('h2');
+  tempoTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a2);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  tempoTitle.textContent='Snitt tempo over tid (rolig)';
+  sb.appendChild(tempoTitle);
+
+  const tempoData=[];
+  W.forEach(w=>{
+    let secsList=[];
+    loktKeys.forEach(k=>{
+      const sv=loggL[w.uke+'_'+k]||{};
+      if((k==='roligLop'||k==='langtur')&&sv.tempo){
+        const p=sv.tempo.split(':');
+        if(p.length===2){const s=parseInt(p[0])*60+parseInt(p[1]);if(!isNaN(s))secsList.push(s);}
+      }
+    });
+    if(secsList.length){
+      const avg=Math.round(secsList.reduce((a,b)=>a+b,0)/secsList.length);
+      tempoData.push({uke:w.uke,val:avg});
+    }
+  });
+
+  const tempoWrap=document.createElement('div');
+  tempoWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:12px;margin-bottom:24px;overflow-x:auto';
+  if(!tempoData.length){
+    tempoWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen tempo-data ennå.</p>';
+  } else {
+    const W2=320,H2=70;
+    const minV=Math.min(...tempoData.map(d=>d.val));
+    const maxV=Math.max(...tempoData.map(d=>d.val));
+    const rng=maxV-minV||30;
+    const pts=tempoData.map((d,i)=>{
+      const x=20+i*(W2-40)/(Math.max(tempoData.length-1,1));
+      const y=H2-15-(d.val-minV)/rng*(H2-30);
+      const mm=Math.floor(d.val/60),ss=(d.val%60).toString().padStart(2,'0');
+      return {x,y,label:mm+':'+ss,uke:d.uke};
+    });
+    const path=pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+    const dots=pts.map(p=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3" fill="var(--a2)"/>').join('');
+    const lbls=pts.filter((_,i)=>i===0||i===pts.length-1||pts.length<=8).map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(p.y-6).toFixed(1)+'" font-size="8" fill="var(--a2)" text-anchor="middle">'+p.label+'</text>').join('');
+    const ukelbl=pts.map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(H2-2)+'" font-size="7" fill="var(--m)" text-anchor="middle">'+p.uke+'</text>').join('');
+    tempoWrap.innerHTML='<svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="min-width:240px">'
+      +'<path d="'+path+'" fill="none" stroke="var(--a2)" stroke-width="1.5" stroke-linejoin="round"/>'
+      +dots+lbls+ukelbl+'</svg>';
+  }
+  sb.appendChild(tempoWrap);
+
   // Følelse over tid
   const t3=document.createElement('h2');
   t3.style.cssText='font-size:16px;font-weight:500;color:var(--pu);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
@@ -989,7 +1057,7 @@ function renderStats(){
   if(!folData2.length){
     folWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen følelsesdata ennå.</p>';
   } else {
-    const W3=500,H3=100;
+    const W3=500,H3=60;
     const pts=folData2.map((d,i)=>{
       const x=20+i*(W3-40)/(folData2.length-1||1);
       const y=H3-15-(d.fol-1)/4*(H3-30);
