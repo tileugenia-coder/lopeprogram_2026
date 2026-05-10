@@ -883,14 +883,19 @@ function renderStats(){
       const sk=w.uke+'_'+okt+'_0_s1';
       const sv=loggS[sk]||{};
       if(sv.vekt||sv.reps) totalUtfort++;
+      // Add strength varighet to totalSecs and følelse to folList
+      const strVarSk=w.uke+'_'+okt+'_varighet';
+      const strVarSv=loggS[strVarSk]||{};
+      if(strVarSv.var){const p=strVarSv.var.split(':');if(p.length===3)totalSecs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)totalSecs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
+      if(strVarSv.fol) folList.push(parseFloat(strVarSv.fol));
       const skIkke=w.uke+'_'+okt+'_0';
       if(loggS[skIkke]&&loggS[skIkke].ikkeUtfort) totalIkke++;
     });
   });
   totalKm=Math.round(totalKm*10)/10;
   const totalH=Math.floor(totalSecs/3600);
-  const totalM=Math.floor((totalSecs%3600)/60);
-  const totalTimeStr=totalSecs>0?(totalH>0?totalH+'t '+totalM+'min':totalM+' min'):'–';
+  const totalM=Math.floor((totalSecs%3600)/60).toString().padStart(2,'0');
+  const totalTimeStr=totalSecs>0?totalH+':'+totalM:'–';
 
   const snittRoligPuls=roligPulsList.length?Math.round(roligPulsList.reduce((a,b)=>a+b,0)/roligPulsList.length):null;
   // Snitt tempo rolig (sekunder → mm:ss)
@@ -990,6 +995,11 @@ function renderStats(){
       const sv=loggL[w.uke+'_'+k]||{};
       const t=sv['var']||sv.tid||'';
       if(t){const p=t.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
+    });
+    // Add strength varighet
+    ['A','B'].forEach(okt=>{
+      const svk=loggS[w.uke+'_'+okt+'_varighet']||{};
+      if(svk.var){const p=svk.var.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
     });
     const mins=Math.round(secs/60);
     const hh=Math.floor(mins/60);
@@ -1602,6 +1612,32 @@ function renderReg(){
       }
     });
     tbl.appendChild(tbody);
+    // Varighet + følelse for strength
+    const varDiv=document.createElement('div');
+    varDiv.style.cssText='padding:10px 14px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px';
+    const strVarSk=`${uke}_${okt}_varighet`;
+    const strVarSv=loggS[strVarSk]||{};
+    // Build varDiv inputs via DOM to avoid quote issues
+    const varDivInp1=document.createElement('div');
+    varDivInp1.innerHTML='<div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Varighet (tt:mm:ss)</div>';
+    const varInput=document.createElement('input');
+    varInput.type='text';varInput.placeholder='tt:mm:ss';
+    varInput.value=strVarSv.var||'';
+    varInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
+    varInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].var=normalizeTime(this.value);};
+    varDivInp1.appendChild(varInput);
+    varDiv.appendChild(varDivInp1);
+
+    const varDivInp2=document.createElement('div');
+    varDivInp2.innerHTML='<div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Følelse (1–5)</div>';
+    const folInput=document.createElement('input');
+    folInput.type='number';folInput.min='1';folInput.max='5';folInput.placeholder='1–5';
+    folInput.value=strVarSv.fol||'';
+    folInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
+    folInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].fol=this.value;};
+    varDivInp2.appendChild(folInput);
+    varDiv.appendChild(varDivInp2);
+    
     // Save row
     const saveRow=document.createElement('div');
     saveRow.style.cssText='padding:10px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--b)';
@@ -1620,8 +1656,10 @@ function renderReg(){
     angreBtn.style.cssText='background:none;border:1px solid var(--b);color:var(--m);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer';
     angreBtn.onclick=()=>nullstillStrOkt(uke,okt,'msg_str_'+uke+'_'+okt);
     saveRow.appendChild(saveBtnEl);saveRow.appendChild(ikkeBtn);saveRow.appendChild(angreBtn);saveRow.appendChild(saveMsgEl);
-    card.querySelector('.hpm-body').appendChild(tbl);
-    card.querySelector('.hpm-body').appendChild(saveRow);
+    const hpmBodyEl = card.querySelector('.hpm-body') || card;
+    hpmBodyEl.appendChild(tbl);
+    hpmBodyEl.appendChild(varDiv);
+    hpmBodyEl.appendChild(saveRow);
     saveBtnEl.onclick=(function(c,uid,o2){return function(){
       saveOkt(null,'msg_str_'+uid+'_'+o2);
       setTimeout(()=>{
