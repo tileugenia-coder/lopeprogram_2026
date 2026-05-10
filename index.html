@@ -961,7 +961,7 @@ function renderStats(){
   const maxKm=Math.max(...kmData.map(d=>d.km),1);
 
   const barWrap=document.createElement('div');
-  barWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:16px;margin-bottom:28px;overflow-x:auto';
+  barWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:8px;margin-bottom:16px;overflow-x:auto';
   const barInner=document.createElement('div');
   barInner.style.cssText='display:flex;align-items:flex-end;gap:3px;height:80px;min-width:500px';
 
@@ -972,7 +972,7 @@ function renderStats(){
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
     bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.km>0?d.km:d.ikke>0?'✗':'')+'</div>'
       +'<div style="width:100%;background:'+col+';border-radius:2px 2px 0 0;height:'+Math.max(pct,d.km>0||d.ikke>0?2:0)+'%;min-height:'+(d.km>0||d.ikke>0?'3px':'0')+'"></div>'
-      +'<div style="font-size:8px;color:var(--m);writing-mode:vertical-rl;transform:rotate(180deg);height:24px;overflow:hidden;text-align:center">'+d.kaluke+'</div>';
+      +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>';
     barInner.appendChild(bar);
   });
   barWrap.appendChild(barInner);
@@ -981,7 +981,7 @@ function renderStats(){
   // Treningstid per uke
   const timeTitle=document.createElement('h2');
   timeTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
-  timeTitle.textContent='Treningstid per uke (min)';
+  timeTitle.textContent='Treningstid per uke (tt:mm)';
   sb.appendChild(timeTitle);
 
   const timeData=W.map(w=>{
@@ -991,18 +991,22 @@ function renderStats(){
       const t=sv['var']||sv.tid||'';
       if(t){const p=t.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
     });
-    return{uke:w.uke,kaluke:w.kaluke,mins:Math.round(secs/60)};
+    const mins=Math.round(secs/60);
+    const hh=Math.floor(mins/60);
+    const mm=(mins%60).toString().padStart(2,'0');
+    const label=mins>0?(hh>0?hh+':'+mm:'0:'+mm):'';
+    return{uke:w.uke,kaluke:w.kaluke,mins,label};
   });
   const maxMins=Math.max(...timeData.map(d=>d.mins),1);
   const timeWrap=document.createElement('div');
-  timeWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:16px;margin-bottom:28px;overflow-x:auto';
+  timeWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:8px;margin-bottom:16px;overflow-x:auto';
   const timeInner=document.createElement('div');
   timeInner.style.cssText='display:flex;align-items:flex-end;gap:3px;height:80px;min-width:500px';
   timeData.forEach(d=>{
     const pct=d.mins/maxMins*100;
     const bar=document.createElement('div');
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
-    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.mins>0?d.mins:'')+'</div>'
+    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.label||'')+'</div>'
       +'<div style="width:100%;background:'+(d.mins>0?'var(--a2)':'var(--b)')+';height:'+pct+'%;border-radius:2px 2px 0 0;min-height:'+(d.mins>0?'2px':'0')+'"></div>'
       +'<div style="font-size:8px;color:var(--m);text-align:center">'+d.kaluke+'</div>';
     timeInner.appendChild(bar);
@@ -1028,7 +1032,7 @@ function renderStats(){
   if(!pulsData.length){
     pulsWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen pulsdata ennå.</p>';
   } else {
-    const W2=500,H2=60;
+    const W2=500,H2=40;
     const minP=Math.min(...pulsData.map(d=>d.puls))-10;
     const maxP=Math.max(...pulsData.map(d=>d.puls))+10;
     const pts=pulsData.map((d,i)=>{
@@ -1041,8 +1045,8 @@ function renderStats(){
     const g164y=H2-15-(164-minP)/(maxP-minP)*(H2-30);
     const g171y=H2-15-(171-minP)/(maxP-minP)*(H2-30);
     pulsWrap.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="min-width:300px;display:block">'
-      +(g164y>5&&g164y<H2?'<line x1="0" y1="'+g164y+'" x2="'+W2+'" y2="'+g164y+'" stroke="var(--a)" stroke-width="0.5" stroke-dasharray="3,3"/><text x="2" y="'+(g164y-2)+'" font-size="8" fill="var(--a)">164</text>':'')
-      +(g171y>5&&g171y<H2?'<line x1="0" y1="'+g171y+'" x2="'+W2+'" y2="'+g171y+'" stroke="var(--a)" stroke-width="0.5" stroke-dasharray="3,3"/><text x="2" y="'+(g171y-2)+'" font-size="8" fill="var(--a)">171</text>':'')
+      +(g164y>5&&g164y<H2?'<line x1="0" y1="'+g164y+'" x2="'+W2+'" y2="'+g164y+'" stroke="var(--a)" stroke-width="0.5" stroke-dasharray="3,3"/><text x="2" y="'+(g164y-2)+'" font-size="7" fill="var(--a)">164</text>':'')
+      +(g171y>5&&g171y<H2?'<line x1="0" y1="'+g171y+'" x2="'+W2+'" y2="'+g171y+'" stroke="var(--a)" stroke-width="0.5" stroke-dasharray="3,3"/><text x="2" y="'+(g171y-2)+'" font-size="7" fill="var(--a)">171</text>':'')
       +'<path d="'+path+'" fill="none" stroke="var(--or)" stroke-width="2"/>'
       +dots+'</svg></div>';
   }
@@ -1071,11 +1075,11 @@ function renderStats(){
   });
 
   const tempoWrap=document.createElement('div');
-  tempoWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:12px;margin-bottom:24px;overflow-x:auto';
+  tempoWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:8px;margin-bottom:16px;overflow-x:auto';
   if(!tempoData.length){
     tempoWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen tempo-data ennå.</p>';
   } else {
-    const W2=320,H2=70;
+    const W2=320,H2=40;
     const minV=Math.min(...tempoData.map(d=>d.val));
     const maxV=Math.max(...tempoData.map(d=>d.val));
     const rng=maxV-minV||30;
@@ -1087,8 +1091,8 @@ function renderStats(){
     });
     const path=pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
     const dots=pts.map(p=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3" fill="var(--a2)"/>').join('');
-    const lbls=pts.filter((_,i)=>i===0||i===pts.length-1||pts.length<=8).map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(p.y-6).toFixed(1)+'" font-size="8" fill="var(--a2)" text-anchor="middle">'+p.label+'</text>').join('');
-    const ukelbl=pts.map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(H2-2)+'" font-size="7" fill="var(--m)" text-anchor="middle">'+p.uke+'</text>').join('');
+    const lbls=pts.filter((_,i)=>i===0||i===pts.length-1||pts.length<=8).map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(p.y-6).toFixed(1)+'" font-size="7" fill="var(--a2)" text-anchor="middle">'+p.label+'</text>').join('');
+    const ukelbl=pts.map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(H2-2)+'" font-size="6" fill="var(--m)" text-anchor="middle">'+p.uke+'</text>').join('');
     tempoWrap.innerHTML='<svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="min-width:240px">'
       +'<path d="'+path+'" fill="none" stroke="var(--a2)" stroke-width="1.5" stroke-linejoin="round"/>'
       +dots+lbls+ukelbl+'</svg>';
@@ -1113,7 +1117,7 @@ function renderStats(){
   if(!folData2.length){
     folWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen følelsesdata ennå.</p>';
   } else {
-    const W3=500,H3=60;
+    const W3=500,H3=40;
     const pts=folData2.map((d,i)=>{
       const x=20+i*(W3-40)/(folData2.length-1||1);
       const y=H3-15-(d.fol-1)/4*(H3-30);
@@ -1196,8 +1200,8 @@ function renderStats(){
         });
         const path=coords.map((c,i)=>(i?'L':'M')+c.x+','+c.y).join(' ');
         const dots=coords.map(c=>'<circle cx="'+c.x+'" cy="'+c.y+'" r="2.5" fill="var(--a2)"/>').join('');
-        const firstLbl='<text x="'+coords[0].x+'" y="'+(coords[0].y+(coords[0].y<20?12:-4))+'" font-size="8" fill="var(--m)" text-anchor="middle">'+coords[0].v+'</text>';
-        const lastLbl='<text x="'+coords[coords.length-1].x+'" y="'+(coords[coords.length-1].y+(coords[coords.length-1].y<20?12:-4))+'" font-size="8" fill="var(--a2)" text-anchor="middle">'+coords[coords.length-1].v+'</text>';
+        const firstLbl='<text x="'+coords[0].x+'" y="'+(coords[0].y+(coords[0].y<20?12:-4))+'" font-size="6" fill="var(--m)" text-anchor="middle">'+coords[0].v+'</text>';
+        const lastLbl='<text x="'+coords[coords.length-1].x+'" y="'+(coords[coords.length-1].y+(coords[coords.length-1].y<20?12:-4))+'" font-size="7" fill="var(--a2)" text-anchor="middle">'+coords[coords.length-1].v+'</text>';
         chartSvg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="50" style="display:block;margin-top:6px">'
           +'<path d="'+path+'" fill="none" stroke="var(--a2)" stroke-width="1.5" stroke-linejoin="round"/>'
           +dots+firstLbl+lastLbl+'</svg>';
