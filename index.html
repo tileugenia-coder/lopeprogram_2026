@@ -607,6 +607,7 @@ function nav(id,btn){
   document.getElementById('v-'+id).classList.add('active');
   btn.classList.add('active');
   if(id==='ukedetalj') rdw();
+  if(id==='ukesplan'){document.getElementById('ugrid').innerHTML='';renderUkesplan();}
   if(id==='stats') renderStats();
 }
 
@@ -623,17 +624,20 @@ function renderUkesplan(){
     [{cls:`ucell uke-n fl-${fc}`,txt:`Uke ${w.uke}\n${w.kaluke}`,click:()=>gw(w.uke)},{cls:'ucell',txt:w.dato},{cls:`ucell fl-${fc}`,txt:w.fase,sm:true}].forEach(c=>{
       const d=document.createElement('div');d.className=c.cls;d.style.fontSize=c.sm?'10px':'';d.textContent=c.txt||'';if(c.click)d.onclick=c.click;g.appendChild(d);
     });
-    const dayToLoggKey={
-      'tir':`${w.uke}_intervall`,
-      'ons':`${w.uke}_roligLop`,
-      'fre':`${w.uke}_tempo`,
-      'son':`${w.uke}_langtur`,
-      'lor':`${w.uke}_race`,
-    };
+    // Build dayToLoggKey dynamically from W data
+    const dayToLoggKey={};
+    ['man','tir','ons','tor','fre','lor','son'].forEach(d=>{
+      const t=w[d]||'';
+      if(t.includes('Intervall')) dayToLoggKey[d]=`${w.uke}_intervall`;
+      if(t.startsWith('Rolig løpetur')) dayToLoggKey[d]=`${w.uke}_roligLop`;
+      if(t.startsWith('Tempoøkt')) dayToLoggKey[d]=`${w.uke}_tempo`;
+      if(t.startsWith('Rolig langtur')) dayToLoggKey[d]=`${w.uke}_langtur`;
+      if(t.includes('🏁')) dayToLoggKey[d]=`${w.uke}_race`;
+    });
     keys.forEach(k=>{
       const txt=w[k]||'';const isH=txt==='Hvile';const isR=txt.includes('🏁');
       const lKey=dayToLoggKey[k];
-      const isLogged=lKey&&loggL[lKey]&&(loggL[lKey]['var']||loggL[lKey].tid||loggL[lKey].sn);
+      const isLogged=lKey&&loggL[lKey]&&(loggL[lKey]['var']||loggL[lKey].tid||loggL[lKey].sn||loggL[lKey].km||loggL[lKey].fol||loggL[lKey].tempo);
       const isIkke=lKey&&loggL[lKey]&&loggL[lKey].ikkeUtfort;
       // Styrke A (lor only, not race weeks) and Styrke B (tir only)
       const sKeyA=`${w.uke}_A_0_s1`;
@@ -803,7 +807,7 @@ function savel(t){
   }catch(e){console.warn('Storage unavailable');}
 }
 
-function sm(id){const el=document.getElementById(id);el.textContent='✓ Lagret';setTimeout(()=>el.textContent='',2000);}
+function sm(id){const el=document.getElementById(id);el.textContent='✓ Utført';setTimeout(()=>el.textContent='',2000);}
 
 function renderIntervall(){
   const g=document.getElementById('igrid');
@@ -1307,7 +1311,10 @@ function renderReg(){
     if(cksv2.tid) ckSum.push(cksv2.tid);
     card.innerHTML=`
       <div class="hpm-preview" onclick="hpmExpand(this)">
-        <span>${ckIkke2?'✗ Ikke utført':ckSum.join(' · ')||'✓ Lagret'}</span>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <span style="font-weight:500;color:var(--t)">${o.l}</span>
+          <span style="font-size:10px;color:${ckIkke2?'var(--or)':'var(--a2)'}">${ckIkke2?'✗ Ikke utført':ckSum.join(' · ')||'✓ Utført'}</span>
+        </div>
         <span style="color:var(--a);white-space:nowrap">↕ Rediger</span>
       </div>
       <div class="hpm-body">
@@ -1456,7 +1463,10 @@ function renderReg(){
     if(!isRaceDay) raceCard.style.border='1px dashed var(--or)';
     raceCard.innerHTML=`
       <div class="hpm-preview" onclick="hpmExpand(this)">
-        <span>${rcIkke?'✗ Ikke utført':rcParts.join(' · ')||'✓ Lagret'}</span>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <span style="font-weight:500;color:var(--or)">🏁 ${todayRace.navn}</span>
+          <span style="font-size:10px;color:${rcIkke?'var(--or)':'var(--a2)'}">${rcIkke?'✗ Ikke utført':rcParts.join(' · ')||'✓ Utført'}</span>
+        </div>
         <span style="color:var(--a);white-space:nowrap">↕ Rediger</span>
       </div>
       <div class="hpm-body">
@@ -1480,7 +1490,7 @@ function renderReg(){
         <div style="grid-column:1/-1"><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Kommentar</div>
           <input type="text" placeholder="Kommentar..." value="${rsv.kom||''}" onchange="upL('${rKey}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
         <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:4px">
-          <button class="sbtn" onclick="saveOkt('${rKey}','msg_${rKey}');setTimeout(()=>{const sv=loggL['${rKey}']||{};const p=[];if(sv.tid)p.push(sv.tid);if(sv.km)p.push(sv.km+' km');if(sv.tempo)p.push(sv.tempo+'/km');hpmCollapse('${rKey}'.replace(/_/g,'-'),p.join(' · ')||'✓ Lagret',false);},1200)" style="padding:6px 14px">Lagre løp</button>
+          <button class="sbtn" onclick="saveOkt('${rKey}','msg_${rKey}');setTimeout(()=>{const sv=loggL['${rKey}']||{};const p=[];if(sv.tid)p.push(sv.tid);if(sv.km)p.push(sv.km+' km');if(sv.tempo)p.push(sv.tempo+'/km');hpmCollapse('${rKey}'.replace(/_/g,'-'),p.join(' · ')||'✓ Utført',false);},1200)" style="padding:6px 14px">Lagre løp</button>
           <button onclick="ikkeUtfort('${rKey}','msg_${rKey}');setTimeout(()=>hpmCollapse('${rKey}'.replace(/_/g,'-'),'✗ Ikke utført',true),1200)" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
           <button onclick="nullstillOkt('${rKey}','msg_${rKey}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">↩ Angre</button>
           <span class="smsg" id="msg_${rKey}"></span>
@@ -1518,7 +1528,7 @@ function renderReg(){
     const strLogged2=!!(strSv2.vekt||strSv2.reps);
     if(strLogged2) card.classList.add('hpm-collapsed','hpm-done');
     const strSum='✓ Utført';
-    card.innerHTML=(strLogged2?`<div class="hpm-preview" onclick="hpmExpand(this)"><span>${strSum}</span><span style="color:var(--a)">↕ Rediger</span></div>`:'')
+    card.innerHTML=(strLogged2?`<div class="hpm-preview" onclick="this.closest('.scard').classList.remove('hpm-collapsed')"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:500;color:var(--t)">Styrke ${okt}</span><span style="font-size:10px;color:var(--a2)">✓ Utført</span></div><span style="color:var(--a);white-space:nowrap">↕ Rediger</span></div>`:'')
       +`<div class="hpm-body"><div class="scardh" style="background:var(--s2)"><h3>Styrke ${okt} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isStrToday?'var(--pu)':'var(--b)'};color:${isStrToday?'#fff':'var(--m)'};">${isStrToday?'Planlagt i dag':okt==='A'?'Planlagt Lør':'Planlagt Tir'}</span></h3><span>${okt==='A'?'Styrke A':'Styrke B'}</span></div>`;
 
     const tbl=document.createElement('table');tbl.className='stbl';
@@ -1579,13 +1589,17 @@ function renderReg(){
     saveBtnEl.onclick=(function(c,uid,o2){return function(){
       saveOkt(null,'msg_str_'+uid+'_'+o2);
       setTimeout(()=>{
+        document.getElementById('ugrid').innerHTML='';
+        renderUkesplan();
+        renderStats();
         c.classList.add('hpm-collapsed','hpm-done');
         const pv=c.querySelector('.hpm-preview');
         if(!pv){
           const d=document.createElement('div');
           d.className='hpm-preview';
           d.onclick=function(){hpmExpand(this);};
-          d.innerHTML='<span>✓ Utført</span><span style="color:var(--a)">↕ Rediger</span>';
+          d.innerHTML='<div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:500;color:var(--t)">Styrke '+o2+'</span><span style="font-size:10px;color:var(--a2)">✓ Utført</span></div><span style="color:var(--a);white-space:nowrap">↕ Rediger</span>';
+          d.onclick=function(){this.closest('.scard').classList.remove('hpm-collapsed');};
           c.insertBefore(d,c.firstChild);
         } else {
           const s=pv.querySelector('span');
@@ -1643,8 +1657,19 @@ function hpmCollapse(id, text, isIkke){
   if(!el) return;
   el.classList.add('hpm-collapsed');
   el.classList.add(isIkke?'hpm-ikke':'hpm-done');
-  const prev=el.querySelector('.hpm-preview span');
-  if(prev) prev.textContent=text||'✓ Lagret';
+  const prev=el.querySelector('.hpm-preview');
+  if(prev){
+    // Get name from scardh h3 if available
+    const h3=el.querySelector('.scardh h3');
+    const name=h3?h3.childNodes[0].textContent.trim():'';
+    const statusText=isIkke?'✗ Ikke utført':text||'✓ Utført';
+    const statusColor=isIkke?'var(--or)':'var(--a2)';
+    prev.innerHTML='<div style="display:flex;flex-direction:column;gap:2px">'
+      +(name?'<span style="font-weight:500;color:var(--t)">'+name+'</span>':'')
+      +'<span style="font-size:10px;color:'+statusColor+'">'+statusText+'</span>'
+      +'</div>'
+      +'<span style="color:var(--a);white-space:nowrap">↕ Rediger</span>';
+  }
 }
 function hpmExpand(el){
   el.closest('.scard').classList.remove('hpm-collapsed');
@@ -1655,7 +1680,7 @@ function saveOkt(key, msgId){
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
     fbSave();
     const el=document.getElementById(msgId);
-    if(el){el.textContent='✓ Lagret';setTimeout(()=>el.textContent='',2000);}
+    if(el){el.textContent='✓ Utført';setTimeout(()=>el.textContent='',2000);}
     if(key){
       const sv=loggL[key]||{};
       const parts=[];
@@ -1664,11 +1689,14 @@ function saveOkt(key, msgId){
       if(sv.tempo) parts.push(sv.tempo+'/km');
       if(sv.sn) parts.push(sv.sn+' bpm');
       if(sv.tid) parts.push(sv.tid);
-      setTimeout(()=>hpmCollapse(key.replace(/_/g,'-'), parts.join(' · ')||'✓ Lagret', false), 1200);
+      setTimeout(()=>hpmCollapse(key.replace(/_/g,'-'), parts.join(' · ')||'✓ Utført', false), 800);
     }
-    document.getElementById('ugrid').innerHTML='';
-    renderUkesplan();
-    renderStats();
+    // Update programplan and stats after collapse animation
+    setTimeout(()=>{
+      document.getElementById('ugrid').innerHTML='';
+      renderUkesplan();
+      renderStats();
+    }, 1400);
   }catch(e){console.warn('Storage unavailable');}
 }
 
