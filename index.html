@@ -150,7 +150,6 @@ main{padding:20px 24px;max-width:1400px}
   <button onclick="nav('ukesplan',this)">Programplan</button>
   <button onclick="nav('stats',this)">Statistikk</button>
   <button onclick="nav('intervall',this)">Intervall</button>
-  <button onclick="nav('races',this)">Løpskalender</button>
 </nav>
 <main>
 
@@ -181,9 +180,7 @@ main{padding:20px 24px;max-width:1400px}
   <div style="overflow-x:auto"><div class="igrid" id="igrid"></div></div>
 </div>
 
-<div class="view" id="v-races">
-  <div class="rlist" id="rlist"></div>
-</div>
+
   </div>
 
 
@@ -702,7 +699,17 @@ function initWsel(){
 
 function cw(d){curW=Math.max(1,Math.min(24,curW+d));document.getElementById('wsel').value=curW;rdw();}
 
-function rdw(){curW=parseInt(document.getElementById('wsel').value)||curW;renderWeek(curW);}
+function rdw(){
+  // If we just saved a specific uke in Registrering, show that uke
+  const regUke=parseInt(document.getElementById('reg-uke')?.value);
+  if(regUke) {
+    curW=regUke;
+    document.getElementById('wsel').value=regUke;
+  } else {
+    curW=parseInt(document.getElementById('wsel').value)||curW;
+  }
+  renderWeek(curW);
+}
 
 function renderWeek(n){
   const w=W.find(x=>x.uke===n);if(!w)return;
@@ -1038,7 +1045,7 @@ function renderStats(){
   });
 
   const pulsWrap=document.createElement('div');
-  pulsWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:16px;margin-bottom:28px';
+  pulsWrap.style.cssText='background:var(--s);border-radius:8px;padding:8px;margin-bottom:16px';
   if(!pulsData.length){
     pulsWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen pulsdata ennå.</p>';
   } else {
@@ -1052,12 +1059,8 @@ function renderStats(){
     });
     const path=pts.map((p,i)=>(i?'L':'M')+p.x+','+p.y).join(' ');
     const dots=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="var(--or)"/><text x="'+p.x+'" y="'+(p.y-6)+'" font-size="9" fill="var(--or)" text-anchor="middle">'+p.d.puls+'</text>').join('');
-    const g164y=H2-15-(164-minP)/(maxP-minP)*(H2-30);
-    const g171y=H2-15-(171-minP)/(maxP-minP)*(H2-30);
     pulsWrap.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="min-width:300px;display:block">'
-      +(g164y>5&&g164y<H2?'<line x1="0" y1="'+g164y+'" x2="'+W2+'" y2="'+g164y+'" stroke="var(--a)" stroke-width="0.5" stroke-dasharray="3,3"/><text x="2" y="'+(g164y-2)+'" font-size="7" fill="var(--a)">164</text>':'')
-      +(g171y>5&&g171y<H2?'<line x1="0" y1="'+g171y+'" x2="'+W2+'" y2="'+g171y+'" stroke="var(--a)" stroke-width="0.5" stroke-dasharray="3,3"/><text x="2" y="'+(g171y-2)+'" font-size="7" fill="var(--a)">171</text>':'')
-      +'<path d="'+path+'" fill="none" stroke="var(--or)" stroke-width="2"/>'
+      +'<path d="'+path+'" fill="none" stroke="var(--or)" stroke-width="1.5"/>'
       +dots+'</svg></div>';
   }
   sb.appendChild(pulsWrap);
@@ -1085,7 +1088,7 @@ function renderStats(){
   });
 
   const tempoWrap=document.createElement('div');
-  tempoWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:8px;margin-bottom:16px;overflow-x:auto';
+  tempoWrap.style.cssText='background:var(--s);border-radius:8px;padding:8px;margin-bottom:16px;overflow-x:auto';
   if(!tempoData.length){
     tempoWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen tempo-data ennå.</p>';
   } else {
@@ -1123,7 +1126,7 @@ function renderStats(){
   });
 
   const folWrap=document.createElement('div');
-  folWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:16px;margin-bottom:28px';
+  folWrap.style.cssText='background:var(--s);border-radius:8px;padding:8px;margin-bottom:16px';
   if(!folData2.length){
     folWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen følelsesdata ennå.</p>';
   } else {
@@ -1136,7 +1139,7 @@ function renderStats(){
     const path=pts.map((p,i)=>(i?'L':'M')+p.x+','+p.y).join(' ');
     const dots=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="var(--pu)"/><text x="'+p.x+'" y="'+(p.y-6)+'" font-size="9" fill="var(--pu)" text-anchor="middle">'+p.d.fol+'</text>').join('');
     folWrap.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W3+' '+H3+'" width="100%" style="min-width:300px;display:block">'
-      +'<path d="'+path+'" fill="none" stroke="var(--pu)" stroke-width="2"/>'
+      +'<path d="'+path+'" fill="none" stroke="var(--pu)" stroke-width="1.5"/>'
       +dots+'</svg></div>';
   }
   sb.appendChild(folWrap);
@@ -1666,6 +1669,7 @@ function renderReg(){
         document.getElementById('ugrid').innerHTML='';
         renderUkesplan();
         renderStats();
+        rdw();
         c.classList.add('hpm-collapsed','hpm-done');
         const pv=c.querySelector('.hpm-preview');
         if(!pv){
@@ -1701,7 +1705,7 @@ function ikkeUtfort(key, msgId){
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
         const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
-    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
+    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdw();
 
   }catch(e){}
 }
@@ -1721,7 +1725,7 @@ function ikkeUtfortStr(uke, okt, msgId){
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
         const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
-    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
+    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdw();
   }catch(e){}
 }
 
@@ -1765,11 +1769,12 @@ function saveOkt(key, msgId){
       if(sv.tid) parts.push(sv.tid);
       setTimeout(()=>hpmCollapse(key.replace(/_/g,'-'), parts.join(' · ')||'✓ Utført', false), 800);
     }
-    // Update programplan and stats after collapse animation
+    // Update programplan, ukesoversikt and stats after collapse animation
     setTimeout(()=>{
       document.getElementById('ugrid').innerHTML='';
       renderUkesplan();
       renderStats();
+      rdw(); // refresh ukesoversikt
     }, 1400);
   }catch(e){console.warn('Storage unavailable');}
 }
@@ -1812,7 +1817,7 @@ function savelReg(){
   if(label) label.textContent='Uke '+uke+' av 24 · '+pct+'%';
 })();
 
-renderUkesplan();initWsel();renderWeek(1);renderIntervall();renderRaces();initReg();renderStats();
+renderUkesplan();initWsel();renderWeek(1);renderIntervall();initReg();renderStats();
 
 
 
