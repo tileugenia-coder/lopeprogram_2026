@@ -700,14 +700,14 @@ function initWsel(){
 function cw(d){curW=Math.max(1,Math.min(24,curW+d));document.getElementById('wsel').value=curW;rdw();}
 
 function rdw(){
-  // If we just saved a specific uke in Registrering, show that uke
+  curW=parseInt(document.getElementById('wsel').value)||curW;
+  renderWeek(curW);
+}
+
+function rdwFromReg(){
+  // Called after save in Registrering - sync week to reg-uke
   const regUke=parseInt(document.getElementById('reg-uke')?.value);
-  if(regUke) {
-    curW=regUke;
-    document.getElementById('wsel').value=regUke;
-  } else {
-    curW=parseInt(document.getElementById('wsel').value)||curW;
-  }
+  if(regUke){curW=regUke;document.getElementById('wsel').value=regUke;}
   renderWeek(curW);
 }
 
@@ -1669,7 +1669,7 @@ function renderReg(){
         document.getElementById('ugrid').innerHTML='';
         renderUkesplan();
         renderStats();
-        rdw();
+        rdwFromReg();
         c.classList.add('hpm-collapsed','hpm-done');
         const pv=c.querySelector('.hpm-preview');
         if(!pv){
@@ -1705,7 +1705,7 @@ function ikkeUtfort(key, msgId){
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
         const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
-    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdw();
+    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
 
   }catch(e){}
 }
@@ -1725,7 +1725,7 @@ function ikkeUtfortStr(uke, okt, msgId){
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
         const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
-    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdw();
+    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
   }catch(e){}
 }
 
@@ -1774,7 +1774,7 @@ function saveOkt(key, msgId){
       document.getElementById('ugrid').innerHTML='';
       renderUkesplan();
       renderStats();
-      rdw(); // refresh ukesoversikt
+      rdwFromReg(); // refresh ukesoversikt
     }, 1400);
   }catch(e){console.warn('Storage unavailable');}
 }
