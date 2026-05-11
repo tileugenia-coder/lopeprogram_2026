@@ -186,7 +186,7 @@ main{padding:20px 24px;max-width:1400px}
 
 <div class="view active" id="v-reg">
   <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
-    <select id="reg-uke" onchange="renderReg()" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:7px 11px;border-radius:4px">
+    <select id="reg-uke" onchange="renderReg();const wv=parseInt(this.value);if(wv){curW=wv;document.getElementById('wsel').value=wv;renderWeek(wv);}" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:7px 11px;border-radius:4px">
       <option value="">Velg uke...</option>
     </select>
 
@@ -984,7 +984,7 @@ function renderStats(){
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
     bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.km>0?d.km:d.ikke>0?'✗':'')+'</div>'
       +'<div style="width:100%;background:'+col+';border-radius:2px 2px 0 0;height:'+Math.max(pct,d.km>0||d.ikke>0?2:0)+'%;min-height:'+(d.km>0||d.ikke>0?'3px':'0')+'"></div>'
-      +(d.uke%2===0?'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>':'<div style="font-size:8px">&nbsp;</div>');
+      +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>';
     barInner.appendChild(bar);
   });
   barWrap.appendChild(barInner);
@@ -1025,7 +1025,7 @@ function renderStats(){
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
     bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.label||'')+'</div>'
       +'<div style="width:100%;background:'+(d.mins>0?'var(--a2)':'var(--b)')+';height:'+pct+'%;border-radius:2px 2px 0 0;min-height:'+(d.mins>0?'2px':'0')+'"></div>'
-      +(d.uke%2===0?'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>':'<div style="font-size:8px">&nbsp;</div>');
+      +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>';
     timeInner.appendChild(bar);
   });
   timeWrap.appendChild(timeInner);
@@ -1049,7 +1049,7 @@ function renderStats(){
   if(!pulsData.length){
     pulsWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen pulsdata ennå.</p>';
   } else {
-    const W2=500,H2=55;
+    const W2=500,H2=40;
     const minP=Math.min(...pulsData.map(d=>d.puls))-10;
     const maxP=Math.max(...pulsData.map(d=>d.puls))+10;
     const pts=pulsData.map((d,i)=>{
@@ -1059,10 +1059,9 @@ function renderStats(){
     });
     const path=pts.map((p,i)=>(i?'L':'M')+p.x+','+p.y).join(' ');
     const dots=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="var(--or)"/><text x="'+p.x+'" y="'+(p.y>10?p.y-5:p.y+10)+'" font-size="7" fill="var(--or)" text-anchor="middle">'+p.d.puls+'</text>').join('');
-    const ukelblP=pts.filter((_,i)=>i%2===0).map(p=>'<text x="'+p.x+'" y="'+(H2-2)+'" font-size="7" fill="var(--m)" text-anchor="middle">U'+p.d.uke+'</text>').join('');
     pulsWrap.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="min-width:300px;display:block">'
       +'<path d="'+path+'" fill="none" stroke="var(--or)" stroke-width="1.5"/>'
-      +dots+ukelblP+'</svg></div>';
+      +dots+'</svg></div>';
   }
   sb.appendChild(pulsWrap);
 
@@ -1093,7 +1092,7 @@ function renderStats(){
   if(!tempoData.length){
     tempoWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen tempo-data ennå.</p>';
   } else {
-    const W2=320,H2=55;
+    const W2=320,H2=40;
     const minV=Math.min(...tempoData.map(d=>d.val));
     const maxV=Math.max(...tempoData.map(d=>d.val));
     const rng=maxV-minV||30;
@@ -1106,7 +1105,7 @@ function renderStats(){
     const path=pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
     const dots=pts.map(p=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3" fill="var(--a2)"/>').join('');
     const lbls=pts.filter((_,i)=>i===0||i===pts.length-1||pts.length<=8).map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(p.y-6).toFixed(1)+'" font-size="7" fill="var(--a2)" text-anchor="middle">'+p.label+'</text>').join('');
-    const ukelbl=pts.filter((_,i)=>i%2===0).map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(H2-2)+'" font-size="7" fill="var(--m)" text-anchor="middle">U'+p.uke+'</text>').join('');
+    const ukelbl=[];
     tempoWrap.innerHTML='<svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="min-width:240px">'
       +'<path d="'+path+'" fill="none" stroke="var(--a2)" stroke-width="1.5" stroke-linejoin="round"/>'
       +dots+lbls+ukelbl+'</svg>';
@@ -1131,7 +1130,7 @@ function renderStats(){
   if(!folData2.length){
     folWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen følelsesdata ennå.</p>';
   } else {
-    const W3=500,H3=55;
+    const W3=500,H3=40;
     const pts=folData2.map((d,i)=>{
       const x=20+i*(W3-40)/(folData2.length-1||1);
       const y=H3-15-(d.fol-1)/4*(H3-30);
@@ -1139,10 +1138,9 @@ function renderStats(){
     });
     const path=pts.map((p,i)=>(i?'L':'M')+p.x+','+p.y).join(' ');
     const dots=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="var(--pu)"/><text x="'+p.x+'" y="'+(p.y-6)+'" font-size="7" fill="var(--pu)" text-anchor="middle">'+p.d.fol+'</text>').join('');
-    const ukelblF=pts.filter((_,i)=>i%2===0).map(p=>'<text x="'+p.x+'" y="'+(H3-2)+'" font-size="7" fill="var(--m)" text-anchor="middle">U'+p.d.uke+'</text>').join('');
     folWrap.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W3+' '+H3+'" width="100%" style="min-width:300px;display:block">'
       +'<path d="'+path+'" fill="none" stroke="var(--pu)" stroke-width="1.5"/>'
-      +dots+ukelblF+'</svg></div>';
+      +dots+'</svg></div>';
   }
   sb.appendChild(folWrap);
 
@@ -1296,6 +1294,9 @@ function initReg(){
   const diffDays=Math.floor((today-start)/(1000*60*60*24));
   const curUke=Math.min(24,Math.max(1,Math.floor(diffDays/7)+1));
   sel.value=curUke;
+  // Sync ukesoversikt to same week
+  const wsel=document.getElementById('wsel');
+  if(wsel){wsel.value=curUke;curW=curUke;renderWeek(curUke);}
   renderReg();
 }
 
