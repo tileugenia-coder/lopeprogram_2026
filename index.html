@@ -120,6 +120,7 @@ main{padding:20px 24px;max-width:1400px}
 .hpm-done{border-left:3px solid var(--a2)!important}
 .hpm-ikke{border-left:3px solid var(--or)!important}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body>
 <div class="hdr">
@@ -1061,21 +1062,24 @@ function renderStats(){
   if(!pulsData.length){
     pulsWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen pulsdata ennå.</p>';
   } else {
-    const W2=500,H2=40;
-    const minP=Math.min(...pulsData.map(d=>d.puls))-10;
-    const maxP=Math.max(...pulsData.map(d=>d.puls))+10;
-    const pts=pulsData.map((d,i)=>{
-      const x=20+i*(W2-40)/(pulsData.length-1||1);
-      const y=H2-15-(d.puls-minP)/(maxP-minP)*(H2-30);
-      return{x,y,d};
+    const allPulsData=Array.from({length:24},(_,i)=>{const f=pulsData.find(d=>d.uke===i+1);return f?f.puls:null;});
+    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+    pulsWrap.innerHTML='<div style="position:relative;width:100%;height:160px"><canvas id="chartPuls" role="img" aria-label="Snitt puls rolig over tid">Puls over tid.</canvas></div>';
+    if(window._chartPuls) window._chartPuls.destroy();
+    window._chartPuls=new Chart(document.getElementById('chartPuls'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[{label:'Snitt puls (rolig)',data:allPulsData,borderColor:'#D4537E',backgroundColor:'rgba(212,83,126,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#D4537E',borderWidth:2,spanGaps:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Snitt puls: '+c.parsed.y+' bpm'}}},
+        scales:{
+          y:{ticks:{color:isDark?'#aaa':'#888',font:{size:11}},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
     });
-    const path=pts.map((p,i)=>(i?'L':'M')+p.x+','+p.y).join(' ');
-    const dots=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="var(--or)"/><text x="'+p.x+'" y="'+(p.y>10?p.y-5:p.y+10)+'" font-size="7" fill="var(--or)" text-anchor="middle">'+p.d.puls+'</text>').join('');
-    pulsWrap.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="min-width:300px;display:block">'
-      +'<path d="'+path+'" fill="none" stroke="var(--or)" stroke-width="1.5"/>'
-      +dots+'</svg></div>';
   }
-  sb.appendChild(pulsWrap);
+    sb.appendChild(pulsWrap);
 
   // Snitt tempo over tid (rolig løpetur + langtur)
   const tempoTitle=document.createElement('h2');
@@ -1104,25 +1108,25 @@ function renderStats(){
   if(!tempoData.length){
     tempoWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen tempo-data ennå.</p>';
   } else {
-    const W2=320,H2=40;
-    const minV=Math.min(...tempoData.map(d=>d.val));
-    const maxV=Math.max(...tempoData.map(d=>d.val));
-    const rng=maxV-minV||30;
-    const pts=tempoData.map((d,i)=>{
-      const x=20+i*(W2-40)/(Math.max(tempoData.length-1,1));
-      const y=H2-15-(d.val-minV)/rng*(H2-30);
-      const mm=Math.floor(d.val/60),ss=(d.val%60).toString().padStart(2,'0');
-      return {x,y,label:mm+':'+ss,uke:d.uke};
+    // Build full 24-uke dataset with nulls for missing ukes (tempo in seconds)
+    const allTempoData=Array.from({length:24},(_,i)=>{const f=tempoData.find(d=>d.uke===i+1);return f?f.val:null;});
+    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+    tempoWrap.innerHTML='<div style="position:relative;width:100%;height:160px"><canvas id="chartTempo" role="img" aria-label="Snitt tempo rolig over tid">Tempo over tid.</canvas></div>';
+    if(window._chartTempo) window._chartTempo.destroy();
+    window._chartTempo=new Chart(document.getElementById('chartTempo'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[{label:'Snitt tempo (rolig)',data:allTempoData,borderColor:'#7030A0',backgroundColor:'rgba(112,48,160,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#7030A0',borderWidth:2,spanGaps:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const v=c.parsed.y;if(!v)return'';const m=Math.floor(v/60),s=(v%60).toString().padStart(2,'0');return 'Tempo: '+m+':'+s+' min/km';}}}},
+        scales:{
+          y:{reverse:true,ticks:{color:isDark?'#aaa':'#888',font:{size:11},callback:v=>{const m=Math.floor(v/60),s=(v%60).toString().padStart(2,'0');return m+':'+s;}},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
     });
-    const path=pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
-    const dots=pts.map(p=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3" fill="var(--a2)"/>').join('');
-    const lbls=pts.filter((_,i)=>i===0||i===pts.length-1||pts.length<=8).map(p=>'<text x="'+p.x.toFixed(1)+'" y="'+(p.y-6).toFixed(1)+'" font-size="7" fill="var(--a2)" text-anchor="middle">'+p.label+'</text>').join('');
-    const ukelbl=[];
-    tempoWrap.innerHTML='<svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="min-width:240px">'
-      +'<path d="'+path+'" fill="none" stroke="var(--a2)" stroke-width="1.5" stroke-linejoin="round"/>'
-      +dots+lbls+ukelbl+'</svg>';
   }
-  sb.appendChild(tempoWrap);
+    sb.appendChild(tempoWrap);
 
   // Følelse over tid
   const t3=document.createElement('h2');
@@ -1142,19 +1146,24 @@ function renderStats(){
   if(!folData2.length){
     folWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen følelsesdata ennå.</p>';
   } else {
-    const W3=500,H3=40;
-    const pts=folData2.map((d,i)=>{
-      const x=20+i*(W3-40)/(folData2.length-1||1);
-      const y=H3-15-(d.fol-1)/4*(H3-30);
-      return{x,y,d};
+    const allFolData=Array.from({length:24},(_,i)=>{const f=folData2.find(d=>d.uke===i+1);return f?f.fol:null;});
+    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+    folWrap.innerHTML='<div style="position:relative;width:100%;height:160px"><canvas id="chartFol" role="img" aria-label="Snitt følelse over tid">Følelse over tid.</canvas></div>';
+    if(window._chartFol) window._chartFol.destroy();
+    window._chartFol=new Chart(document.getElementById('chartFol'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[{label:'Snitt følelse',data:allFolData,borderColor:'#7030A0',backgroundColor:'rgba(112,48,160,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#7030A0',borderWidth:2,spanGaps:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Følelse: '+c.parsed.y+' / 5'}}},
+        scales:{
+          y:{min:1,max:5,ticks:{color:isDark?'#aaa':'#888',font:{size:11},stepSize:1},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
     });
-    const path=pts.map((p,i)=>(i?'L':'M')+p.x+','+p.y).join(' ');
-    const dots=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="var(--pu)"/><text x="'+p.x+'" y="'+(p.y-6)+'" font-size="7" fill="var(--pu)" text-anchor="middle">'+p.d.fol+'</text>').join('');
-    folWrap.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W3+' '+H3+'" width="100%" style="min-width:300px;display:block">'
-      +'<path d="'+path+'" fill="none" stroke="var(--pu)" stroke-width="1.5"/>'
-      +dots+'</svg></div>';
   }
-  sb.appendChild(folWrap);
+    sb.appendChild(folWrap);
 
   // ── Styrke progresjon ────────────────────────────────────────────────
   const strPTitle=document.createElement('h2');
