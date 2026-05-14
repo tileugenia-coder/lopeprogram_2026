@@ -219,8 +219,9 @@ function nullstillStrOkt(uke, okt, msgId){
   const src=okt==='A'?SA:SB;
   const ovs=src[String(uke)]||[];
   ovs.forEach((ov,i)=>{
+    const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
     for(let s=1;s<=4;s++){
-      delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+      delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
     }
   });
   localStorage.setItem('hpm_s', JSON.stringify(loggS));
@@ -247,8 +248,9 @@ function nullstillUke(){
     const src=okt==='A'?SA:SB;
     const ovs=src[String(uke)]||[];
     ovs.forEach((ov,i)=>{
+      const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
       for(let s=1;s<=4;s++){
-        delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+        delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
       }
     });
   });
@@ -405,8 +407,9 @@ function nullstillStrOkt(uke, okt, msgId){
   const src=okt==='A'?SA:SB;
   const ovs=src[String(uke)]||[];
   ovs.forEach((ov,i)=>{
+    const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
     for(let s=1;s<=4;s++){
-      delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+      delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
     }
   });
   localStorage.setItem('hpm_s', JSON.stringify(loggS));
@@ -433,8 +436,9 @@ function nullstillUke(){
     const src=okt==='A'?SA:SB;
     const ovs=src[String(uke)]||[];
     ovs.forEach((ov,i)=>{
+      const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
       for(let s=1;s<=4;s++){
-        delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+        delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
       }
     });
   });
@@ -1188,6 +1192,7 @@ function renderStats(){
     // Build data per exercise
     const exWithData=[];
     exNames.forEach(name=>{
+      const isTimeEx=(name==='Plank'||name==='Superman');
       const pts=[];
       Object.entries(src).forEach(([ukeStr,ovs])=>{
         const uke=parseInt(ukeStr);
@@ -1198,14 +1203,14 @@ function renderStats(){
         const numSets=setsM?parseInt(setsM[1]):3;
         let maxVekt=null, lastReps=null;
         for(let s=1;s<=numSets;s++){
-          const sk=uke+'_'+okt+'_'+idx+'_s'+s;
+          const safeName2=name.replace(/[^a-zA-Z0-9]/g,'-');const sk=uke+'_'+okt+'_'+safeName2+'_s'+s;
           const sv=loggS[sk]||{};
           if(sv.vekt){ const v=parseFloat(sv.vekt); if(maxVekt===null||v>maxVekt) maxVekt=v; }
           if(sv.reps && lastReps===null) lastReps=sv.reps;
         }
         if(maxVekt!==null||lastReps) pts.push({uke,vekt:maxVekt,reps:lastReps});
       });
-      if(pts.length) exWithData.push({name,pts,okt});
+      if(pts.length) exWithData.push({name,pts,okt,isTimeEx});
     });
 
     if(!exWithData.length) return;
@@ -1218,7 +1223,7 @@ function renderStats(){
     const exGrid=document.createElement('div');
     exGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:8px';
 
-    exWithData.forEach(({name,pts})=>{
+    exWithData.forEach(({name,pts,isTimeEx})=>{
       const first=pts[0],last=pts[pts.length-1];
       const vektDiff=first.vekt&&last.vekt?Math.round((last.vekt-first.vekt)*10)/10:null;
       const diffCol=vektDiff>0?'var(--a)':vektDiff<0?'var(--or)':'var(--m)';
@@ -1255,8 +1260,8 @@ function renderStats(){
         +'</div>'
         +(chartSvg?'<div style="padding:4px 12px 0">'+chartSvg+'</div>':'')
         +'<div style="padding:8px 12px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px">'
-        +(last.vekt?'<div><span style="color:var(--m)">Siste vekt: </span><strong style="color:var(--a2)">'+last.vekt+' kg</strong></div>':'')
-        +(last.reps?'<div><span style="color:var(--m)">Siste reps: </span><strong style="color:var(--a2)">'+last.reps+'</strong></div>':'')
+        +(isTimeEx?'':last.vekt?'<div><span style="color:var(--m)">Siste vekt: </span><strong style="color:var(--a2)">'+last.vekt+' kg</strong></div>':'')
+        +(last.reps?'<div><span style="color:var(--m)">'+(isTimeEx?'Siste tid: ':'Siste reps: ')+'</span><strong style="color:var(--a2)">'+last.reps+(isTimeEx?' sek':'')+'</strong></div>':'')
         +'<div><span style="color:var(--m)">Logginger: </span><strong>'+pts.length+'</strong></div>'
         +'</div>';
       exGrid.appendChild(card);
@@ -1621,12 +1626,12 @@ function renderReg(){
       htr.innerHTML=`<td colspan="5" style="padding:8px 11px;font-weight:500;color:var(--a);border-bottom:1px solid var(--b)">${name} <span style="color:var(--m);font-size:10px;font-weight:400">– ${plan}</span></td>`;
       tbody.appendChild(htr);
       for(let s=1;s<=numSets;s++){
-        const sk=`${uke}_${okt}_${i}_s${s}`;const ssv=loggS[sk]||{};
+        const safeName=name.replace(/[^a-zA-Z0-9]/g,'-');const sk=`${uke}_${okt}_${safeName}_s${s}`;const ssv=loggS[sk]||{};
         const isTime=plan.includes('sek');
         // Find last logged value from previous weeks
         let prevVekt='', prevReps='';
         for(let prevUke=uke-1;prevUke>=1;prevUke--){
-          const psk=`${prevUke}_${okt}_${i}_s${s}`;
+          const psk=`${prevUke}_${okt}_${safeName}_s${s}`;
           const psv=loggS[psk]||{};
           if(psv.vekt||psv.reps){prevVekt=psv.vekt||'';prevReps=psv.reps||'';break;}
         }
@@ -1744,8 +1749,9 @@ function ikkeUtfortStr(uke, okt, msgId){
   const src=okt==='A'?SA:SB;
   const ovs=src[String(uke)]||[];
   ovs.forEach((ov,i)=>{
+    const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
     for(let s=1;s<=4;s++){
-      const sk=`${uke}_${okt}_${i}_s${s}`;
+      const sk=`${uke}_${okt}_${sn}_s${s}`;
       if(!loggS[sk]) loggS[sk]={};
       loggS[sk].ikkeUtfort=true;
     }
@@ -1868,8 +1874,9 @@ function nullstillStrOkt(uke, okt, msgId){
   const src=okt==='A'?SA:SB;
   const ovs=src[String(uke)]||[];
   ovs.forEach((ov,i)=>{
+    const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
     for(let s=1;s<=4;s++){
-      delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+      delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
     }
   });
   localStorage.setItem('hpm_s', JSON.stringify(loggS));
@@ -1896,8 +1903,9 @@ function nullstillUke(){
     const src=okt==='A'?SA:SB;
     const ovs=src[String(uke)]||[];
     ovs.forEach((ov,i)=>{
+      const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
       for(let s=1;s<=4;s++){
-        delete loggS[uke+'_'+okt+'_'+i+'_s'+s];
+        delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
       }
     });
   });
