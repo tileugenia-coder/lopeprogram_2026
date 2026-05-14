@@ -1231,16 +1231,18 @@ function renderStats(){
 
       // Mini SVG line chart for vekt
       let chartSvg='';
-      const vPts=pts.filter(p=>p.vekt);
+      const chartPts=isTimeEx?pts.filter(p=>p.reps):pts.filter(p=>p.vekt);
+      const chartVal=p=>isTimeEx?parseFloat(p.reps):p.vekt;
+      const vPts=chartPts;
       if(vPts.length>1){
         const W=200,H=50;
-        const minV=Math.min(...vPts.map(p=>p.vekt));
-        const maxV=Math.max(...vPts.map(p=>p.vekt));
+        const minV=Math.min(...vPts.map(p=>chartVal(p)));
+        const maxV=Math.max(...vPts.map(p=>chartVal(p)));
         const rng=maxV-minV||1;
         const coords=vPts.map((p,i)=>{
           const x=8+i*(W-16)/(vPts.length-1);
-          const y=H-8-(p.vekt-minV)/rng*(H-16);
-          return{x,y,v:p.vekt};
+          const y=H-8-(chartVal(p)-minV)/rng*(H-16);
+          return{x,y,v:chartVal(p)};
         });
         const path=coords.map((c,i)=>(i?'L':'M')+c.x+','+c.y).join(' ');
         const dots=coords.map(c=>'<circle cx="'+c.x+'" cy="'+c.y+'" r="2.5" fill="var(--a2)"/>').join('');
