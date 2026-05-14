@@ -1225,9 +1225,13 @@ function renderStats(){
 
     exWithData.forEach(({name,pts,isTimeEx})=>{
       const first=pts[0],last=pts[pts.length-1];
-      const vektDiff=first.vekt&&last.vekt?Math.round((last.vekt-first.vekt)*10)/10:null;
+      // For time exercises use reps diff, otherwise vekt diff
+      const vektDiff=isTimeEx
+        ?(first.reps&&last.reps?Math.round((parseFloat(last.reps)-parseFloat(first.reps))*10)/10:null)
+        :(first.vekt&&last.vekt?Math.round((last.vekt-first.vekt)*10)/10:null);
+      const unit=isTimeEx?(name==='Plank'?' sek':' reps'):' kg';
       const diffCol=vektDiff>0?'var(--a)':vektDiff<0?'var(--or)':'var(--m)';
-      const diffStr=vektDiff!==null?(vektDiff>0?'+'+vektDiff+' kg':vektDiff+' kg'):'';
+      const diffStr=vektDiff!==null?(vektDiff>0?'+'+vektDiff+unit:vektDiff+unit):'';
 
       // Mini SVG line chart for vekt
       let chartSvg='';
