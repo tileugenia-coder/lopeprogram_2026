@@ -1261,7 +1261,7 @@ function renderStats(){
         +(chartSvg?'<div style="padding:4px 12px 0">'+chartSvg+'</div>':'')
         +'<div style="padding:8px 12px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px">'
         +(isTimeEx?'':last.vekt?'<div><span style="color:var(--m)">Siste vekt: </span><strong style="color:var(--a2)">'+last.vekt+' kg</strong></div>':'')
-        +(last.reps?'<div><span style="color:var(--m)">'+(isTimeEx?'Siste tid: ':'Siste reps: ')+'</span><strong style="color:var(--a2)">'+last.reps+(isTimeEx?' sek':'')+'</strong></div>':'')
+        +(last.reps?'<div><span style="color:var(--m)">'+(isTimeEx&&name==='Plank'?'Siste tid: ':'Siste reps: ')+'</span><strong style="color:var(--a2)">'+last.reps+(isTimeEx&&name==='Plank'?' sek':'')+'</strong></div>':'')
         +'<div><span style="color:var(--m)">Logginger: </span><strong>'+pts.length+'</strong></div>'
         +'</div>';
       exGrid.appendChild(card);
