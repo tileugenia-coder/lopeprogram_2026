@@ -305,39 +305,6 @@ function signIn(){
   });
 }
 
-function signOut(){
-  auth.signOut();
-}
-
-auth.onAuthStateChanged(user=>{
-  if(user){
-    currentUser = user;
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-content').style.display='block';
-    // Show user info and logout button in header
-    const syncEl=document.getElementById('sync-status');
-    if(syncEl){
-      syncEl.style.cursor='pointer';
-      syncEl.title='Klikk for å logge ut';
-      syncEl.onclick=()=>{ if(confirm('Logge ut?')) signOut(); };
-    }
-    // Add user name to header
-    const userEl=document.getElementById('user-info');
-    if(userEl) userEl.textContent=user.displayName||user.email;
-    fbLoad().then(()=>{
-      renderUkesplan();
-      document.getElementById('ugrid').innerHTML='';
-      renderUkesplan();
-      renderStats();
-      fbListen();
-    });
-  } else {
-    currentUser = null;
-    document.getElementById('login-screen').style.display='flex';
-    document.getElementById('app-content').style.display='none';
-  }
-});
-
 // Firebase REST API — ingen script-avhengighet
 const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
 const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
@@ -533,45 +500,8 @@ const provider = new firebase.auth.GoogleAuthProvider();
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
 
-function signIn(){
-  document.getElementById('login-status').textContent = 'Logger inn...';
-  auth.signInWithPopup(provider).catch(e=>{
-    document.getElementById('login-status').textContent = 'Feil: '+e.message;
-  });
+);
 }
-
-function signOut(){
-  auth.signOut();
-}
-
-auth.onAuthStateChanged(user=>{
-  if(user){
-    currentUser = user;
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-content').style.display='block';
-    // Show user info and logout button in header
-    const syncEl=document.getElementById('sync-status');
-    if(syncEl){
-      syncEl.style.cursor='pointer';
-      syncEl.title='Klikk for å logge ut';
-      syncEl.onclick=()=>{ if(confirm('Logge ut?')) signOut(); };
-    }
-    // Add user name to header
-    const userEl=document.getElementById('user-info');
-    if(userEl) userEl.textContent=user.displayName||user.email;
-    fbLoad().then(()=>{
-      renderUkesplan();
-      document.getElementById('ugrid').innerHTML='';
-      renderUkesplan();
-      renderStats();
-      fbListen();
-    });
-  } else {
-    currentUser = null;
-    document.getElementById('login-screen').style.display='flex';
-    document.getElementById('app-content').style.display='none';
-  }
-});
 
 // Firebase REST API — ingen script-avhengighet
 const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
@@ -2115,11 +2045,7 @@ const provider = new firebase.auth.GoogleAuthProvider();
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
 
-function signIn(){
-  document.getElementById('login-status').textContent = 'Logger inn...';
-  auth.signInWithPopup(provider).catch(e=>{
-    document.getElementById('login-status').textContent = 'Feil: '+e.message;
-  });
+);
 }
 
 function signOut(){
