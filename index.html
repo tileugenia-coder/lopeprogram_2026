@@ -292,9 +292,14 @@ const firebaseConfig = {
   authDomain: "lopeprogram2026.firebaseapp.com",
   projectId: "lopeprogram2026"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
+let auth = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+} catch(e) {
+  console.warn('Firebase Auth init failed:', e);
+}
+const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
@@ -313,6 +318,10 @@ function viewWithoutLogin(){
 }
 
 function signIn(){
+  if(!auth||!provider){
+    document.getElementById('login-status').textContent = 'Auth ikke tilgjengelig. Bruk GitHub Pages.';
+    return;
+  }
   document.getElementById('login-status').textContent = 'Logger inn...';
   auth.signInWithPopup(provider).catch(e=>{
     document.getElementById('login-status').textContent = 'Feil: '+e.message;
@@ -507,9 +516,14 @@ const firebaseConfig = {
   authDomain: "lopeprogram2026.firebaseapp.com",
   projectId: "lopeprogram2026"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
+let auth = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+} catch(e) {
+  console.warn('Firebase Auth init failed:', e);
+}
+const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
@@ -2052,9 +2066,14 @@ const firebaseConfig = {
   authDomain: "lopeprogram2026.firebaseapp.com",
   projectId: "lopeprogram2026"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
+let auth = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+} catch(e) {
+  console.warn('Firebase Auth init failed:', e);
+}
+const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
@@ -2066,7 +2085,7 @@ function signOut(){
   auth.signOut();
 }
 
-auth.onAuthStateChanged(user=>{
+if(auth) auth.onAuthStateChanged(user=>{
   if(user){
     currentUser = user;
     document.getElementById('login-screen').style.display='none';
@@ -2093,7 +2112,7 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('login-screen').style.display='flex';
     document.getElementById('app-content').style.display='none';
   }
-});
+});}
 
 // Firebase REST API — ingen script-avhengighet
 const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
