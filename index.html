@@ -151,6 +151,7 @@ main{padding:20px 24px;max-width:1400px}
   <button onclick="nav('ukesplan',this)">Programplan</button>
   <button onclick="nav('stats',this)">Statistikk</button>
   <button onclick="nav('intervall',this)">Intervall</button>
+  <button onclick="nav('styrke',this)">Styrkeprogram</button>
 </nav>
 <main>
 
@@ -178,7 +179,12 @@ main{padding:20px 24px;max-width:1400px}
 </div>
 
 <div class="view" id="v-intervall">
-  <div style="overflow-x:auto"><div class="igrid" id="igrid"></div></div>
+  <div style="overflow-x:auto"><div class="igrid" id="igrid">
+</div></div>
+</div>
+
+<div class="view" id="v-styrke">
+  <div id="styrke-body" style="padding:8px 0"></div>
 </div>
 
 
@@ -610,6 +616,7 @@ function nav(id,btn){
   btn.classList.add('active');
   if(id==='ukedetalj') rdw();
   if(id==='ukesplan'){document.getElementById('ugrid').innerHTML='';renderUkesplan();}
+  if(id==='styrke') renderStyrke();
   if(id==='stats') renderStats();
 }
 
@@ -1319,6 +1326,67 @@ function renderStats(){
     raceWrap.appendChild(card);
   });
   sb.appendChild(raceWrap);
+}
+
+function renderStyrke(){
+  const sb=document.getElementById('styrke-body');
+  sb.innerHTML='';
+  const uker=Array.from({length:24},(_,i)=>i+1);
+
+  function buildTable(title, color, lightColor, exercises, data){
+    const wrap=document.createElement('div');
+    wrap.style.cssText='margin-bottom:32px;overflow-x:auto';
+    const h=document.createElement('h2');
+    h.style.cssText='font-family:"Fraunces",serif;font-size:18px;font-weight:900;color:'+color+';margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+    h.textContent=title;
+    wrap.appendChild(h);
+
+    const tbl=document.createElement('table');
+    tbl.style.cssText='border-collapse:collapse;min-width:600px;width:100%;font-size:11px';
+
+    // Header row
+    const thead=document.createElement('thead');
+    let hRow='<tr><th style="text-align:left;padding:6px 10px;background:'+color+';color:#fff;position:sticky;left:0;z-index:2;white-space:nowrap">Øvelse</th>';
+    uker.forEach(u=>{
+      hRow+='<th style="padding:6px 6px;background:'+lightColor+';color:var(--t);text-align:center;white-space:nowrap">U'+u+'</th>';
+    });
+    hRow+='</tr>';
+    thead.innerHTML=hRow;
+    tbl.appendChild(thead);
+
+    const tbody=document.createElement('tbody');
+    exercises.forEach(([label, name],rowIdx)=>{
+      const tr=document.createElement('tr');
+      tr.style.background=rowIdx%2===0?'var(--s2)':'var(--s)';
+      let row='<td style="padding:6px 10px;font-weight:500;white-space:nowrap;position:sticky;left:0;background:'+(rowIdx%2===0?'var(--s2)':'var(--s)')+';z-index:1"><span style="color:var(--m);font-size:10px">'+label+'</span> '+name+'</td>';
+      uker.forEach(u=>{
+        const ovs=data[String(u)]||[];
+        let plan='';
+        for(const o of ovs){
+          if(o.split(' – ')[0]===name){plan=o.split(' – ').slice(1).join(' – ');break;}
+        }
+        row+='<td style="padding:6px 6px;text-align:center;white-space:nowrap">'+plan+'</td>';
+      });
+      tr.innerHTML=row;
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    wrap.appendChild(tbl);
+    sb.appendChild(wrap);
+  }
+
+  buildTable('Styrke A – Lørdag','var(--a)','var(--s2)',[
+    ['A1','Smith squat'],['A2','Dead bug'],
+    ['B1','Romanian deadlift (RDL)'],['B2','Pallof press'],
+    ['C1','Bulgarian split squat'],['C2','Single-leg RDL'],
+    ['D1','Leg extension'],['D2','Single-leg calf raise']
+  ],SA);
+
+  buildTable('Styrke B – Tirsdag','var(--pu)','var(--s2)',[
+    ['A1','Lat Pulldown'],['A2','Single arm-shoulder press'],
+    ['B1','Seated row'],['B2','Plank'],
+    ['C1','Calf raise'],['C2','Superman']
+  ],SB);
 }
 
 function initReg(){
