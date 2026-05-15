@@ -121,34 +121,8 @@ main{padding:20px 24px;max-width:1400px}
 .hpm-ikke{border-left:3px solid var(--or)!important}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
-<script>
-function viewWithoutLogin(){
-  document.getElementById("login-screen").style.display="none";
-  document.getElementById("app-content").style.display="block";
-  setTimeout(function(){
-    if(typeof initWsel==="function"){initWsel();renderWeek(1);renderIntervall();initReg();}
-    if(typeof fbLoad==="function"){fbLoad().then(function(){renderUkesplan();document.getElementById("ugrid").innerHTML="";renderUkesplan();renderStats();if(typeof fbListen==="function")fbListen();});}
-  },100);
-}
-</script>
-<!-- Login screen -->
-<div id="login-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);padding:32px;text-align:center;z-index:9999">
-  <h1 style="font-family:'Fraunces',serif;font-size:28px;font-weight:900;color:var(--a);margin-bottom:8px">Marias treningsdagbok</h1>
-  <p style="color:var(--m);font-size:13px;margin-bottom:32px">🏁 Hovedmål: Hytteplanmila 2026 (55:00 – 5:30 min/km)</p>
-  <div id="login-status" style="font-size:12px;color:var(--m);margin-bottom:16px"></div>
-  <button id="login-btn" onclick="signIn()" style="background:var(--a);color:#fff;font-family:'DM Mono',monospace;font-size:14px;font-weight:700;padding:12px 28px;border:none;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:10px">
-    <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#fff" d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z"/><path fill="#fff" d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#fff" d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z"/><path fill="#fff" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z"/></svg>
-    Logg inn med Google
-  </button>
-  <p style="margin-top:24px;font-size:11px;color:var(--m)">Kun Maria kan logge. Andre kan se programmet.</p>
-  <button onclick="viewWithoutLogin()" style="margin-top:12px;background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:4px;cursor:pointer">Se uten innlogging →</button>
-</div>
-
-<div id="app-content" style="display:none">
 <div class="hdr">
   <div style="display:flex;align-items:center;gap:16px">
     <img src="data:image/png;base64,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" style="height:52px;opacity:.85;mix-blend-mode:multiply" alt="løper">
@@ -159,7 +133,7 @@ function viewWithoutLogin(){
   </div>
   
   <div class="cd" id="cd"></div>
-  <div style="display:flex;align-items:center;gap:8px;margin-top:2px"><span id="user-info" style="font-size:11px;color:var(--m);margin-right:8px"></span><div id="sync-status" style="font-size:10px;color:var(--m)"></div><button onclick="fbLoad().then(()=>fbListen())" style="font-size:10px;background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;padding:0">↻ Prøv igjen</button></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:2px"><div id="sync-status" style="font-size:10px;color:var(--m)"></div><button onclick="fbLoad().then(()=>fbListen())" style="font-size:10px;background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;padding:0">↻ Prøv igjen</button></div>
   <div style="margin-top:14px;max-width:600px" id="progress-bar-wrap">
     <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--m);margin-bottom:5px">
       <span>04.05.2026</span>
@@ -232,7 +206,6 @@ function viewWithoutLogin(){
   <div id="stats-body"></div>
 </div>
 </main>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
 // ── Nullstill ────────────────────────────────────────────────────────────
 function nullstillOkt(key, msgId){
   // Delete all data for this specific session
@@ -296,12 +269,7 @@ function nullstillUke(){
 }
 
 // ── Firebase ─────────────────────────────────────────────────────────────
-// ── Firebase Auth ────────────────────────────────────────────────────────
-const firebaseConfig={apiKey:"AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",authDomain:"lopeprogram2026.firebaseapp.com",projectId:"lopeprogram2026"};
-let auth=null;
-try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();}catch(e){console.warn('Firebase Auth unavailable:',e);}
 
-function signIn(){
   if(!auth){alert('Innlogging ikke tilgjengelig her. Bruk GitHub Pages-lenken.');return;}
   document.getElementById('login-status').textContent='Logger inn...';
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{
@@ -309,22 +277,15 @@ function signIn(){
   });
 }
 
-function signOut(){if(auth)auth.signOut();}
 
-function launchApp(){
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app-content').style.display='block';
+
+
   initWsel();renderWeek(1);renderIntervall();initReg();
   fbLoad().then(()=>{renderUkesplan();document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();fbListen();});
 }
 
-function viewWithoutLogin(){launchApp();}
 
-if(auth){
-  auth.onAuthStateChanged(function(user){
-    if(user){launchApp();}
-    else{document.getElementById('login-screen').style.display='flex';document.getElementById('app-content').style.display='none';}
-  });
+  
 }
 
 
@@ -509,7 +470,6 @@ function nullstillUke(){
 }
 
 // ── Firebase ─────────────────────────────────────────────────────────────
-// ── Firebase Auth ────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
   authDomain: "lopeprogram2026.firebaseapp.com",
@@ -524,8 +484,6 @@ try {
 }
 const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 
-let currentUser = null;
-const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
 
 
 const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
@@ -2056,7 +2014,6 @@ function nullstillUke(){
 }
 
 // ── Firebase ─────────────────────────────────────────────────────────────
-// ── Firebase Auth ────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
   authDomain: "lopeprogram2026.firebaseapp.com",
@@ -2071,16 +2028,14 @@ try {
 }
 const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 
-let currentUser = null;
-const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
 
 
 
 if(auth) auth.onAuthStateChanged(user=>{
   if(user){
     currentUser = user;
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-content').style.display='block';
+
+
     // Show user info and logout button in header
     const syncEl=document.getElementById('sync-status');
     if(syncEl){
@@ -2100,8 +2055,8 @@ if(auth) auth.onAuthStateChanged(user=>{
     });
   } else {
     currentUser = null;
-    document.getElementById('login-screen').style.display='flex';
-    document.getElementById('app-content').style.display='none';
+
+
   }
 });
 
@@ -2223,6 +2178,5 @@ window.ikkeUtfortStr=function(uke,okt,msgId){
 // Auth handles init
 
 </script>
-</div><!-- end app-content -->
 </body>
 </html>
