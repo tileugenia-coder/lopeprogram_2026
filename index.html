@@ -287,48 +287,37 @@ function nullstillUke(){
 
 // ── Firebase ─────────────────────────────────────────────────────────────
 // ── Firebase Auth ────────────────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
-  authDomain: "lopeprogram2026.firebaseapp.com",
-  projectId: "lopeprogram2026"
-};
-let auth = null;
-try {
-  firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-} catch(e) {
-  console.warn('Firebase Auth init failed:', e);
+const firebaseConfig={apiKey:"AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",authDomain:"lopeprogram2026.firebaseapp.com",projectId:"lopeprogram2026"};
+let auth=null;
+try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();}catch(e){console.warn('Firebase Auth unavailable:',e);}
+
+function signIn(){
+  if(!auth){alert('Innlogging ikke tilgjengelig her. Bruk GitHub Pages-lenken.');return;}
+  document.getElementById('login-status').textContent='Logger inn...';
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{
+    document.getElementById('login-status').textContent='Feil: '+e.message;
+  });
 }
-const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 
-let currentUser = null;
-const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
+function signOut(){if(auth)auth.signOut();}
 
-function viewWithoutLogin(){
+function launchApp(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-content').style.display='block';
   initWsel();renderWeek(1);renderIntervall();initReg();
-  fbLoad().then(()=>{
-    renderUkesplan();
-    document.getElementById('ugrid').innerHTML='';
-    renderUkesplan();
-    renderStats();
-    fbListen();
+  fbLoad().then(()=>{renderUkesplan();document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();fbListen();});
+}
+
+function viewWithoutLogin(){launchApp();}
+
+if(auth){
+  auth.onAuthStateChanged(function(user){
+    if(user){launchApp();}
+    else{document.getElementById('login-screen').style.display='flex';document.getElementById('app-content').style.display='none';}
   });
 }
 
-function signIn(){
-  if(!auth||!provider){
-    document.getElementById('login-status').textContent = 'Auth ikke tilgjengelig. Bruk GitHub Pages.';
-    return;
-  }
-  document.getElementById('login-status').textContent = 'Logger inn...';
-  auth.signInWithPopup(provider).catch(e=>{
-    document.getElementById('login-status').textContent = 'Feil: '+e.message;
-  });
-}
 
-// Firebase REST API — ingen script-avhengighet
 const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
 const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
 const DOC = true; // always available
@@ -528,7 +517,7 @@ const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
 
-// Firebase REST API — ingen script-avhengighet
+
 const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
 const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
 const DOC = true; // always available
@@ -2075,9 +2064,7 @@ const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
 
-function signOut(){
-  auth.signOut();
-}
+
 
 if(auth) auth.onAuthStateChanged(user=>{
   if(user){
