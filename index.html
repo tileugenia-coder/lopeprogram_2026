@@ -126,7 +126,7 @@ main{padding:20px 24px;max-width:1400px}
 </head>
 <body>
 <!-- Login screen -->
-<div id="login-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:32px;text-align:center">
+<div id="login-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);padding:32px;text-align:center;z-index:9999">
   <h1 style="font-family:'Fraunces',serif;font-size:28px;font-weight:900;color:var(--a);margin-bottom:8px">Marias treningsdagbok</h1>
   <p style="color:var(--m);font-size:13px;margin-bottom:32px">🏁 Hovedmål: Hytteplanmila 2026 (55:00 – 5:30 min/km)</p>
   <div id="login-status" style="font-size:12px;color:var(--m);margin-bottom:16px"></div>
@@ -135,6 +135,7 @@ main{padding:20px 24px;max-width:1400px}
     Logg inn med Google
   </button>
   <p style="margin-top:24px;font-size:11px;color:var(--m)">Kun Maria kan logge. Andre kan se programmet.</p>
+  <button onclick="viewWithoutLogin()" style="margin-top:12px;background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:4px;cursor:pointer">Se uten innlogging →</button>
 </div>
 
 <div id="app-content" style="display:none">
@@ -297,6 +298,19 @@ const provider = new firebase.auth.GoogleAuthProvider();
 
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
+
+function viewWithoutLogin(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-content').style.display='block';
+  initWsel();renderWeek(1);renderIntervall();initReg();
+  fbLoad().then(()=>{
+    renderUkesplan();
+    document.getElementById('ugrid').innerHTML='';
+    renderUkesplan();
+    renderStats();
+    fbListen();
+  });
+}
 
 function signIn(){
   document.getElementById('login-status').textContent = 'Logger inn...';
