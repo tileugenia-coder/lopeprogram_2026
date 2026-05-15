@@ -528,9 +528,6 @@ const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
 
-);
-}
-
 // Firebase REST API — ingen script-avhengighet
 const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
 const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
@@ -2078,9 +2075,6 @@ const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
 let currentUser = null;
 const ALLOWED_EMAIL = ""; // leave empty to allow any Google account for now
 
-);
-}
-
 function signOut(){
   auth.signOut();
 }
@@ -2112,7 +2106,7 @@ if(auth) auth.onAuthStateChanged(user=>{
     document.getElementById('login-screen').style.display='flex';
     document.getElementById('app-content').style.display='none';
   }
-});}
+});
 
 // Firebase REST API — ingen script-avhengighet
 const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
