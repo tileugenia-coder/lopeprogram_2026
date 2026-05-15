@@ -1852,10 +1852,10 @@ try {
       document.body.classList.remove('guest');
       if (status) status.textContent = '● ' + (user.displayName || user.email);
       if (btn) btn.textContent = 'Logg ut';
-      if (banner) banner.style.display = 'none';
+      if (banner) banner.style.display = 'flex';
     } else {
       document.body.classList.add('guest');
-      if (status) status.textContent = 'Ikke innlogget – kun lesemodus';
+      if (status) status.textContent = 'Ikke innlogget';
       if (btn) btn.textContent = 'Logg inn med Google';
       if (banner) banner.style.display = 'flex';
     }
