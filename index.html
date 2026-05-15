@@ -1824,21 +1824,26 @@ window.ikkeUtfortStr=function(uke,okt,msgId){
 
 
 // ── Auth ─────────────────────────────────────────────────────────────────
+var _auth = null;
+
+function authAction() {
+  if (!_auth) { alert('Innlogging ikke tilgjengelig. Prøv å laste siden på nytt.'); return; }
+  if (_auth.currentUser) {
+    _auth.signOut();
+  } else {
+    _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e) {
+      alert('Innlogging feilet: ' + e.message);
+    });
+  }
+}
+
 try {
   firebase.initializeApp({
     apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
     authDomain: "lopeprogram2026.firebaseapp.com",
     projectId: "lopeprogram2026"
   });
-  const _auth = firebase.auth();
-
-  function authAction() {
-    if (_auth.currentUser) {
-      _auth.signOut();
-    } else {
-      _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    }
-  }
+  _auth = firebase.auth();
 
   _auth.onAuthStateChanged(function(user) {
     const banner = document.getElementById('auth-banner');
@@ -1858,7 +1863,6 @@ try {
   });
 } catch(e) {
   console.warn('Auth unavailable:', e);
-  function authAction() {}
 }
 
 </script>
