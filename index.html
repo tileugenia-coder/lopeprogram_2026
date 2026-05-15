@@ -125,6 +125,16 @@ main{padding:20px 24px;max-width:1400px}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
+<script>
+function viewWithoutLogin(){
+  document.getElementById("login-screen").style.display="none";
+  document.getElementById("app-content").style.display="block";
+  setTimeout(function(){
+    if(typeof initWsel==="function"){initWsel();renderWeek(1);renderIntervall();initReg();}
+    if(typeof fbLoad==="function"){fbLoad().then(function(){renderUkesplan();document.getElementById("ugrid").innerHTML="";renderUkesplan();renderStats();if(typeof fbListen==="function")fbListen();});}
+  },100);
+}
+</script>
 <!-- Login screen -->
 <div id="login-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);padding:32px;text-align:center;z-index:9999">
   <h1 style="font-family:'Fraunces',serif;font-size:28px;font-weight:900;color:var(--a);margin-bottom:8px">Marias treningsdagbok</h1>
