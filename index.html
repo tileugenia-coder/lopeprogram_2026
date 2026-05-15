@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treningsdagbok</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,900;1,300&display=swap');
+:root{--bg:#fff0f3;--s:#fff5f7;--s2:#ffe8ed;--b:#f5c0cc;--t:#2a1a1e;--m:#8a5a65;--a:#c0306a;--a2:#e05585;--or:#c05020;--pu:#7030a0;--bl:#2050a0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;line-height:1.6;min-height:100vh}
+.hdr{padding:28px 24px 20px;border-bottom:1px solid var(--b)}
+.hdr h1{font-family:'Fraunces',serif;font-size:26px;font-weight:900;color:var(--a)}
+.hdr-sub{color:var(--m);font-size:11px;margin-top:2px}
+.cd{color:var(--a2);font-size:11px;margin-top:4px}
+nav{display:flex;border-bottom:1px solid var(--b);overflow-x:auto}
+nav button{background:none;border:none;border-bottom:2px solid transparent;color:var(--m);cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;padding:12px 16px;white-space:nowrap;transition:all .15s;text-transform:uppercase;letter-spacing:1px}
+nav button:hover{color:var(--t)}
+nav button.active{color:var(--a);border-bottom-color:var(--a)}
+main{padding:20px 24px;max-width:1400px}
+.view{display:none}
+.view.active{display:block}
+
+.ugrid{display:grid;grid-template-columns:70px 80px 100px repeat(7,1fr);gap:0;background:var(--bg);border:1px solid #c8909a;font-size:11px}
+.ucell{background:var(--s);padding:6px 8px;min-height:40px;display:flex;align-items:center;border-right:1px solid #c8909a;border-bottom:1px solid #c8909a;font-weight:500}
+.uhdr{background:var(--s2);color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:9px;justify-content:center;text-align:center;border-right:1px solid #c8909a;border-bottom:1px solid #c8909a}
+.uke-n{font-weight:500;color:var(--a);cursor:pointer;justify-content:center;flex-direction:column;align-items:center;gap:0;text-align:center}
+.uke-n:hover{color:#fff}
+.hvile{color:var(--m);font-style:italic}
+.race-c{color:var(--or);font-weight:500}
+.fl-b{border-left:3px solid #4a8a4a}.fl-O{border-left:3px solid #4a4a8a}
+.fl-T{border-left:3px solid #8a8a4a}.fl-N{border-left:3px solid #8a4a4a}
+.fl-D{border-left:3px solid var(--pu)}.fl-P{border-left:3px solid var(--a2)}
+
+.wsel{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.wsel select,.lctrl select{background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:7px 11px;border-radius:4px;cursor:pointer}
+.wnav{background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:14px;padding:5px 13px;border-radius:4px;cursor:pointer;transition:all .15s}
+.wnav:hover{border-color:var(--a);color:var(--a)}
+.winfo{background:var(--s2);border:1px solid var(--b);border-radius:6px;padding:11px 15px;margin-bottom:18px;display:flex;gap:22px;flex-wrap:wrap;font-size:11px}
+.ii{display:flex;flex-direction:column;gap:2px}
+.il{color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.iv{color:var(--t);font-weight:500}
+.iv.ac{color:var(--a)}
+.wdet{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:11px}
+.dcard{background:var(--s);border:1px solid var(--b);border-radius:6px;overflow:hidden;transition:border-color .15s}
+.dcard:hover{border-color:#444}
+.dcard.hvile-c{opacity:.5}
+.dcard.race-d{border-color:var(--or)}
+.dhdr{padding:9px 13px;background:var(--s2);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--b)}
+.dn{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--m);font-weight:500}
+.dbadge{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}
+.dbadge.int{background:#1a3a1a;color:var(--a)}
+.dbadge.tmp{background:#3a2a1a;color:var(--or)}
+.dbadge.rol{background:#1a1a3a;color:var(--bl)}
+.dbadge.str{background:#2a1a3a;color:var(--pu)}
+.dbadge.lop{background:#3a1a0a;color:var(--or)}
+.dcont{padding:11px 13px;white-space:pre-wrap;font-size:11px;line-height:1.7}
+
+.lctrl{display:flex;gap:11px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.sbtn{background:var(--a);color:#000;border:none;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:7px 16px;border-radius:4px;cursor:pointer;text-transform:uppercase;letter-spacing:1px}
+.sbtn:hover{opacity:.85}
+.smsg{color:var(--a2);font-size:11px}
+.ltbl{width:100%;border-collapse:collapse;font-size:11px}
+.ltbl th{background:var(--s2);color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:9px 11px;text-align:left;border-bottom:1px solid var(--b);font-weight:500}
+.ltbl td{padding:7px 11px;border-bottom:1px solid var(--b);vertical-align:middle}
+.ltbl tr:hover td{background:var(--s2)}
+.ltbl input,.ltbl select{background:transparent;border:none;border-bottom:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:11px;padding:2px 3px}
+.ltbl input:focus{outline:none;border-bottom-color:var(--a)}
+
+.scard{background:var(--s);border:1px solid var(--b);border-radius:6px;margin-bottom:16px;overflow:hidden}
+.scardh{padding:10px 14px;background:var(--s2);border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
+.scardh h3{font-size:12px;font-weight:500;color:var(--pu)}
+.scardh span{font-size:10px;color:var(--m)}
+.stbl{width:100%;border-collapse:collapse;font-size:11px}
+.stbl th{background:var(--s2);color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:7px 11px;text-align:left;border-bottom:1px solid var(--b);font-weight:500}
+.stbl td{padding:6px 11px;border-bottom:1px solid var(--b);vertical-align:middle}
+.stbl tr:last-child td{border-bottom:none}
+.stbl tr:hover td{background:var(--s2)}
+.stbl input{background:transparent;border:none;border-bottom:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:11px;padding:2px 3px}
+.stbl input:focus{outline:none;border-bottom-color:var(--pu)}
+.fsel{display:flex;gap:3px}
+.fstar{background:none;border:1px solid var(--b);color:var(--m);width:22px;height:22px;border-radius:3px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'DM Mono',monospace}
+.fstar.on{background:#2a1e00;color:var(--or);border-color:var(--or)}
+
+.igrid{display:grid;grid-template-columns:60px 70px 110px 1fr 80px 180px;gap:1px;background:var(--b);border:1px solid var(--b);font-size:11px}
+.icell{background:var(--s);padding:7px 9px;min-height:33px;display:flex;align-items:center;white-space:pre-wrap}
+.ihdr{background:var(--s2);color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:9px}
+.bwrap{width:100%;background:var(--b);height:5px;border-radius:3px;overflow:hidden}
+.bfill{height:100%;border-radius:3px;background:var(--a)}
+.bfill.dl{background:var(--pu)}.bfill.tp{background:var(--a2)}
+.tpill{font-size:10px;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.tl{background:#1a3a1a;color:var(--a)}.t45{background:#1a2a3a;color:var(--bl)}
+.t8{background:#3a2a1a;color:var(--or)}.tdl{background:#2a1a3a;color:var(--pu)}
+
+.rlist{display:flex;flex-direction:column;gap:11px}
+.rcard{background:var(--s);border:1px solid var(--b);border-left:3px solid var(--or);border-radius:6px;padding:15px 19px;display:flex;align-items:center;gap:18px}
+.rcard.main{border-left-color:var(--a)}
+.rdate{color:var(--m);font-size:11px;min-width:80px}
+.rname{font-size:14px;font-weight:500}
+.rkm{color:var(--or);font-size:11px}
+.ruke{color:var(--m);font-size:10px;margin-left:auto}
+
+.zgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:11px;margin-bottom:28px}
+.zcard{background:var(--s);border:1px solid var(--b);border-radius:6px;padding:15px}
+.zcard h3{font-size:20px;font-weight:700;color:var(--a);margin-bottom:3px}
+.zname{color:var(--m);font-size:11px;margin-bottom:7px}
+.zbpm{font-size:15px;font-weight:500;margin-bottom:3px}
+.zdesc{font-size:10px;color:var(--m);line-height:1.5}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
+
+
+
+.hpm-collapsed .hpm-body{display:none}
+.hpm-preview{display:none;padding:10px 14px;align-items:center;justify-content:space-between;cursor:pointer;font-size:11px;gap:8px}
+.hpm-preview:hover{background:var(--s2)}
+.hpm-collapsed .hpm-preview{display:flex}
+.hpm-done{border-left:3px solid var(--a2)!important}
+.hpm-ikke{border-left:3px solid var(--or)!important}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+<div class="hdr">
+  <div style="display:flex;align-items:center;gap:16px">
+    <img src="data:image/png;base64,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" style="height:52px;opacity:.85;mix-blend-mode:multiply" alt="løper">
+    <div>
+    <h1 style="margin-bottom:2px">Marias treningsdagbok</h1>
+    <div class="hdr-sub">🏁 Hovedmål: Hytteplanmila 2026 (55:00 – 5:30 min/km)</div>
+  </div>
+  </div>
+  
+  <div class="cd" id="cd"></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:2px"><div id="sync-status" style="font-size:10px;color:var(--m)"></div><button onclick="fbLoad().then(()=>fbListen())" style="font-size:10px;background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;padding:0">↻ Prøv igjen</button></div>
+  <div style="margin-top:14px;max-width:600px" id="progress-bar-wrap">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--m);margin-bottom:5px">
+      <span>04.05.2026</span>
+      <span style="color:var(--a);font-weight:500" id="prog-label">Beregner...</span>
+      <span>17.10.2026</span>
+    </div>
+    <div style="background:#e8a0b0;height:8px;border-radius:4px;overflow:hidden">
+      <div id="prog-fill" style="background:var(--a);height:100%;width:0%;border-radius:4px;transition:width .5s"></div>
+    </div>
+  </div>
+</div>
+<nav>
+  <button class="active" onclick="nav('reg',this)">Registrering</button>
+  <button onclick="nav('ukedetalj',this)">Ukesoversikt</button>
+  <button onclick="nav('ukesplan',this)">Programplan</button>
+  <button onclick="nav('stats',this)">Statistikk</button>
+  <button onclick="nav('intervall',this)">Intervall</button>
+  <button onclick="nav('styrke',this)">Styrkeprogram</button>
+</nav>
+<main>
+
+<div class="view" id="v-ukesplan">
+  <div style="overflow-x:auto"><div class="ugrid" id="ugrid"></div></div>
+</div>
+
+<div class="view" id="v-ukedetalj">
+  <div class="wsel">
+    <button class="wnav" onclick="cw(-1)">←</button>
+    <select id="wsel" onchange="rdw()"></select>
+    <button class="wnav" onclick="cw(1)">→</button>
+  </div>
+  <div class="winfo" id="winfo"></div>
+  <div class="wdet" id="wdet"></div>
+</div>
+  <div style="overflow-x:auto">
+  <table class="ltbl">
+    
+    <tbody id="lbody"></tbody>
+  </table>
+  </div>
+</div>
+  <div id="sbody"></div>
+</div>
+
+<div class="view" id="v-intervall">
+  <div style="overflow-x:auto"><div class="igrid" id="igrid">
+</div></div>
+</div>
+
+<div class="view" id="v-styrke">
+  <div id="styrke-body" style="padding:8px 0"></div>
+</div>
+
+
+  </div>
+
+
+<div class="view active" id="v-reg">
+  <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+    <select id="reg-uke" onchange="renderReg();const wv=parseInt(this.value);if(wv){curW=wv;document.getElementById('wsel').value=wv;renderWeek(wv);}" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:7px 11px;border-radius:4px">
+      <option value="">Velg uke...</option>
+    </select>
+
+<span class="smsg" id="regmsg"></span>
+  </div>
+  <div id="reg-body"></div>
+</div>
+
+<div class="view" id="v-stats">
+  <div id="stats-body"></div>
+</div>
+</main>
+// ── Nullstill ────────────────────────────────────────────────────────────
+function nullstillOkt(key, msgId){
+  // Delete all data for this specific session
+  delete loggL[key];
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillStrOkt(uke, okt, msgId){
+  const src=okt==='A'?SA:SB;
+  const ovs=src[String(uke)]||[];
+  ovs.forEach((ov,i)=>{
+    const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+    for(let s=1;s<=4;s++){
+      delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
+    }
+  });
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillUke(){
+  const uv=document.getElementById('reg-uke').value;
+  if(!uv) return;
+  const uke=parseInt(uv);
+  if(!confirm('Nullstille all logging for uke '+uke+'?')) return;
+  // Delete all running sessions
+  ['intervall','roligLop','tempo','langtur','race'].forEach(k=>{
+    delete loggL[uke+'_'+k];
+  });
+  // Delete all strength sessions
+  ['A','B'].forEach(okt=>{
+    const src=okt==='A'?SA:SB;
+    const ovs=src[String(uke)]||[];
+    ovs.forEach((ov,i)=>{
+      const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+      for(let s=1;s<=4;s++){
+        delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
+      }
+    });
+  });
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+// ── Firebase ─────────────────────────────────────────────────────────────
+
+  if(!auth){alert('Innlogging ikke tilgjengelig her. Bruk GitHub Pages-lenken.');return;}
+  document.getElementById('login-status').textContent='Logger inn...';
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{
+    document.getElementById('login-status').textContent='Feil: '+e.message;
+  });
+}
+
+
+
+
+  initWsel();renderWeek(1);renderIntervall();initReg();
+  fbLoad().then(()=>{renderUkesplan();document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();fbListen();});
+}
+
+
+  
+}
+
+
+const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
+const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
+const DOC = true; // always available
+
+function setSyncStatus(txt, col){
+  const el=document.getElementById('sync-status');
+  if(el){el.textContent=txt;el.style.color=col||'var(--m)';}
+}
+
+// Save ALL data to Firebase (simple overwrite — single user)
+async function fbSave(){
+  setSyncStatus('● Lagrer...','var(--or)');
+  try{
+    const body={fields:{
+      l:{stringValue:JSON.stringify(loggL)},
+      s:{stringValue:JSON.stringify(loggS)},
+      ts:{integerValue:Date.now()}
+    }};
+    const res=await fetch(FB_URL+'?key='+FB_KEY,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    setSyncStatus('● Synkronisert','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Feil: '+e.message,'var(--or)');
+    console.error(e);
+  }
+}
+
+// Load from Firebase on startup
+async function fbLoad(){
+  setSyncStatus('● Henter data...','var(--m)');
+  try{
+    const res=await fetch(FB_URL+'?key='+FB_KEY);
+    if(res.status===404){setSyncStatus('● Klar – ingen data ennå','var(--a2)');return;}
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    const fields=d.fields||{};
+    if(fields.l) loggL=JSON.parse(fields.l.stringValue);
+    if(fields.s) loggS=JSON.parse(fields.s.stringValue);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    setSyncStatus('● Lastet fra sky','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Offline ('+e.message+')','var(--or)');
+    console.error(e);
+  }
+}
+
+// Listen for real-time changes from other devices
+let userTyping=false;
+let typingTimer=null;
+document.addEventListener('input',()=>{
+  userTyping=true;
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{ userTyping=false; },5000);
+});
+
+function fbListen(){
+  setInterval(async()=>{
+    // Don't overwrite while user is typing
+    if(userTyping) return;
+    try{
+      const res=await fetch(FB_URL+'?key='+FB_KEY);
+      if(!res.ok) return;
+      const d=await res.json();
+      const fields=d.fields||{};
+      if(fields.l){
+        const remoteL=JSON.parse(fields.l.stringValue);
+        const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        // Only update if remote timestamp is newer
+        const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+        const localTs=parseInt(localStorage.getItem('hpm_ts')||'0');
+        if(remoteTs<=localTs) return;
+        loggL=remoteL; loggS=remoteS;
+        localStorage.setItem('hpm_l',JSON.stringify(loggL));
+        localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        localStorage.setItem('hpm_ts',String(remoteTs));
+        document.getElementById('ugrid').innerHTML='';
+        renderUkesplan(); renderStats();
+        const rv=document.getElementById('v-reg');
+        if(rv&&rv.classList.contains('active')) renderReg();
+        setSyncStatus('● Synkronisert','var(--a2)');
+      }
+    }catch(e){ console.warn('Poll error:',e); }
+  },15000);
+  setSyncStatus('● Tilkoblet','var(--a2)');
+}
+
+// Patch all save functions to also call fbSave
+const _origSaveOkt=saveOkt;
+window.saveOkt=function(key,msgId){
+  _origSaveOkt(key,msgId);
+  fbSave();
+};
+const _origSavelReg=savelReg;
+window.savelReg=function(){
+  _origSavelReg();
+  fbSave();
+};
+const _origIkke=ikkeUtfort;
+window.ikkeUtfort=function(key,msgId){
+  _origIkke(key,msgId);
+  fbSave();
+};
+const _origIkkeStr=ikkeUtfortStr;
+window.ikkeUtfortStr=function(uke,okt,msgId){
+  _origIkkeStr(uke,okt,msgId);
+  fbSave();
+};
+
+// Init: load then listen
+// Auth handles init
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+// ── Nullstill ────────────────────────────────────────────────────────────
+function nullstillOkt(key, msgId){
+  // Delete all data for this specific session
+  delete loggL[key];
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillStrOkt(uke, okt, msgId){
+  const src=okt==='A'?SA:SB;
+  const ovs=src[String(uke)]||[];
+  ovs.forEach((ov,i)=>{
+    const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+    for(let s=1;s<=4;s++){
+      delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
+    }
+  });
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillUke(){
+  const uv=document.getElementById('reg-uke').value;
+  if(!uv) return;
+  const uke=parseInt(uv);
+  if(!confirm('Nullstille all logging for uke '+uke+'?')) return;
+  // Delete all running sessions
+  ['intervall','roligLop','tempo','langtur','race'].forEach(k=>{
+    delete loggL[uke+'_'+k];
+  });
+  // Delete all strength sessions
+  ['A','B'].forEach(okt=>{
+    const src=okt==='A'?SA:SB;
+    const ovs=src[String(uke)]||[];
+    ovs.forEach((ov,i)=>{
+      const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+      for(let s=1;s<=4;s++){
+        delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
+      }
+    });
+  });
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+// ── Firebase ─────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
+  authDomain: "lopeprogram2026.firebaseapp.com",
+  projectId: "lopeprogram2026"
+};
+let auth = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+} catch(e) {
+  console.warn('Firebase Auth init failed:', e);
+}
+const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
+
+
+
+const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
+const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
+const DOC = true; // always available
+
+function setSyncStatus(txt, col){
+  const el=document.getElementById('sync-status');
+  if(el){el.textContent=txt;el.style.color=col||'var(--m)';}
+}
+
+// Save ALL data to Firebase (simple overwrite — single user)
+async function fbSave(){
+  setSyncStatus('● Lagrer...','var(--or)');
+  try{
+    const body={fields:{
+      l:{stringValue:JSON.stringify(loggL)},
+      s:{stringValue:JSON.stringify(loggS)},
+      ts:{integerValue:Date.now()}
+    }};
+    const res=await fetch(FB_URL+'?key='+FB_KEY,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    setSyncStatus('● Synkronisert','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Feil: '+e.message,'var(--or)');
+    console.error(e);
+  }
+}
+
+// Load from Firebase on startup
+async function fbLoad(){
+  setSyncStatus('● Henter data...','var(--m)');
+  try{
+    const res=await fetch(FB_URL+'?key='+FB_KEY);
+    if(res.status===404){setSyncStatus('● Klar – ingen data ennå','var(--a2)');return;}
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    const fields=d.fields||{};
+    if(fields.l) loggL=JSON.parse(fields.l.stringValue);
+    if(fields.s) loggS=JSON.parse(fields.s.stringValue);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    setSyncStatus('● Lastet fra sky','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Offline ('+e.message+')','var(--or)');
+    console.error(e);
+  }
+}
+
+// Listen for real-time changes from other devices
+let userTyping=false;
+let typingTimer=null;
+document.addEventListener('input',()=>{
+  userTyping=true;
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{ userTyping=false; },5000);
+});
+
+function fbListen(){
+  setInterval(async()=>{
+    // Don't overwrite while user is typing
+    if(userTyping) return;
+    try{
+      const res=await fetch(FB_URL+'?key='+FB_KEY);
+      if(!res.ok) return;
+      const d=await res.json();
+      const fields=d.fields||{};
+      if(fields.l){
+        const remoteL=JSON.parse(fields.l.stringValue);
+        const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        // Only update if remote timestamp is newer
+        const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+        const localTs=parseInt(localStorage.getItem('hpm_ts')||'0');
+        if(remoteTs<=localTs) return;
+        loggL=remoteL; loggS=remoteS;
+        localStorage.setItem('hpm_l',JSON.stringify(loggL));
+        localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        localStorage.setItem('hpm_ts',String(remoteTs));
+        document.getElementById('ugrid').innerHTML='';
+        renderUkesplan(); renderStats();
+        const rv=document.getElementById('v-reg');
+        if(rv&&rv.classList.contains('active')) renderReg();
+        setSyncStatus('● Synkronisert','var(--a2)');
+      }
+    }catch(e){ console.warn('Poll error:',e); }
+  },15000);
+  setSyncStatus('● Tilkoblet','var(--a2)');
+}
+
+// Patch all save functions to also call fbSave
+const _origSaveOkt=saveOkt;
+window.saveOkt=function(key,msgId){
+  _origSaveOkt(key,msgId);
+  fbSave();
+};
+const _origSavelReg=savelReg;
+window.savelReg=function(){
+  _origSavelReg();
+  fbSave();
+};
+const _origIkke=ikkeUtfort;
+window.ikkeUtfort=function(key,msgId){
+  _origIkke(key,msgId);
+  fbSave();
+};
+const _origIkkeStr=ikkeUtfortStr;
+window.ikkeUtfortStr=function(uke,okt,msgId){
+  _origIkkeStr(uke,okt,msgId);
+  fbSave();
+};
+
+// Init: load then listen
+// Auth handles init
+
+</script>
+<script>
+
+
+
+// Save to Firestore
+
+// Load from Firestore
+
+// Listen for real-time updates from other devices
+
+const W=[{"uke": 1, "kaluke": "U19", "dato": "04.05 – 10.05", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →6×4 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×8\nSingle arm-shoulder press – 3×10\nSeated row – 3×12\nPlank – 3×maks sek\nCalf raise – 3×20\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n20 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Backyard Ultra 18 km\n09.05.2026", "son": "Hvile"}, {"uke": 2, "kaluke": "U20", "dato": "11.05 – 17.05", "fase": "Basis", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×8\nSingle arm-shoulder press – 3×10\nSeated row – 3×12\nPlank – 3×maks sek\nCalf raise – 3×20\nSuperman – 3×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n22 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "fre": "Hvile", "lor": "Styrke A\nSmith squat – 3×8\nDead bug – 3×10\nRomanian deadlift (RDL) – 3×8\nPallof press – 3×10\nBulgarian split squat – 3×10\nSingle-leg RDL – 3×10\nLeg extension – 3×12\nSingle-leg calf raise – 3×15", "son": "Rolig langtur\n65 min\n130–150 bpm"}, {"uke": 3, "kaluke": "U21", "dato": "18.05 – 24.05", "fase": "Basis", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n22 min\n130–155 bpm\n4–6 stigningsløp", "tor": "Hvile", "fre": "Tempoøkt\n10+10 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n65 min\n130–150 bpm"}, {"uke": 4, "kaluke": "U22", "dato": "25.05 – 31.05", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×8 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n25 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+12 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 5, "kaluke": "U23", "dato": "01.06 – 07.06", "fase": "Basis", "man": "Hvile", "tir": "Intervall + Styrke B\n50–40 min\n[DELOAD –40%] 15 min oppvarming →4×4 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n15 min\n130–155 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+10 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n40 min\n130–150 bpm"}, {"uke": 6, "kaluke": "U24", "dato": "08.06 – 14.06", "fase": "Basis", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →18×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n27 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+14 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 7, "kaluke": "U25", "dato": "15.06 – 21.06", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–30 min\n[TAPER –50%] 15 min oppvarming →7×4 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n30 min\n130–155 bpm\n[TAPER –50%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Sommernattsløpet 5 km\n20.06.2026", "son": "Hvile"}, {"uke": 8, "kaluke": "U26", "dato": "22.06 – 28.06", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n33 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 EcoTrail Bergen 12 km\n27.06.2026", "son": "Hvile"}, {"uke": 9, "kaluke": "U27", "dato": "29.06 – 05.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n35 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 10, "kaluke": "U28", "dato": "06.07 – 12.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×8 min / 2 min aktiv pause – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n35 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+20 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 11, "kaluke": "U29", "dato": "13.07 – 19.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n38 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+22 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 12, "kaluke": "U30", "dato": "20.07 – 26.07", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →5×6 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n40 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+24 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 13, "kaluke": "U31", "dato": "27.07 – 02.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall + Styrke B\n50–40 min\n[DELOAD –40%] 15 min oppvarming →3×5 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n25 min\n130–155 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+15 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n55 min\n130–150 bpm"}, {"uke": 14, "kaluke": "U32", "dato": "03.08 – 09.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n42 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+26 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 15, "kaluke": "U33", "dato": "10.08 – 16.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×8 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n45 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+28 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 16, "kaluke": "U34", "dato": "17.08 – 23.08", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n45 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+30 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 17, "kaluke": "U35", "dato": "24.08 – 30.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall + Styrke B\n50–40 min\n[DELOAD –40%] 15 min oppvarming →3×5 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n27 min\n130–155 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+18 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "son": "Rolig langtur\n55 min\n130–150 bpm"}, {"uke": 18, "kaluke": "U36", "dato": "31.08 – 06.09", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →3×8 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n45 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+32 min+10 min\n164–166 bpm", "lor": "Hvile", "son": "Rolig langtur\n90 min\n130–150 bpm"}, {"uke": 19, "kaluke": "U37", "dato": "07.09 – 13.09", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–30 min\n[TAPER –50%] 15 min oppvarming →20×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n45 min\n130–155 bpm\n[TAPER –50%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "fre": "Hvile", "lor": "🏁 Jentemila 5 km\n05.09.2026\n10–15 min oppvarming 130–150 bpm → løp → 10 min nedkjøling", "son": "Styrke A\nSmith squat – 3×6\nRomanian deadlift (RDL) – 3×6\nBulgarian split squat – 2×8\nSingle-leg RDL – 2×8\nLeg extension – 2×10\nSingle-leg calf raise – 2×12\nPallof press – 2×8\nDead bug – 2×8"}, {"uke": 20, "kaluke": "U38", "dato": "14.09 – 20.09", "fase": "Nedtrapping", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →16×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n35 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "fre": "Hvile", "lor": "🏁 Oslo Maraton 10 km\n12.09.2026\nStyrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "son": "Hvile"}, {"uke": 21, "kaluke": "U39", "dato": "21.09 – 27.09", "fase": "Nedtrapping", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n30 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "son": "Rolig langtur\n60 min\n130–150 bpm"}, {"uke": 22, "kaluke": "U40", "dato": "28.09 – 04.10", "fase": "Nedtrapping", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →4×5 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n25 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+15 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "son": "Rolig langtur\n45 min\n130–150 bpm"}, {"uke": 23, "kaluke": "U41", "dato": "05.10 – 11.10", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–65 min\n15 min oppvarming →12×(45 sek/15 sek) / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n22 min\n130–155 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Tempoøkt\n10+12 min+10 min\n164–166 bpm", "lor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "son": "Rolig langtur\n30 min\n130–150 bpm"}, {"uke": 24, "kaluke": "U42", "dato": "12.10 – 18.10", "fase": "⏬ Taper", "man": "Hvile", "tir": "Intervall + Styrke B\n50–30 min\n[TAPER –50%] 15 min oppvarming →3×5 min / 2 min aktiv pause  – 164–171 bpm → 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n20 min\n130–155 bpm\n[TAPER –50%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Hytteplanmila 10 km\n17.10.2026", "son": "Hvile"}];
+
+const IV=[{"uke": 1, "arbeidstid": 24, "drag": "6×4 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 4, "arbeidstid": 24, "drag": "3×8 min / 2 min aktiv pause", "type": "Lang 8 min"}, {"uke": 5, "arbeidstid": 16, "drag": "4×4 min / 2 min aktiv pause", "type": "Lang – Deload"}, {"uke": 6, "arbeidstid": 14, "drag": "18×(45 sek/15 sek) / 2 min aktiv pause", "type": "45/15"}, {"uke": 7, "arbeidstid": 28, "drag": "7×4 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 8, "arbeidstid": 15, "drag": "20×(45 sek/15 sek) / 2 min aktiv pause", "type": "45/15"}, {"uke": 10, "arbeidstid": 24, "drag": "3×8 min / 2 min aktiv pause", "type": "Lang 8 min"}, {"uke": 11, "arbeidstid": 15, "drag": "20×(45 sek/15 sek) / 2 min aktiv pause", "type": "45/15"}, {"uke": 12, "arbeidstid": 30, "drag": "5×6 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 13, "arbeidstid": 15, "drag": "3×5 min / 2 min aktiv pause", "type": "Lang – Deload"}, {"uke": 14, "arbeidstid": 15, "drag": "20×(45 sek/15 sek) / 2 min aktiv pause", "type": "45/15"}, {"uke": 15, "arbeidstid": 24, "drag": "3×8 min / 2 min aktiv pause", "type": "Lang 8 min"}, {"uke": 16, "arbeidstid": 15, "drag": "20×(45 sek/15 sek) / 2 min aktiv pause", "type": "45/15"}, {"uke": 17, "arbeidstid": 15, "drag": "3×5 min / 2 min aktiv pause", "type": "Lang – Deload"}, {"uke": 18, "arbeidstid": 24, "drag": "3×8 min / 2 min aktiv pause", "type": "Lang 8 min"}, {"uke": 19, "arbeidstid": 15, "drag": "20×(45 sek/15 sek) / 2 min aktiv pause", "type": "45/15"}, {"uke": 20, "arbeidstid": 12, "drag": "16×(45 sek/15 sek) / 2 min aktiv pause", "type": "45/15"}, {"uke": 22, "arbeidstid": 20, "drag": "4×5 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 23, "arbeidstid": 9, "drag": "12×(45 sek/15 sek) / 2 min aktiv pause", "type": "45/15"}, {"uke": 24, "arbeidstid": 15, "drag": "3×5 min / 2 min aktiv pause", "type": "Lang"}];
+
+const RC=[{"uke": 1, "navn": "Backyard Ultra", "km": 18, "dato": "09.05.2026"}, {"uke": 7, "navn": "Sommernattsløpet", "km": 5, "dato": "20.06.2026"}, {"uke": 8, "navn": "EcoTrail Bergen", "km": 12, "dato": "27.06.2026"}, {"uke": 19, "navn": "Jentemila", "km": 5, "dato": "05.09.2026"}, {"uke": 20, "navn": "Oslo Maraton", "km": 10, "dato": "12.09.2026"}, {"uke": 24, "navn": "Hytteplanmila", "km": 10, "dato": "17.10.2026"}];
+
+const SA={"2": ["Smith squat – 3×8", "Dead bug – 3×10", "Romanian deadlift (RDL) – 3×8", "Pallof press – 3×10", "Bulgarian split squat – 3×10", "Single-leg RDL – 3×10", "Leg extension – 3×12", "Single-leg calf raise – 3×15"], "3": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "4": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "5": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "6": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "9": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "10": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "11": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "12": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "13": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "14": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "15": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "16": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "17": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "20": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "21": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "22": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "23": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"]};
+
+const SB={"1": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "2": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "3": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "4": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "5": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "6": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "7": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 3×maks"], "8": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "9": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "10": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "11": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "12": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "13": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "14": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "15": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "16": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "17": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "18": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 3×maks"], "19": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "20": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "21": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "22": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "23": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "24": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"]};
+
+let loggL={},loggS={};
+try{loggL=JSON.parse(localStorage.getItem('hpm_l')||'{}');}catch(e){}
+try{loggS=JSON.parse(localStorage.getItem('hpm_s')||'{}');}catch(e){}
+let curW=1;
+
+function fC(f){if(f.includes('Deload'))return 'D';if(f.includes('Taper')||f.includes('Løpsuke'))return 'P';if(f.includes('Basis'))return 'b';if(f.includes('Oppbygging'))return 'O';if(f.includes('Toppform'))return 'T';if(f.includes('Nedtrapping'))return 'N';return '';}
+
+function nav(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('v-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='ukedetalj') rdw();
+  if(id==='ukesplan'){document.getElementById('ugrid').innerHTML='';renderUkesplan();}
+  if(id==='styrke') renderStyrke();
+  if(id==='stats') renderStats();
+}
+
+function gw(n){curW=n;document.querySelector('#wsel').value=n;rdw();document.querySelectorAll('nav button')[1].click();}
+
+function renderUkesplan(){
+  const g=document.getElementById('ugrid');
+  ['Uke','Dato','Fase','Man','Tir','Ons','Tor','Fre','Lør','Søn'].forEach(h=>{
+    const d=document.createElement('div');d.className='ucell uhdr';d.textContent=h;g.appendChild(d);
+  });
+  const keys=['man','tir','ons','tor','fre','lor','son'];
+  W.forEach(w=>{
+    const fc=fC(w.fase);
+    [{cls:`ucell uke-n fl-${fc}`,txt:`Uke ${w.uke}\n${w.kaluke}`,click:()=>gw(w.uke)},{cls:'ucell',txt:w.dato},{cls:`ucell fl-${fc}`,txt:w.fase,sm:true}].forEach(c=>{
+      const d=document.createElement('div');d.className=c.cls;d.style.fontSize=c.sm?'10px':'';d.textContent=c.txt||'';if(c.click)d.onclick=c.click;g.appendChild(d);
+    });
+    // Build dayToLoggKey dynamically from W data
+    const dayToLoggKey={};
+    ['man','tir','ons','tor','fre','lor','son'].forEach(d=>{
+      const t=w[d]||'';
+      if(t.includes('Intervall')) dayToLoggKey[d]=`${w.uke}_intervall`;
+      if(t.startsWith('Rolig løpetur')) dayToLoggKey[d]=`${w.uke}_roligLop`;
+      if(t.startsWith('Tempoøkt')) dayToLoggKey[d]=`${w.uke}_tempo`;
+      if(t.startsWith('Rolig langtur')) dayToLoggKey[d]=`${w.uke}_langtur`;
+      if(t.includes('🏁')) dayToLoggKey[d]=`${w.uke}_race`;
+    });
+    keys.forEach(k=>{
+      const txt=w[k]||'';const isH=txt==='Hvile';const isR=txt.includes('🏁');
+      const lKey=dayToLoggKey[k];
+      const isLogged=lKey&&loggL[lKey]&&(loggL[lKey]['var']||loggL[lKey].tid||loggL[lKey].sn||loggL[lKey].km||loggL[lKey].fol||loggL[lKey].tempo);
+      const isIkke=lKey&&loggL[lKey]&&loggL[lKey].ikkeUtfort;
+      // Styrke A (lor only, not race weeks) and Styrke B (tir only)
+      const sKeyA=`${w.uke}_A_0_s1`;
+      const sKeyB=`${w.uke}_B_0_s1`;
+      const raceUkes=[1,7,8,19,20,24];
+      // lor: show checkmark if Styrke A logged (only non-race weeks)
+      // Find actual days for Styrke A and B
+      const strADay=Object.keys({man:1,tir:1,ons:1,tor:1,fre:1,lor:1,son:1}).find(d=>w[d]&&w[d].split('\n').some(l=>l.trim().startsWith('Styrke A')))||'lor';
+      const strBDay=Object.keys({man:1,tir:1,ons:1,tor:1,fre:1,lor:1,son:1}).find(d=>w[d]&&w[d].split('\n').some(l=>l.trim().startsWith('Styrke B')))||'tir';
+      const isStrA=k===strADay&&!raceUkes.includes(w.uke)&&loggS[sKeyA]&&(loggS[sKeyA].vekt||loggS[sKeyA].reps);
+      const isStrB=k===strBDay&&loggS[sKeyB]&&(loggS[sKeyB].vekt||loggS[sKeyB].reps);
+      // For tir: show ✓ only if BOTH intervall AND styrke B are logged
+      const tirBothLogged=k==='tir'&&isLogged&&isStrB;
+      const tirOnlyRun=k==='tir'&&isLogged&&!isStrB;
+      const tirOnlyStr=k==='tir'&&!isLogged&&isStrB;
+      const logged=(k==='tir'?tirBothLogged:isLogged)||isStrA;
+      const d=document.createElement('div');
+      d.className='ucell'+(isH?' hvile':'')+(isR?' race-c':'');
+      const label=isH?'—':txt.split('\n')[0];
+      let display=label;
+      if(isIkke){
+        display=`<span style="color:var(--or)">✗</span> <span style="opacity:.5">${label}</span>`;
+      } else if(logged){
+        display=`<span style="color:var(--a2)">✓</span> <span style="text-decoration:line-through;opacity:.6">${label}</span>`;
+      } else if(tirOnlyRun){
+        display=`<span style="color:var(--a2);font-size:9px">✓løp</span> ${label}`;
+      } else if(tirOnlyStr){
+        display=`<span style="color:var(--pu);font-size:9px">✓str</span> ${label}`;
+      }
+      // For tir: show split status for intervall and styrke B
+      if(k==='tir'){
+        const hasIntervall=txt.startsWith('Intervall');
+        const hasStryrkeB=txt.includes('Styrke B');
+        if(hasIntervall && hasStryrkeB){
+          const intIcon=isIkke?'✗ ':isLogged?'✓ ':'';
+          const intColor=isIkke?'var(--or)':isLogged?'var(--a2)':'var(--t)';
+          const strIcon=isStrB?'✓ ':'';
+          const strColor=isStrB?'var(--a2)':'var(--m)';
+          d.innerHTML=`<div style="line-height:1.5">
+            <div style="color:${intColor}">${intIcon}Intervall</div>
+            <div style="color:${strColor};border-top:1px solid var(--b);margin-top:2px;padding-top:2px">${strIcon}Styrke B</div>
+          </div>`;
+        } else if(hasStryrkeB && !hasIntervall){
+          const strIcon=isStrB?'✓ ':'';
+          const strColor=isStrB?'var(--a2)':'var(--t)';
+          d.innerHTML=`<div style="color:${strColor}">${strIcon}Styrke B</div>`;
+        } else {
+          d.innerHTML=display;
+        }
+      } else {
+        d.innerHTML=display;
+      }
+      g.appendChild(d);
+    });
+  });
+}
+
+function initWsel(){
+  const sel=document.getElementById('wsel');
+  W.forEach(w=>{const o=document.createElement('option');o.value=w.uke;o.textContent=`Uke ${w.uke} (${w.kaluke}) – ${w.dato}`;sel.appendChild(o);});
+}
+
+function cw(d){curW=Math.max(1,Math.min(24,curW+d));document.getElementById('wsel').value=curW;rdw();}
+
+function rdw(){
+  curW=parseInt(document.getElementById('wsel').value)||curW;
+  renderWeek(curW);
+}
+
+function rdwFromReg(){
+  // Called after save in Registrering - sync week to reg-uke
+  const regUke=parseInt(document.getElementById('reg-uke')?.value);
+  if(regUke){curW=regUke;document.getElementById('wsel').value=regUke;}
+  renderWeek(curW);
+}
+
+function renderWeek(n){
+  const w=W.find(x=>x.uke===n);if(!w)return;
+  document.getElementById('wsel').value=n;
+  const race=RC.find(r=>r.uke===n);
+  document.getElementById('winfo').innerHTML=`
+    <div class="ii"><div class="il">Uke</div><div class="iv ac">Uke ${n} (${w.kaluke})</div></div>
+    <div class="ii"><div class="il">Dato</div><div class="iv">${w.dato}</div></div>
+    <div class="ii"><div class="il">Fase</div><div class="iv">${w.fase}</div></div>
+    ${race?`<div class="ii"><div class="il">Løp</div><div class="iv" style="color:var(--or)">🏁 ${race.navn} ${race.km} km</div></div>`:''}
+  `;
+  const days=[{k:'man',l:'Mandag'},{k:'tir',l:'Tirsdag'},{k:'ons',l:'Onsdag'},{k:'tor',l:'Torsdag'},{k:'fre',l:'Fredag'},{k:'lor',l:'Lørdag'},{k:'son',l:'Søndag'}];
+  const det=document.getElementById('wdet');det.innerHTML='';
+  days.forEach(d=>{
+    // Build txt - use SA/SB for strength days with updated exercises
+    let txt=w[d.k]||'';
+    if(d.k==='lor'&&SA[String(n)]&&SA[String(n)].length){
+      const lines=txt.split('\n');
+      const nonStr=lines.filter(l=>!l.startsWith('Styrke A')&&!SA[String(n)].some(e=>l.startsWith(e.split(' – ')[0])));
+      txt=nonStr.join('\n').trim()+(nonStr.length&&nonStr.join('').trim()?'\n':'')+'Styrke A\n'+SA[String(n)].join('\n');
+    }
+    if(d.k==='tir'&&SB[String(n)]&&SB[String(n)].length){
+      const lines=txt.split('\n');
+      const nonStr=lines.filter(l=>!l.startsWith('Styrke B')&&!SB[String(n)].some(e=>l.startsWith(e.split(' – ')[0])));
+      txt=nonStr.join('\n').trim()+(nonStr.length&&nonStr.join('').trim()?'\n':'')+'\nStyrke B\n'+SB[String(n)].join('\n');
+    }
+    const isH=txt==='Hvile';const isR=txt.includes('🏁');
+    let badge='',bcls='';
+    if(isH){badge='Hvile';}else if(isR){badge='Løp';bcls='lop';}
+    else if(txt.startsWith('Intervall')){badge='Intervall + Styrke B';bcls='int';}
+    else if(txt.startsWith('Tempoøkt')){badge='Tempo';bcls='tmp';}
+    else if(txt.startsWith('Rolig løpetur + SL')){badge='Rolig løp + ST';bcls='rol';}
+    else if(txt.startsWith('Rolig langtur')){badge='Langtur';bcls='rol';}
+    else if(txt.startsWith('Styrke A')){badge='Styrke A';bcls='str';}
+    else{badge=txt.split('\n')[0];}
+    const card=document.createElement('div');
+    card.className='dcard'+(isH?' hvile-c':'')+(isR?' race-d':'');
+    const lines=txt.split('\n');
+    const fmt=isH?'<span style="color:var(--m);font-style:italic">Hvile / aktiv restitusjon</span>':
+      lines.map((l,i)=>{
+        if(i===0)return`<strong style="color:var(--a)">${l}</strong>`;
+        if(l.trim()==='')return'';
+        if(l==='Styrke B'||l.startsWith('Styrke A'))return`<strong style="color:var(--pu);display:block;margin-top:8px">${l}</strong>`;
+        return l;
+      }).join('\n');
+    card.innerHTML=`<div class="dhdr"><span class="dn">${d.l}</span><span class="dbadge ${bcls}">${badge}</span></div><div class="dcont">${fmt}</div>`;
+    det.appendChild(card);
+  });
+}
+
+function normalizeTime(v){
+  if(!v) return v;
+  const p=v.trim().split(':');
+  if(p.length===2) return '0:'+p[0].padStart(2,'0')+':'+p[1].padStart(2,'0');
+  if(p.length===3) return p[0]+':'+p[1].padStart(2,'0')+':'+p[2].padStart(2,'0');
+  return v;
+}
+function upL(k,f,v){
+  if(!loggL[k])loggL[k]={};
+  if(f==='var'||f==='tid') v=normalizeTime(v);
+  loggL[k][f]=v;
+}
+function upLDrag(k,dragNum,field,val){
+  if(!loggL[k]) loggL[k]={};
+  if(!loggL[k].drags) loggL[k].drags={};
+  if(!loggL[k].drags[dragNum]) loggL[k].drags[dragNum]={};
+  loggL[k].drags[dragNum][field]=val;
+  // Update snitt display
+  const baseId=k.replace(/_/g,'-');
+  const drags=loggL[k].drags;
+  const num=Object.keys(drags).length;
+  const tEl=document.getElementById('snitt-tempo-'+baseId);
+  const pEl=document.getElementById('snitt-puls-'+baseId);
+  if(tEl) tEl.querySelector('span').textContent=calcSnittTempo(drags,num);
+  if(pEl) pEl.querySelector('span').textContent=calcSnittPuls(drags,num);
+}
+
+function calcSnittTempo(drags, num){
+  // Convert mm:ss to seconds, average, convert back
+  const vals=[];
+  for(let i=1;i<=num;i++){
+    const d=drags[i]||{};
+    if(d.tempo){
+      const parts=d.tempo.split(':');
+      if(parts.length===2) vals.push(parseInt(parts[0])*60+parseInt(parts[1]));
+    }
+  }
+  if(!vals.length) return '–';
+  const avg=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+  return Math.floor(avg/60)+':'+(avg%60).toString().padStart(2,'0');
+}
+
+function calcSnittPuls(drags, num){
+  const vals=[];
+  for(let i=1;i<=num;i++){
+    const d=drags[i]||{};
+    if(d.puls) vals.push(parseFloat(d.puls));
+  }
+  if(!vals.length) return '–';
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)+' bpm';
+}
+
+function upS(k,f,v){if(!loggS[k])loggS[k]={};loggS[k][f]=v;}
+
+function setF(key,n,btn){
+  if(!loggS[key])loggS[key]={};loggS[key].fol=n;
+  btn.closest('tr').querySelectorAll('.fstar').forEach((b,i)=>b.classList.toggle('on',i<n));
+}
+
+function savel(t){
+  try{
+    if(t==='l'){localStorage.setItem('hpm_l',JSON.stringify(loggL));sm('lmsg');}
+    else{localStorage.setItem('hpm_s',JSON.stringify(loggS));sm('smsg');}
+  }catch(e){console.warn('Storage unavailable');}
+}
+
+function sm(id){const el=document.getElementById(id);el.textContent='✓ Utført';setTimeout(()=>el.textContent='',2000);}
+
+function renderIntervall(){
+  const g=document.getElementById('igrid');
+  const mx=Math.max(...IV.map(i=>i.arbeidstid));
+  ['Uke','Dato','Type','Drag','Arbeid','Progresjon'].forEach(h=>{const d=document.createElement('div');d.className='icell ihdr';d.textContent=h;g.appendChild(d);});
+  IV.forEach(iv=>{
+    const w=W.find(x=>x.uke===iv.uke);
+    const pct=Math.round(iv.arbeidstid/mx*100);
+    const isD=iv.type.includes('Deload'),isT=w&&w.fase.includes('Taper');
+    const tc=iv.type.includes('45/15')?'t45':iv.type.includes('8 min')?'t8':isD?'tdl':'tl';
+    const bc=isD?'dl':isT?'tp':'';
+    [[`Uke ${iv.uke}`],[w?w.dato:''],[`<span class="tpill ${tc}">${iv.type}</span>`],[iv.drag],[`${iv.arbeidstid} min`]].forEach(([v])=>{
+      const d=document.createElement('div');d.className='icell';d.innerHTML=v;g.appendChild(d);
+    });
+    const bd=document.createElement('div');bd.className='icell';
+    bd.innerHTML=`<div style="width:100%"><div class="bwrap"><div class="bfill ${bc}" style="width:${pct}%"></div></div></div>`;
+    g.appendChild(bd);
+  });
+}
+
+function renderRaces(){
+  const list=document.getElementById('rlist');
+  RC.forEach(r=>{
+    const d=document.createElement('div');d.className='rcard'+(r.uke===24?' main':'');
+    d.innerHTML=`<div class="rdate">${r.dato}</div><div><div class="rname">${r.navn}${r.uke===24?' ★ HOVEDMÅL':''}</div><div class="rkm">${r.km} km</div></div><div class="ruke">Uke ${r.uke}</div>`;
+    list.appendChild(d);
+  });
+}
+
+function renderStats(){
+  const sb=document.getElementById('stats-body');
+  if(!sb){console.error('stats-body not found');return;}
+  sb.innerHTML='';
+
+  const loktKeys=['intervall','roligLop','tempo','langtur','race'];
+  let totalKm=0,totalUtfort=0,totalIkke=0,totalSecs=0;
+  const roligPulsList=[],intervallPulsList=[],folList=[],roligTempoList=[];
+
+  W.forEach(w=>{
+    loktKeys.forEach(k=>{
+      const sv=loggL[w.uke+'_'+k]||{};
+      if(sv['var']||sv.tid||sv.sn||sv.km) totalUtfort++;
+      // Sum total time
+      const timeStr=sv['var']||sv.tid||'';
+      if(timeStr){
+        const p=timeStr.split(':');
+        if(p.length===3) totalSecs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);
+        else if(p.length===2) totalSecs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);
+      }
+      if(sv.ikkeUtfort) totalIkke++;
+      if(sv.km) totalKm+=parseFloat(sv.km)||0;
+      // Snitt puls fra rolig løpetur og langtur
+      if((k==='roligLop'||k==='langtur')&&sv.sn) roligPulsList.push(parseFloat(sv.sn));
+      if(sv.fol) folList.push(parseFloat(sv.fol));
+      // Intervall puls fra drag-tabellen
+      if(k==='intervall'&&sv.drags){
+        Object.values(sv.drags).forEach(d=>{if(d.puls) intervallPulsList.push(parseFloat(d.puls));});
+      }
+      // Snitt tempo fra rolig løpetur og langtur (format mm:ss)
+      if((k==='roligLop'||k==='langtur')&&sv.tempo){
+        const parts=sv.tempo.split(':');
+        if(parts.length===2){
+          const secs=parseInt(parts[0])*60+parseInt(parts[1]);
+          if(!isNaN(secs)) roligTempoList.push({uke:w.uke,secs});
+        }
+      }
+    });
+    // Count strength sessions
+    ['A','B'].forEach(okt=>{
+      const src=okt==='A'?SA:SB;
+      const ovs=src[String(w.uke)]||[];
+      if(!ovs.length) return;
+      const sk=w.uke+'_'+okt+'_0_s1';
+      const sv=loggS[sk]||{};
+      if(sv.vekt||sv.reps) totalUtfort++;
+      // Add strength varighet to totalSecs and følelse to folList
+      const strVarSk=w.uke+'_'+okt+'_varighet';
+      const strVarSv=loggS[strVarSk]||{};
+      if(strVarSv.var){const p=strVarSv.var.split(':');if(p.length===3)totalSecs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)totalSecs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
+      if(strVarSv.fol) folList.push(parseFloat(strVarSv.fol));
+      const skIkke=w.uke+'_'+okt+'_0';
+      if(loggS[skIkke]&&loggS[skIkke].ikkeUtfort) totalIkke++;
+    });
+  });
+  totalKm=Math.round(totalKm*10)/10;
+  const totalH=Math.floor(totalSecs/3600);
+  const totalM=Math.floor((totalSecs%3600)/60).toString().padStart(2,'0');
+  const totalTimeStr=totalSecs>0?totalH+':'+totalM:'–';
+
+  const snittRoligPuls=roligPulsList.length?Math.round(roligPulsList.reduce((a,b)=>a+b,0)/roligPulsList.length):null;
+  // Snitt tempo rolig (sekunder → mm:ss)
+  const snittTempoSecs=roligTempoList.length?Math.round(roligTempoList.reduce((a,b)=>a+b.secs,0)/roligTempoList.length):null;
+  const snittTempoStr=snittTempoSecs?Math.floor(snittTempoSecs/60)+':'+(snittTempoSecs%60).toString().padStart(2,'0')+' min/km':null;
+  const snittIntervallPuls=intervallPulsList.length?Math.round(intervallPulsList.reduce((a,b)=>a+b,0)/intervallPulsList.length):null;
+
+  const snittFol=folList.length?Math.round(folList.reduce((a,b)=>a+b,0)/folList.length*10)/10:null;
+
+  // Streak: consecutive weeks with at least one logged session
+  let streak=0, streakActive=true;
+  const loggedWeekNums=W.map(w=>{
+    const loktK=['intervall','roligLop','tempo','langtur','race'];
+    return loktK.some(k=>{const sv=loggL[w.uke+'_'+k]||{};return sv['var']||sv.tid||sv.sn||sv.km;});
+  });
+  for(let i=loggedWeekNums.length-1;i>=0;i--){
+    if(loggedWeekNums[i]&&streakActive) streak++;
+    else if(!loggedWeekNums[i]&&streak>0){streakActive=false;break;}
+  }
+
+  // Days to race
+  const raceDate=new Date('2026-10-17');
+  const daysLeft=Math.max(0,Math.ceil((raceDate-new Date())/86400000));
+  const weeksLeft=Math.ceil(daysLeft/7);
+
+  // Goal: 55 min on 10 km = 5:30/km
+  // Best race tempo so far
+  const raceTimes=['1','7','8','18','19','24'].map(u=>{
+    const sv=loggL[u+'_race']||{};
+    return sv.tempo||null;
+  }).filter(Boolean);
+
+  // Summary cards
+  const cards=[
+    {l:'Totalt løpt',v:totalKm+' km',c:'var(--a)'},
+    {l:'Total treningstid',v:totalTimeStr,c:'var(--a2)'},
+    {l:'Gjennomført',v:totalUtfort+' økter',c:'var(--a2)'},
+    {l:'Snitt puls (rolig)',v:snittRoligPuls?snittRoligPuls+' bpm':'–',c:'var(--or)'},
+    {l:'Snitt tempo (rolig)',v:snittTempoStr||'–',c:'var(--a2)'},
+    {l:'Snitt puls (intervall)',v:snittIntervallPuls?snittIntervallPuls+' bpm':'–',c:'#e05b00'},
+    {l:'Snitt følelse',v:snittFol?snittFol+' / 5':'–',c:'var(--pu)'},
+  ];
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:28px';
+  cards.forEach(c=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:14px';
+    d.innerHTML='<div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+c.l+'</div><div style="font-size:22px;font-weight:500;color:'+c.c+'">'+c.v+'</div>';
+    grid.appendChild(d);
+  });
+  sb.appendChild(grid);
+
+  // Km per uke
+  const t1=document.createElement('h2');
+  t1.style.cssText='font-size:16px;font-weight:500;color:var(--a);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  t1.textContent='Km per uke';
+  sb.appendChild(t1);
+
+  const kmData=W.map(w=>{
+    let km=0, ikke=0;
+    loktKeys.forEach(k=>{
+      const sv=loggL[w.uke+'_'+k]||{};
+      if(sv.km) km+=parseFloat(sv.km)||0;
+      if(sv.ikkeUtfort) ikke++;
+    });
+    return{uke:w.uke,km:Math.round(km*10)/10,ikke};
+  });
+  const maxKm=Math.max(...kmData.map(d=>d.km),1);
+
+  const barWrap=document.createElement('div');
+  barWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:8px;margin-bottom:16px;overflow-x:auto';
+  const barInner=document.createElement('div');
+  barInner.style.cssText='display:flex;align-items:flex-end;gap:3px;height:80px;min-width:500px';
+
+  kmData.forEach(d=>{
+    const pct=d.km/maxKm*100;
+    const col=d.ikke>0&&d.km===0?'var(--or)':[1,7,8,18,19,24].includes(d.uke)?'var(--or)':[4,8,12,16].includes(d.uke)?'var(--pu)':d.km>0?'var(--a)':'var(--b)';
+    const bar=document.createElement('div');
+    bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
+    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.km>0?d.km:d.ikke>0?'✗':'')+'</div>'
+      +'<div style="width:100%;background:'+col+';border-radius:2px 2px 0 0;height:'+Math.max(pct,d.km>0||d.ikke>0?2:0)+'%;min-height:'+(d.km>0||d.ikke>0?'3px':'0')+'"></div>'
+      +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>';
+    barInner.appendChild(bar);
+  });
+  barWrap.appendChild(barInner);
+  sb.appendChild(barWrap);
+
+  // Treningstid per uke
+  const timeTitle=document.createElement('h2');
+  timeTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  timeTitle.textContent='Treningstid per uke (tt:mm)';
+  sb.appendChild(timeTitle);
+
+  const timeData=W.map(w=>{
+    let secs=0;
+    loktKeys.forEach(k=>{
+      const sv=loggL[w.uke+'_'+k]||{};
+      const t=sv['var']||sv.tid||'';
+      if(t){const p=t.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
+    });
+    // Add strength varighet
+    ['A','B'].forEach(okt=>{
+      const svk=loggS[w.uke+'_'+okt+'_varighet']||{};
+      if(svk.var){const p=svk.var.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
+    });
+    const mins=Math.round(secs/60);
+    const hh=Math.floor(mins/60);
+    const mm=(mins%60).toString().padStart(2,'0');
+    const label=mins>0?(hh>0?hh+':'+mm:'0:'+mm):'';
+    return{uke:w.uke,mins,label};
+  });
+  const maxMins=Math.max(...timeData.map(d=>d.mins),1);
+  const timeWrap=document.createElement('div');
+  timeWrap.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:8px;margin-bottom:16px;overflow-x:auto';
+  const timeInner=document.createElement('div');
+  timeInner.style.cssText='display:flex;align-items:flex-end;gap:3px;height:80px;min-width:500px';
+  timeData.forEach(d=>{
+    const pct=d.mins/maxMins*100;
+    const bar=document.createElement('div');
+    bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
+    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.label||'')+'</div>'
+      +'<div style="width:100%;background:'+(d.mins>0?'var(--a2)':'var(--b)')+';height:'+pct+'%;border-radius:2px 2px 0 0;min-height:'+(d.mins>0?'2px':'0')+'"></div>'
+      +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>';
+    timeInner.appendChild(bar);
+  });
+  timeWrap.appendChild(timeInner);
+  sb.appendChild(timeWrap);
+
+  // Puls over tid
+  const t2=document.createElement('h2');
+  t2.style.cssText='font-size:16px;font-weight:500;color:var(--or);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  t2.textContent='Snitt puls over tid (rolig)';
+  sb.appendChild(t2);
+
+  const pulsData=[];
+  W.forEach(w=>{
+    let list=[];
+    loktKeys.forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if((k==='roligLop'||k==='langtur')&&sv.sn)list.push(parseFloat(sv.sn));});
+    if(list.length) pulsData.push({uke:w.uke,kaluke:w.kaluke,puls:Math.round(list.reduce((a,b)=>a+b,0)/list.length)});
+  });
+
+  const pulsWrap=document.createElement('div');
+  pulsWrap.style.cssText='background:var(--s);border-radius:8px;padding:8px;margin-bottom:16px';
+  if(!pulsData.length){
+    pulsWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen pulsdata ennå.</p>';
+    sb.appendChild(pulsWrap);
+  } else {
+    const allPulsData=Array.from({length:24},(_,i)=>{const f=pulsData.find(d=>d.uke===i+1);return f?f.puls:null;});
+    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+    pulsWrap.innerHTML='<div style="position:relative;width:100%;height:160px"><canvas id="chartPuls" role="img" aria-label="Snitt puls rolig over tid">Puls over tid.</canvas></div>';
+    sb.appendChild(pulsWrap);
+    if(!window.Chart){setTimeout(renderStats,200);return;}if(window._chartPuls) window._chartPuls.destroy();
+    window._chartPuls=new Chart(document.getElementById('chartPuls'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[{label:'Snitt puls (rolig)',data:allPulsData,borderColor:'#D4537E',backgroundColor:'rgba(212,83,126,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#D4537E',borderWidth:2,spanGaps:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Snitt puls: '+c.parsed.y+' bpm'}}},
+        scales:{
+          y:{ticks:{color:isDark?'#aaa':'#888',font:{size:11}},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
+    });
+  }
+
+  // Snitt tempo over tid (rolig løpetur + langtur)
+  const tempoTitle=document.createElement('h2');
+  tempoTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a2);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  tempoTitle.textContent='Snitt tempo over tid (rolig)';
+  sb.appendChild(tempoTitle);
+
+  const tempoData=[];
+  W.forEach(w=>{
+    let secsList=[];
+    loktKeys.forEach(k=>{
+      const sv=loggL[w.uke+'_'+k]||{};
+      if((k==='roligLop'||k==='langtur')&&sv.tempo){
+        const p=sv.tempo.split(':');
+        if(p.length===2){const s=parseInt(p[0])*60+parseInt(p[1]);if(!isNaN(s))secsList.push(s);}
+      }
+    });
+    if(secsList.length){
+      const avg=Math.round(secsList.reduce((a,b)=>a+b,0)/secsList.length);
+      tempoData.push({uke:w.uke,val:avg});
+    }
+  });
+
+  const tempoWrap=document.createElement('div');
+  tempoWrap.style.cssText='background:var(--s);border-radius:8px;padding:8px;margin-bottom:16px;overflow-x:auto';
+  if(!tempoData.length){
+    tempoWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen tempo-data ennå.</p>';
+    sb.appendChild(tempoWrap);
+  } else {
+    // Build full 24-uke dataset with nulls for missing ukes (tempo in seconds)
+    const allTempoData=Array.from({length:24},(_,i)=>{const f=tempoData.find(d=>d.uke===i+1);return f?f.val:null;});
+    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+    tempoWrap.innerHTML='<div style="position:relative;width:100%;height:160px"><canvas id="chartTempo" role="img" aria-label="Snitt tempo rolig over tid">Tempo over tid.</canvas></div>';
+    sb.appendChild(tempoWrap);
+    if(window._chartTempo) window._chartTempo.destroy();
+    window._chartTempo=new Chart(document.getElementById('chartTempo'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[{label:'Snitt tempo (rolig)',data:allTempoData,borderColor:'#7030A0',backgroundColor:'rgba(112,48,160,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#7030A0',borderWidth:2,spanGaps:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const v=c.parsed.y;if(!v)return'';const m=Math.floor(v/60),s=(v%60).toString().padStart(2,'0');return 'Tempo: '+m+':'+s+' min/km';}}}},
+        scales:{
+          y:{reverse:true,ticks:{color:isDark?'#aaa':'#888',font:{size:11},callback:v=>{const m=Math.floor(v/60),s=(v%60).toString().padStart(2,'0');return m+':'+s;}},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
+    });
+  }
+    sb.appendChild(tempoWrap);
+
+  // Følelse over tid
+  const t3=document.createElement('h2');
+  t3.style.cssText='font-size:16px;font-weight:500;color:var(--pu);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  t3.textContent='Snitt følelse over tid (1–5)';
+  sb.appendChild(t3);
+
+  const folData2=[];
+  W.forEach(w=>{
+    let list=[];
+    loktKeys.forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if(sv.fol)list.push(parseFloat(sv.fol));});
+    if(list.length) folData2.push({uke:w.uke,kaluke:w.kaluke,fol:Math.round(list.reduce((a,b)=>a+b,0)/list.length*10)/10});
+  });
+
+  const folWrap=document.createElement('div');
+  folWrap.style.cssText='background:var(--s);border-radius:8px;padding:8px;margin-bottom:16px';
+  if(!folData2.length){
+    folWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen følelsesdata ennå.</p>';
+    sb.appendChild(folWrap);
+  } else {
+    const allFolData=Array.from({length:24},(_,i)=>{const f=folData2.find(d=>d.uke===i+1);return f?f.fol:null;});
+    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+    folWrap.innerHTML='<div style="position:relative;width:100%;height:160px"><canvas id="chartFol" role="img" aria-label="Snitt følelse over tid">Følelse over tid.</canvas></div>';
+    sb.appendChild(folWrap);
+    if(window._chartFol) window._chartFol.destroy();
+    window._chartFol=new Chart(document.getElementById('chartFol'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[{label:'Snitt følelse',data:allFolData,borderColor:'#7030A0',backgroundColor:'rgba(112,48,160,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#7030A0',borderWidth:2,spanGaps:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Følelse: '+c.parsed.y+' / 5'}}},
+        scales:{
+          y:{min:1,max:5,ticks:{color:isDark?'#aaa':'#888',font:{size:11},stepSize:1},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
+    });
+  }
+    sb.appendChild(folWrap);
+
+  // ── Styrke progresjon ────────────────────────────────────────────────
+  const strPTitle=document.createElement('h2');
+  strPTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a2);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  strPTitle.textContent='Progresjon styrkeøvelser';
+  sb.appendChild(strPTitle);
+
+  ['A','B'].forEach(okt=>{
+    const src=okt==='A'?SA:SB;
+    // Collect all unique exercise names
+    const exNames=[];
+    Object.values(src).forEach(ovs=>ovs.forEach(ov=>{
+      const n=ov.split(' – ')[0];
+      if(!exNames.includes(n)) exNames.push(n);
+    }));
+
+    // Build data per exercise
+    const exWithData=[];
+    exNames.forEach(name=>{
+      const isTimeEx=(name==='Plank'||name==='Superman');
+      const pts=[];
+      Object.entries(src).forEach(([ukeStr,ovs])=>{
+        const uke=parseInt(ukeStr);
+        const idx=ovs.findIndex(o=>o.split(' – ')[0]===name);
+        if(idx===-1) return;
+        const plan=ovs[idx].split(' – ').slice(1).join(' – ');
+        const setsM=plan.match(/(\d+)×/);
+        const numSets=setsM?parseInt(setsM[1]):3;
+        let maxVekt=null, lastReps=null;
+        for(let s=1;s<=numSets;s++){
+          const safeName2=name.replace(/[^a-zA-Z0-9]/g,'-');const sk=uke+'_'+okt+'_'+safeName2+'_s'+s;
+          const sv=loggS[sk]||{};
+          if(sv.vekt){ const v=parseFloat(sv.vekt); if(maxVekt===null||v>maxVekt) maxVekt=v; }
+          if(sv.reps && lastReps===null) lastReps=sv.reps;
+        }
+        if(maxVekt!==null||lastReps) pts.push({uke,vekt:maxVekt,reps:lastReps});
+      });
+      if(pts.length) exWithData.push({name,pts,okt,isTimeEx});
+    });
+
+    if(!exWithData.length) return;
+
+    const oktTitle=document.createElement('h3');
+    oktTitle.style.cssText='font-size:13px;font-weight:500;color:var(--pu);margin:18px 0 10px';
+    oktTitle.textContent='Styrke '+okt+(okt==='A'?' – Lørdag':' – Tirsdag');
+    sb.appendChild(oktTitle);
+
+    const exGrid=document.createElement('div');
+    exGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:8px';
+
+    exWithData.forEach(({name,pts,isTimeEx})=>{
+      const first=pts[0],last=pts[pts.length-1];
+      // For time exercises use reps diff, otherwise vekt diff
+      const vektDiff=isTimeEx
+        ?(first.reps&&last.reps?Math.round((parseFloat(last.reps)-parseFloat(first.reps))*10)/10:null)
+        :(first.vekt&&last.vekt?Math.round((last.vekt-first.vekt)*10)/10:null);
+      const unit=isTimeEx?(name==='Plank'?' sek':' reps'):' kg';
+      const diffCol=vektDiff>0?'var(--a)':vektDiff<0?'var(--or)':'var(--m)';
+      const diffStr=vektDiff!==null?(vektDiff>0?'+'+vektDiff+unit:vektDiff+unit):'';
+
+      // Mini SVG line chart for vekt
+      let chartSvg='';
+      const chartPts=isTimeEx?pts.filter(p=>p.reps):pts.filter(p=>p.vekt);
+      const chartVal=p=>isTimeEx?parseFloat(p.reps):p.vekt;
+      const vPts=chartPts;
+      if(vPts.length>1){
+        const W=200,H=50;
+        const minV=Math.min(...vPts.map(p=>chartVal(p)));
+        const maxV=Math.max(...vPts.map(p=>chartVal(p)));
+        const rng=maxV-minV||1;
+        const coords=vPts.map((p,i)=>{
+          const x=8+i*(W-16)/(vPts.length-1);
+          const y=H-8-(chartVal(p)-minV)/rng*(H-16);
+          return{x,y,v:chartVal(p)};
+        });
+        const path=coords.map((c,i)=>(i?'L':'M')+c.x+','+c.y).join(' ');
+        const dots=coords.map(c=>'<circle cx="'+c.x+'" cy="'+c.y+'" r="2.5" fill="var(--a2)"/>').join('');
+        const firstLbl='<text x="'+coords[0].x+'" y="'+(coords[0].y+(coords[0].y<20?12:-4))+'" font-size="6" fill="var(--m)" text-anchor="middle">'+coords[0].v+'</text>';
+        const lastLbl='<text x="'+coords[coords.length-1].x+'" y="'+(coords[coords.length-1].y+(coords[coords.length-1].y<20?12:-4))+'" font-size="7" fill="var(--a2)" text-anchor="middle">'+coords[coords.length-1].v+'</text>';
+        chartSvg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="50" style="display:block;margin-top:6px">'
+          +'<path d="'+path+'" fill="none" stroke="var(--a2)" stroke-width="1.5" stroke-linejoin="round"/>'
+          +dots+firstLbl+lastLbl+'</svg>';
+      }
+
+      const card=document.createElement('div');
+      card.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;overflow:hidden';
+      card.innerHTML=
+        '<div style="padding:9px 12px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center">'
+        +'<strong style="font-size:11px">'+name+'</strong>'
+        +'<span style="font-size:11px;color:'+diffCol+'">'+diffStr+'</span>'
+        +'</div>'
+        +(chartSvg?'<div style="padding:4px 12px 0">'+chartSvg+'</div>':'')
+        +'<div style="padding:8px 12px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px">'
+        +(isTimeEx?'':last.vekt?'<div><span style="color:var(--m)">Siste vekt: </span><strong style="color:var(--a2)">'+last.vekt+' kg</strong></div>':'')
+        +(last.reps?'<div><span style="color:var(--m)">'+(isTimeEx&&name==='Plank'?'Siste tid: ':'Siste reps: ')+'</span><strong style="color:var(--a2)">'+last.reps+(isTimeEx&&name==='Plank'?' sek':'')+'</strong></div>':'')
+        +'<div><span style="color:var(--m)">Logginger: </span><strong>'+pts.length+'</strong></div>'
+        +'</div>';
+      exGrid.appendChild(card);
+    });
+    sb.appendChild(exGrid);
+  });
+
+  // ── Løpsresultater ───────────────────────────────────────────────────
+  const racesList=[
+    {uke:1,navn:"Backyard Ultra",km:18,dato:"09.05.2026"},
+    {uke:7,navn:"Sommernattsløpet",km:5,dato:"20.06.2026"},
+    {uke:8,navn:"EcoTrail Bergen",km:12,dato:"27.06.2026"},
+    {uke:19,navn:"Jentemila",km:5,dato:"05.09.2026"},
+    {uke:20,navn:"Oslo Maraton",km:10,dato:"12.09.2026"},
+    {uke:24,navn:"Hytteplanmila",km:10,dato:"17.10.2026"},
+  ];
+
+  const raceTitle=document.createElement('h2');
+  raceTitle.style.cssText='font-size:16px;font-weight:500;color:var(--or);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  raceTitle.textContent='Løpsresultater';
+  sb.appendChild(raceTitle);
+
+  const raceWrap=document.createElement('div');
+  raceWrap.style.cssText='display:flex;flex-direction:column;gap:10px;margin-bottom:28px';
+
+  racesList.forEach(r=>{
+    const sv=loggL[r.uke+'_race']||{};
+    const hasData=sv.tid||sv.sn||sv.km;
+    const isMain=r.uke===24;
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--s);border:'+(isMain?'2px solid var(--a)':hasData?'1px solid var(--or)':'1px solid var(--b)')+';border-radius:8px;padding:14px 16px;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap';
+    card.innerHTML=
+      '<div style="min-width:90px">'
+      +'<div style="font-size:10px;color:var(--m);margin-bottom:2px">'+r.dato+'</div>'
+      +'<div style="font-size:14px;font-weight:500;color:'+(isMain?'var(--a)':'var(--or)')+'">'+r.navn+(isMain?' ★':'')+'</div>'
+      +'<div style="font-size:11px;color:var(--m)">'+r.km+' km</div>'
+      +'</div>'
+      +(hasData?
+        '<div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px">'
+        +(sv.tid?'<div><div style="font-size:10px;color:var(--m)">Tid</div><div style="font-weight:500;color:var(--or)">'+sv.tid+'</div></div>':'')
+        +(sv.km?'<div><div style="font-size:10px;color:var(--m)">Distanse</div><div style="font-weight:500">'+sv.km+' km</div></div>':'')
+        +(sv.tempo?'<div><div style="font-size:10px;color:var(--m)">Snitt tempo</div><div style="font-weight:500;color:var(--a2)">'+sv.tempo+' min/km</div></div>':'')
+        +(sv.sn?'<div><div style="font-size:10px;color:var(--m)">Snitt puls</div><div style="font-weight:500">'+sv.sn+' bpm</div></div>':'')
+        +(sv.mx?'<div><div style="font-size:10px;color:var(--m)">Maks puls</div><div style="font-weight:500">'+sv.mx+' bpm</div></div>':'')
+        +(sv.fol?'<div><div style="font-size:10px;color:var(--m)">Følelse</div><div style="font-weight:500">'+sv.fol+' / 5</div></div>':'')
+        +(sv.kom?'<div><div style="font-size:10px;color:var(--m)">Kommentar</div><div style="font-weight:500;max-width:200px">'+sv.kom+'</div></div>':'')
+        +'</div>'
+        :'<div style="font-size:11px;color:var(--m);font-style:italic">Ikke registrert</div>');
+    raceWrap.appendChild(card);
+  });
+  sb.appendChild(raceWrap);
+}
+
+function renderStyrke(){
+  const sb=document.getElementById('styrke-body');
+  sb.innerHTML='';
+  const uker=Array.from({length:24},(_,i)=>i+1);
+
+  function buildTable(title, color, lightColor, exercises, data){
+    const wrap=document.createElement('div');
+    wrap.style.cssText='margin-bottom:32px;overflow-x:auto';
+    const h=document.createElement('h2');
+    h.style.cssText='font-family:"Fraunces",serif;font-size:18px;font-weight:900;color:'+color+';margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+    h.textContent=title;
+    wrap.appendChild(h);
+
+    const tbl=document.createElement('table');
+    tbl.style.cssText='border-collapse:collapse;min-width:600px;width:100%;font-size:11px';
+
+    // Header row
+    const thead=document.createElement('thead');
+    let hRow='<tr><th style="text-align:left;padding:6px 10px;background:'+color+';color:#fff;position:sticky;left:0;z-index:2;white-space:nowrap">Øvelse</th>';
+    uker.forEach(u=>{
+      hRow+='<th style="padding:6px 6px;background:'+lightColor+';color:var(--t);text-align:center;white-space:nowrap">U'+u+'</th>';
+    });
+    hRow+='</tr>';
+    thead.innerHTML=hRow;
+    tbl.appendChild(thead);
+
+    const tbody=document.createElement('tbody');
+    exercises.forEach(([label, name],rowIdx)=>{
+      const tr=document.createElement('tr');
+      tr.style.background=rowIdx%2===0?'var(--s2)':'var(--s)';
+      let row='<td style="padding:6px 10px;font-weight:500;white-space:nowrap;position:sticky;left:0;background:'+(rowIdx%2===0?'var(--s2)':'var(--s)')+';z-index:1"><span style="color:var(--m);font-size:10px">'+label+'</span> '+name+'</td>';
+      uker.forEach(u=>{
+        const ovs=data[String(u)]||[];
+        let plan='';
+        for(const o of ovs){
+          if(o.split(' – ')[0]===name){plan=o.split(' – ').slice(1).join(' – ');break;}
+        }
+        row+='<td style="padding:6px 6px;text-align:center;white-space:nowrap">'+plan+'</td>';
+      });
+      tr.innerHTML=row;
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    wrap.appendChild(tbl);
+    sb.appendChild(wrap);
+  }
+
+  buildTable('Styrke A – Lørdag','var(--a)','var(--s2)',[
+    ['A1','Smith squat'],['A2','Dead bug'],
+    ['B1','Romanian deadlift (RDL)'],['B2','Pallof press'],
+    ['C1','Bulgarian split squat'],['C2','Single-leg RDL'],
+    ['D1','Leg extension'],['D2','Single-leg calf raise']
+  ],SA);
+
+  buildTable('Styrke B – Tirsdag','var(--pu)','var(--s2)',[
+    ['A1','Lat Pulldown'],['A2','Single arm-shoulder press'],
+    ['B1','Seated row'],['B2','Plank'],
+    ['C1','Calf raise'],['C2','Superman']
+  ],SB);
+}
+
+function initReg(){
+  const sel=document.getElementById('reg-uke');
+  W.forEach(w=>{const o=document.createElement('option');o.value=w.uke;o.textContent=`Uke ${w.uke} (${w.kaluke}) – ${w.dato} – ${w.fase}`;sel.appendChild(o);});
+
+  // Auto-detect current week based on today's date
+  const today=new Date();
+  const start=new Date('2026-05-04');
+  const diffDays=Math.floor((today-start)/(1000*60*60*24));
+  const curUke=Math.min(24,Math.max(1,Math.floor(diffDays/7)+1));
+  sel.value=curUke;
+  // Sync ukesoversikt to same week
+  const wsel=document.getElementById('wsel');
+  if(wsel){wsel.value=curUke;curW=curUke;renderWeek(curUke);}
+  renderReg();
+}
+
+function renderReg(){
+  const uv=document.getElementById('reg-uke').value;
+  const rb=document.getElementById('reg-body');rb.innerHTML='';
+  if(!uv)return;
+  const uke=parseInt(uv);
+  const w=W.find(x=>x.uke===uke);if(!w)return;
+
+  // Day selection — use dropdown or auto-detect
+  const daySelVal=document.getElementById('reg-dag')?document.getElementById('reg-dag').value:'auto';
+  const realToday=new Date().getDay();
+  const selectedDay=daySelVal==='auto'?realToday:parseInt(daySelVal);
+  const todayDay=selectedDay;
+  const dayMap={0:'son',1:'man',2:'tir',3:'ons',4:'tor',5:'fre',6:'lor'};
+  const todayKey=dayMap[todayDay];
+  const dayNames=['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
+  const todayName=dayNames[todayDay]+(daySelVal==='auto'?' (i dag)':'');
+
+  // ── LØPEØKTER ──────────────────────────────────────────────────────────
+  const lSection=document.createElement('div');
+  lSection.innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="font-size:11px;color:var(--m)">I dag: <strong style="color:var(--t)">${todayName}</strong></div>
+
+    </div>
+    <h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Løpeøkter – Uke ${uke}</h2>`;
+
+  // Build loktMap dynamically based on actual week data
+  const loktMap=[];
+  const dayKeys=['man','tir','ons','tor','fre','lor','son'];
+  dayKeys.forEach(d=>{
+    const txt=w[d]||'';
+    if(txt.startsWith('Intervall')) loktMap.push({k:'intervall',l:'Intervall',day:d});
+    else if(txt.startsWith('Tempoøkt')) loktMap.push({k:'tempo',l:'Tempoøkt',day:d});
+    else if(txt.startsWith('Rolig løpetur')) loktMap.push({k:'roligLop',l:'Rolig løpetur + SL',day:d});
+    else if(txt.startsWith('Rolig langtur')) loktMap.push({k:'langtur',l:'Rolig langtur',day:d});
+  });
+
+  // Show all running sessions, highlight today's planned one
+  loktMap.forEach(o=>{
+    const txt=w[o.day]||'';
+    if(!txt||txt==='Hvile')return;
+    const key=`${uke}_${o.k}`;const sv=loggL[key]||{};
+    const dayLabels={man:'Man',tir:'Tir',ons:'Ons',tor:'Tor',fre:'Fre',lor:'Lør',son:'Søn'};
+    const isToday2=(o.day===todayKey);
+    const card=document.createElement('div');
+    card.className='scard';
+    card.style.marginBottom='12px';
+    if(!isToday2) card.style.border='1px dashed var(--b)';
+    const cardId='hpm_'+((`${uke}_${o.k}`).replace(/_/g,'-'));
+    card.id=cardId;
+    const cksv2=loggL[`${uke}_${o.k}`]||{};
+    const ckLogged2=cksv2['var']||cksv2.tid||cksv2.sn||cksv2.km;
+    const ckIkke2=cksv2.ikkeUtfort;
+    if(ckLogged2) card.classList.add('hpm-collapsed','hpm-done');
+    if(ckIkke2) card.classList.add('hpm-collapsed','hpm-ikke');
+    const ckSum=[];
+    if(cksv2.km) ckSum.push(cksv2.km+' km');
+    if(cksv2.tempo) ckSum.push(cksv2.tempo+'/km');
+    if(cksv2.sn) ckSum.push(cksv2.sn+' bpm');
+    if(cksv2['var']) ckSum.push(cksv2['var']+' min');
+    if(cksv2.tid) ckSum.push(cksv2.tid);
+    card.innerHTML=`
+      <div class="hpm-preview" onclick="hpmExpand(this)">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <span style="font-weight:500;color:var(--t)">${o.l}</span>
+          <span style="font-size:10px;color:${ckIkke2?'var(--or)':'var(--a2)'}">${ckIkke2?'✗ Ikke utført':ckSum.join(' · ')||'✓ Utført'}</span>
+        </div>
+        <span style="color:var(--a);white-space:nowrap">↕ Rediger</span>
+      </div>
+      <div class="hpm-body">
+      <div class="scardh" style="background:var(--s2)">
+        <h3 style="color:var(--a2)">${o.l} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isToday2?'var(--a)':'var(--b)'};color:${isToday2?'#000':'var(--m)'};">${isToday2?'Planlagt i dag':'Planlagt '+dayLabels[o.day]}</span></h3>
+        <span>${w.dato}</span>
+      </div>
+      <div style="padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+        <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Varighet (tt:mm:ss)</div>
+          <input type="text" placeholder="tt:mm:ss" value="${sv['var']||''}" onchange="upL('${key}','var',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Distanse (km)</div>
+          <input type="number" step="0.1" placeholder="km" value="${sv.km||''}" onchange="upL('${key}','km',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+        </div>
+        ${o.k!=='intervall'?`
+        <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Snitt tempo (min/km)</div>
+          <input type="text" placeholder="f.eks. 5:30" value="${sv.tempo||''}" onchange="upL('${key}','tempo',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Snitt puls (bpm)</div>
+          <input type="number" placeholder="bpm" value="${sv.sn||''}" onchange="upL('${key}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Maks puls (bpm)</div>
+          <input type="number" placeholder="bpm" value="${sv.mx||''}" onchange="upL('${key}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+        </div>
+        `:''}
+        <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Følelse (1–5)</div>
+          <input type="number" min="1" max="5" placeholder="1–5" value="${sv.fol||''}" onchange="upL('${key}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+        </div>
+        <div style="grid-column:1/-1">
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Kommentar</div>
+          <input type="text" placeholder="Kommentar..." value="${sv.kom||''}" onchange="upL('${key}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+        </div>
+        ${o.k==='intervall'?`
+        <div style="grid-column:1/-1;border-top:1px solid var(--b);padding-top:10px;margin-top:4px">
+          <div style="font-size:11px;font-weight:500;color:var(--pu);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Drag-statistikk</div>
+          <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead>
+              <tr>
+                <th style="padding:5px 8px;text-align:left;border-bottom:1px solid var(--b);color:var(--m);font-weight:500;font-size:10px;text-transform:uppercase">Drag</th>
+                <th style="padding:5px 8px;text-align:left;border-bottom:1px solid var(--b);color:var(--m);font-weight:500;font-size:10px;text-transform:uppercase">Tempo</th>
+                <th style="padding:5px 8px;text-align:left;border-bottom:1px solid var(--b);color:var(--m);font-weight:500;font-size:10px;text-transform:uppercase">Snitt puls</th>
+              </tr>
+            </thead>
+            <tbody id="drag-rows-${key.replace(/_/g,'-')}"></tbody>
+          </table>
+          </div>
+        </div>`:''}
+        <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:4px">
+          <button class="sbtn" onclick="saveOkt('${key}','msg_${key}')" style="padding:6px 14px">Lagre økt</button>
+          <button onclick="ikkeUtfort('${key}','msg_${key}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
+          <button onclick="nullstillOkt('${key}','msg_${key}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">↩ Angre</button>
+          <span class="smsg" id="msg_${key}"></span>
+        </div>
+      </div>
+      </div>
+    `;
+    // Populate drag rows for intervall
+    if(o.k==='intervall'){
+      const tbody=card.querySelector('#drag-rows-'+(`${uke}_${o.k}`).replace(/_/g,'-'));
+      if(tbody){
+        // Parse number of drags from W data
+        const tirTxt=w['tir']||'';
+        const dragMatch=tirTxt.match(/(\d+)×/);
+        const numDrags=dragMatch?parseInt(dragMatch[1]):3;
+        const savedDrags=sv.drags||{};
+        for(let d=1;d<=numDrags;d++){
+          const tr=document.createElement('tr');
+          const dSv=savedDrags[d]||{};
+          tr.innerHTML=`
+            <td style="padding:5px 8px;border-bottom:1px solid var(--b);font-weight:500;color:var(--pu)">Drag ${d}</td>
+            <td style="padding:5px 8px;border-bottom:1px solid var(--b)">
+              <input type="text" placeholder="5:10" value="${dSv.tempo||''}"
+                onchange="upLDrag('${key}',${d},'tempo',this.value)"
+                style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:4px 8px;border-radius:4px;width:80px">
+            </td>
+            <td style="padding:5px 8px;border-bottom:1px solid var(--b)">
+              <input type="number" placeholder="bpm" value="${dSv.puls||''}"
+                onchange="upLDrag('${key}',${d},'puls',this.value)"
+                style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:4px 8px;border-radius:4px;width:70px">
+            </td>`;
+          tbody.appendChild(tr);
+        }
+        // Add snitt row
+        const snittr=document.createElement('tr');
+        snittr.style.background='var(--s2)';
+        snittr.innerHTML=`
+          <td style="padding:6px 8px;font-weight:500;font-size:10px;color:var(--m);text-transform:uppercase">Snitt</td>
+          <td style="padding:6px 8px" id="snitt-tempo-${(`${uke}_${o.k}`).replace(/_/g,'-')}">
+            <span style="font-weight:500;color:var(--pu);font-size:12px">${calcSnittTempo(savedDrags,numDrags)}</span>
+          </td>
+          <td style="padding:6px 8px" id="snitt-puls-${(`${uke}_${o.k}`).replace(/_/g,'-')}">
+            <span style="font-weight:500;color:var(--pu);font-size:12px">${calcSnittPuls(savedDrags,numDrags)}</span>
+          </td>`;
+        tbody.appendChild(snittr);
+      }
+    }
+    lSection.appendChild(card);
+  });
+  // If no running session today, show message
+  if(!lSection.querySelector('.scard')){
+    const noMsg=document.createElement('p');
+    noMsg.style.cssText='color:var(--m);font-style:italic;font-size:12px;padding:8px 0 16px';
+    noMsg.textContent='Ingen løpeøkt i dag.';
+    lSection.appendChild(noMsg);
+  }
+  rb.appendChild(lSection);
+
+  // ── STYRKEØKTER ─────────────────────────────────────────────────────────
+  const sSection=document.createElement('div');
+  sSection.style.marginTop='28px';
+  sSection.innerHTML=`<h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--pu);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Styrkeøkter – Uke ${uke}</h2>`;
+
+  // Check if today is a race day (Lørdag = lor)
+  const races=[{"uke":1,"navn":"Backyard Ultra","km":18,"dato":"09.05.2026"},{"uke":7,"navn":"Sommernattsløpet","km":5,"dato":"20.06.2026"},{"uke":8,"navn":"EcoTrail Bergen","km":12,"dato":"27.06.2026"},{"uke":18,"navn":"Jentemila","km":5,"dato":"05.09.2026"},{"uke":19,"navn":"Oslo Maraton","km":10,"dato":"12.09.2026"},{"uke":24,"navn":"Hytteplanmila","km":10,"dato":"17.10.2026"}];
+  const todayRace=races.find(r=>r.uke===uke);
+
+  // Race logging card
+  // ── LØPSRESULTAT ────────────────────────────────────────────────────────
+  if(todayRace){
+    const isRaceDay=todayKey==='lor';
+    const raceTitle=document.createElement('h2');
+    raceTitle.style.cssText='font-size:16px;font-weight:500;color:var(--or);margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+    raceTitle.textContent='Løpsresultat';
+    rb.appendChild(raceTitle);
+    const raceCard=document.createElement('div');
+    const rKey=`${uke}_race`;const rsv=loggL[rKey]||{};
+    const rcSv=rsv;
+    const rcLogged=rcSv.tid||rcSv.sn||rcSv.km;
+    const rcIkke=rcSv.ikkeUtfort;
+    const rcParts=[];
+    if(rcSv.tid) rcParts.push(rcSv.tid);
+    if(rcSv.km) rcParts.push(rcSv.km+' km');
+    if(rcSv.tempo) rcParts.push(rcSv.tempo+'/km');
+    if(rcSv.sn) rcParts.push(rcSv.sn+' bpm');
+    raceCard.id='hpm_'+uke+'-race';
+    raceCard.className='scard'+(rcLogged?' hpm-collapsed hpm-done':rcIkke?' hpm-collapsed hpm-ikke':'');
+    raceCard.style.marginBottom='16px';
+    raceCard.style.borderColor='var(--or)';
+    if(!isRaceDay) raceCard.style.border='1px dashed var(--or)';
+    raceCard.innerHTML=`
+      <div class="hpm-preview" onclick="hpmExpand(this)">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <span style="font-weight:500;color:var(--or)">🏁 ${todayRace.navn}</span>
+          <span style="font-size:10px;color:${rcIkke?'var(--or)':'var(--a2)'}">${rcIkke?'✗ Ikke utført':rcParts.join(' · ')||'✓ Utført'}</span>
+        </div>
+        <span style="color:var(--a);white-space:nowrap">↕ Rediger</span>
+      </div>
+      <div class="hpm-body">
+      <div class="scardh" style="background:var(--s2)">
+        <h3 style="color:var(--or)">🏁 ${todayRace.navn} – ${todayRace.km} km <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isRaceDay?'var(--or)':'var(--b)'};color:${isRaceDay?'#fff':'var(--m)'}">${isRaceDay?'Løpsdag':'Planlagt Lør '+todayRace.dato}</span></h3>
+        <span>${todayRace.dato}</span>
+      </div>
+      <div style="padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+        <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Tid (tt:mm:ss)</div>
+          <input type="text" placeholder="tt:mm:ss" value="${rsv.tid||''}" onchange="upL('${rKey}','tid',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
+        <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Distanse (km)</div>
+          <input type="number" step="0.1" placeholder="km" value="${rsv.km||''}" onchange="upL('${rKey}','km',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
+        <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Snitt puls (bpm)</div>
+          <input type="number" placeholder="bpm" value="${rsv.sn||''}" onchange="upL('${rKey}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
+        <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Maks puls (bpm)</div>
+          <input type="number" placeholder="bpm" value="${rsv.mx||''}" onchange="upL('${rKey}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
+        <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Snitt tempo (min/km)</div>
+          <input type="text" placeholder="f.eks. 5:30" value="${rsv.tempo||''}" onchange="upL('${rKey}','tempo',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
+        <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Følelse (1–5)</div>
+          <input type="number" min="1" max="5" placeholder="1–5" value="${rsv.fol||''}" onchange="upL('${rKey}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
+        <div style="grid-column:1/-1"><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Kommentar</div>
+          <input type="text" placeholder="Kommentar..." value="${rsv.kom||''}" onchange="upL('${rKey}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
+        <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:4px">
+          <button class="sbtn" onclick="saveOkt('${rKey}','msg_${rKey}');setTimeout(()=>{const sv=loggL['${rKey}']||{};const p=[];if(sv.tid)p.push(sv.tid);if(sv.km)p.push(sv.km+' km');if(sv.tempo)p.push(sv.tempo+'/km');hpmCollapse('${rKey}'.replace(/_/g,'-'),p.join(' · ')||'✓ Utført',false);},1200)" style="padding:6px 14px">Lagre løp</button>
+          <button onclick="ikkeUtfort('${rKey}','msg_${rKey}');setTimeout(()=>hpmCollapse('${rKey}'.replace(/_/g,'-'),'✗ Ikke utført',true),1200)" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
+          <button onclick="nullstillOkt('${rKey}','msg_${rKey}')" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">↩ Angre</button>
+          <span class="smsg" id="msg_${rKey}"></span>
+        </div>
+      </div></div>
+    `;
+    rb.appendChild(raceCard);
+  }
+
+  // Build strength map dynamically - check all lines in each day
+  const strMapDyn={};
+  dayKeys.forEach(d=>{
+    const txt=w[d]||'';
+    const lines=txt.split('\n').map(l=>l.trim());
+    const hasA=lines.some(l=>l==='Styrke A'||l.startsWith('Styrke A\n'));
+    const hasB=lines.some(l=>l==='Styrke B'||l.startsWith('Styrke B\n'));
+    if(hasA) strMapDyn[d]=['A',SA];
+    else if(hasB) strMapDyn[d]=['B',SB];
+  });
+  const strMap=strMapDyn;
+  const todayStr=strMap[todayKey]?strMap[todayKey][0]:null;
+  const allStr=(todayRace&&Object.keys(strMap).some(k=>w[k]&&w[k].includes('🏁')))?[]:Object.entries(strMap);
+
+  allStr.forEach(([day, [okt, strData]])=>{
+    const ovs=strData[String(uke)]||[];
+    if(!ovs.length)return;
+    const card=document.createElement('div');
+    card.className='scard';card.style.marginBottom='16px';
+    const strDay=day;
+    const isStrToday=(strDay===todayKey);
+    if(!isStrToday) card.style.border='1px dashed var(--b)';
+    const strId='hpm-str-'+uke+'-'+okt;
+    card.id=strId;
+    const strSv2=loggS[uke+'_'+okt+'_0_s1']||{};
+    const strLogged2=!!(strSv2.vekt||strSv2.reps);
+    if(strLogged2) card.classList.add('hpm-collapsed','hpm-done');
+    const strSum='✓ Utført';
+    card.innerHTML=(strLogged2?`<div class="hpm-preview" onclick="this.closest('.scard').classList.remove('hpm-collapsed')"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:500;color:var(--t)">Styrke ${okt}</span><span style="font-size:10px;color:var(--a2)">✓ Utført</span></div><span style="color:var(--a);white-space:nowrap">↕ Rediger</span></div>`:'')
+      +`<div class="hpm-body"><div class="scardh" style="background:var(--s2)"><h3>Styrke ${okt} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isStrToday?'var(--pu)':'var(--b)'};color:${isStrToday?'#fff':'var(--m)'};">${isStrToday?'Planlagt i dag':okt==='A'?'Planlagt Lør':'Planlagt Tir'}</span></h3><span>${okt==='A'?'Styrke A':'Styrke B'}</span></div>`;
+
+    const tbl=document.createElement('table');tbl.className='stbl';
+    tbl.innerHTML=`<thead><tr><th>Øvelse</th><th>Plan</th><th>Sett</th><th>Vekt (kg)</th><th>Reps / Sek</th></tr></thead>`;
+    const tbody=document.createElement('tbody');
+
+    ovs.forEach((ov,i)=>{
+      const parts=ov.split(' – ');const name=parts[0];const plan=parts.slice(1).join(' – ');
+      const setsMatch=plan.match(/(\d+)×/);const numSets=setsMatch?parseInt(setsMatch[1]):3;
+      const htr=document.createElement('tr');
+      htr.style.background='var(--s2)';
+      htr.innerHTML=`<td colspan="5" style="padding:8px 11px;font-weight:500;color:var(--a);border-bottom:1px solid var(--b)">${name} <span style="color:var(--m);font-size:10px;font-weight:400">– ${plan}</span></td>`;
+      tbody.appendChild(htr);
+      for(let s=1;s<=numSets;s++){
+        const safeName=name.replace(/[^a-zA-Z0-9]/g,'-');const sk=`${uke}_${okt}_${safeName}_s${s}`;const ssv=loggS[sk]||{};
+        const isTime=plan.includes('sek');
+        // Find last logged value from previous weeks
+        let prevVekt='', prevReps='';
+        for(let prevUke=uke-1;prevUke>=1;prevUke--){
+          const psk=`${prevUke}_${okt}_${safeName}_s${s}`;
+          const psv=loggS[psk]||{};
+          if(psv.vekt||psv.reps){prevVekt=psv.vekt||'';prevReps=psv.reps||'';break;}
+        }
+        const hintVekt=prevVekt?`S:${prevVekt}kg`:'kg';
+        const hintReps=prevReps?`S:${prevReps}`:(isTime?'sek':'reps');
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td style="color:var(--m);padding-left:20px">Sett ${s}</td>
+          <td style="color:var(--m);font-size:10px">${plan}</td>
+          <td style="color:var(--a);font-weight:500">${s} / ${numSets}</td>
+          <td><input type="text" placeholder="${hintVekt}" value="${ssv.vekt||''}" onchange="upS('${sk}','vekt',this.value)" style="width:70px"></td>
+          <td><input type="text" placeholder="${hintReps}" value="${ssv.reps||''}" onchange="upS('${sk}','reps',this.value)" style="width:70px"></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    });
+    tbl.appendChild(tbody);
+    // Varighet + følelse for strength
+    const varDiv=document.createElement('div');
+    varDiv.style.cssText='padding:10px 14px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px';
+    const strVarSk=`${uke}_${okt}_varighet`;
+    const strVarSv=loggS[strVarSk]||{};
+    // Build varDiv inputs via DOM to avoid quote issues
+    const varDivInp1=document.createElement('div');
+    varDivInp1.innerHTML='<div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Varighet (tt:mm:ss)</div>';
+    const varInput=document.createElement('input');
+    varInput.type='text';varInput.placeholder='tt:mm:ss';
+    varInput.value=strVarSv.var||'';
+    varInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
+    varInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].var=normalizeTime(this.value);};
+    varDivInp1.appendChild(varInput);
+    varDiv.appendChild(varDivInp1);
+
+    const varDivInp2=document.createElement('div');
+    varDivInp2.innerHTML='<div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Følelse (1–5)</div>';
+    const folInput=document.createElement('input');
+    folInput.type='number';folInput.min='1';folInput.max='5';folInput.placeholder='1–5';
+    folInput.value=strVarSv.fol||'';
+    folInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
+    folInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].fol=this.value;};
+    varDivInp2.appendChild(folInput);
+    varDiv.appendChild(varDivInp2);
+    
+    // Save row
+    const saveRow=document.createElement('div');
+    saveRow.style.cssText='padding:10px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--b)';
+    const saveBtnEl=document.createElement('button');
+    saveBtnEl.className='sbtn';saveBtnEl.style.padding='6px 14px';
+    saveBtnEl.textContent='Lagre Styrke '+okt;
+    const ikkeBtn=document.createElement('button');
+    ikkeBtn.textContent='Ikke utført';
+    ikkeBtn.style.cssText='background:none;border:1px solid var(--b);color:var(--m);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer';
+    const saveMsgEl=document.createElement('span');
+    saveMsgEl.className='smsg';saveMsgEl.id='msg_str_'+uke+'_'+okt;
+    saveBtnEl.onclick=()=>saveOkt(null,'msg_str_'+uke+'_'+okt);
+    ikkeBtn.onclick=()=>ikkeUtfortStr(uke,okt,'msg_str_'+uke+'_'+okt);
+    const angreBtn=document.createElement('button');
+    angreBtn.textContent='↩ Angre';
+    angreBtn.style.cssText='background:none;border:1px solid var(--b);color:var(--m);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer';
+    angreBtn.onclick=()=>nullstillStrOkt(uke,okt,'msg_str_'+uke+'_'+okt);
+    saveRow.appendChild(saveBtnEl);saveRow.appendChild(ikkeBtn);saveRow.appendChild(angreBtn);saveRow.appendChild(saveMsgEl);
+    const hpmBodyEl = card.querySelector('.hpm-body') || card;
+    hpmBodyEl.appendChild(tbl);
+    hpmBodyEl.appendChild(varDiv);
+    hpmBodyEl.appendChild(saveRow);
+    saveBtnEl.onclick=(function(c,uid,o2){return function(){
+      saveOkt(null,'msg_str_'+uid+'_'+o2);
+      setTimeout(()=>{
+        document.getElementById('ugrid').innerHTML='';
+        renderUkesplan();
+        renderStats();
+        rdwFromReg();
+        c.classList.add('hpm-collapsed','hpm-done');
+        const pv=c.querySelector('.hpm-preview');
+        if(!pv){
+          const d=document.createElement('div');
+          d.className='hpm-preview';
+          d.onclick=function(){hpmExpand(this);};
+          d.innerHTML='<div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:500;color:var(--t)">Styrke '+o2+'</span><span style="font-size:10px;color:var(--a2)">✓ Utført</span></div><span style="color:var(--a);white-space:nowrap">↕ Rediger</span>';
+          d.onclick=function(){this.closest('.scard').classList.remove('hpm-collapsed');};
+          c.insertBefore(d,c.firstChild);
+        } else {
+          const s=pv.querySelector('span');
+          if(s) s.textContent='✓ Utført';
+        }
+      },1200);
+    };})(card,uke,okt);
+    sSection.appendChild(card);
+  });
+  // If no strength session today, show message
+  if(!sSection.querySelector('.scard')){
+    const noMsg=document.createElement('p');
+    noMsg.style.cssText='color:var(--m);font-style:italic;font-size:12px;padding:8px 0';
+    noMsg.textContent='Ingen styrkeøkt i dag.';
+    sSection.appendChild(noMsg);
+  }
+  rb.appendChild(sSection);
+}
+
+function ikkeUtfort(key, msgId){
+  if(!loggL[key]) loggL[key]={};
+  loggL[key].ikkeUtfort=true;
+  loggL[key]['var']='';loggL[key].sn='';loggL[key].km='';
+  try{
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+        const el=document.getElementById(msgId);
+    if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
+
+  }catch(e){}
+}
+
+function ikkeUtfortStr(uke, okt, msgId){
+  // Mark all sets as not done
+  const src=okt==='A'?SA:SB;
+  const ovs=src[String(uke)]||[];
+  ovs.forEach((ov,i)=>{
+    const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+    for(let s=1;s<=4;s++){
+      const sk=`${uke}_${okt}_${sn}_s${s}`;
+      if(!loggS[sk]) loggS[sk]={};
+      loggS[sk].ikkeUtfort=true;
+    }
+  });
+  try{
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        const el=document.getElementById(msgId);
+    if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
+  }catch(e){}
+}
+
+
+function hpmCollapse(id, text, isIkke){
+  const el=document.getElementById('hpm_'+id);
+  if(!el) return;
+  el.classList.add('hpm-collapsed');
+  el.classList.add(isIkke?'hpm-ikke':'hpm-done');
+  const prev=el.querySelector('.hpm-preview');
+  if(prev){
+    // Get name from scardh h3 if available
+    const h3=el.querySelector('.scardh h3');
+    const name=h3?h3.childNodes[0].textContent.trim():'';
+    const statusText=isIkke?'✗ Ikke utført':text||'✓ Utført';
+    const statusColor=isIkke?'var(--or)':'var(--a2)';
+    prev.innerHTML='<div style="display:flex;flex-direction:column;gap:2px">'
+      +(name?'<span style="font-weight:500;color:var(--t)">'+name+'</span>':'')
+      +'<span style="font-size:10px;color:'+statusColor+'">'+statusText+'</span>'
+      +'</div>'
+      +'<span style="color:var(--a);white-space:nowrap">↕ Rediger</span>';
+  }
+}
+function hpmExpand(el){
+  el.closest('.scard').classList.remove('hpm-collapsed');
+}
+function saveOkt(key, msgId){
+  try{
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    fbSave();
+    const el=document.getElementById(msgId);
+    if(el){el.textContent='✓ Utført';setTimeout(()=>el.textContent='',2000);}
+    if(key){
+      const sv=loggL[key]||{};
+      const parts=[];
+      if(sv['var']) parts.push(sv['var']);
+      if(sv.km) parts.push(sv.km+' km');
+      if(sv.tempo) parts.push(sv.tempo+'/km');
+      if(sv.sn) parts.push(sv.sn+' bpm');
+      if(sv.tid) parts.push(sv.tid);
+      setTimeout(()=>hpmCollapse(key.replace(/_/g,'-'), parts.join(' · ')||'✓ Utført', false), 800);
+    }
+    // Update programplan, ukesoversikt and stats after collapse animation
+    setTimeout(()=>{
+      document.getElementById('ugrid').innerHTML='';
+      renderUkesplan();
+      renderStats();
+      rdwFromReg(); // refresh ukesoversikt
+    }, 1400);
+  }catch(e){console.warn('Storage unavailable');}
+}
+
+function savelReg(){
+  try{
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        sm('regmsg');
+    // Sync week selection in other views
+    const regUke=document.getElementById('reg-uke').value;
+    if(regUke){
+      document.getElementById('ll-uke').value=regUke;
+      document.getElementById('sl-uke').value=regUke;
+    }
+    // Refresh other views
+    
+    
+    // Re-render ukesplan to update checkmarks
+    document.getElementById('ugrid').innerHTML='';
+    renderUkesplan();
+    renderStats();
+  }catch(e){console.warn('Storage unavailable');}
+}
+
+
+
+  // Progress bar — runs immediately, independent of Firebase
+(function(){
+  const start=new Date('2026-05-04');
+  const end=new Date('2026-10-17');
+  const now=new Date();
+  const total=Math.ceil((end-start)/86400000);
+  const passed=Math.max(0,Math.ceil((now-start)/86400000));
+  const pct=Math.min(100,Math.max(0,Math.round(passed/total*100)));
+  const uke=Math.min(24,Math.max(1,Math.ceil(passed/7)));
+  const fill=document.getElementById('prog-fill');
+  const label=document.getElementById('prog-label');
+  if(fill) fill.style.width=pct+'%';
+  if(label) label.textContent='Uke '+uke+' av 24 · '+pct+'%';
+})();
+
+renderUkesplan();initWsel();renderWeek(1);renderIntervall();initReg();renderStats();
+
+
+
+// ── Nullstill ────────────────────────────────────────────────────────────
+function nullstillOkt(key, msgId){
+  // Delete all data for this specific session
+  delete loggL[key];
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillStrOkt(uke, okt, msgId){
+  const src=okt==='A'?SA:SB;
+  const ovs=src[String(uke)]||[];
+  ovs.forEach((ov,i)=>{
+    const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+    for(let s=1;s<=4;s++){
+      delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
+    }
+  });
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  const el=document.getElementById(msgId);
+  if(el){el.textContent='↩ Angret';el.style.color='var(--a2)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+function nullstillUke(){
+  const uv=document.getElementById('reg-uke').value;
+  if(!uv) return;
+  const uke=parseInt(uv);
+  if(!confirm('Nullstille all logging for uke '+uke+'?')) return;
+  // Delete all running sessions
+  ['intervall','roligLop','tempo','langtur','race'].forEach(k=>{
+    delete loggL[uke+'_'+k];
+  });
+  // Delete all strength sessions
+  ['A','B'].forEach(okt=>{
+    const src=okt==='A'?SA:SB;
+    const ovs=src[String(uke)]||[];
+    ovs.forEach((ov,i)=>{
+      const sn=ov.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+      for(let s=1;s<=4;s++){
+        delete loggS[uke+'_'+okt+'_'+sn+'_s'+s];
+      }
+    });
+  });
+  localStorage.setItem('hpm_l', JSON.stringify(loggL));
+  localStorage.setItem('hpm_s', JSON.stringify(loggS));
+  fbSave();
+  document.getElementById('ugrid').innerHTML='';
+  renderUkesplan();
+  renderStats();
+  renderReg();
+}
+
+// ── Firebase ─────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido",
+  authDomain: "lopeprogram2026.firebaseapp.com",
+  projectId: "lopeprogram2026"
+};
+let auth = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+} catch(e) {
+  console.warn('Firebase Auth init failed:', e);
+}
+const provider = auth ? new firebase.auth.GoogleAuthProvider() : null;
+
+
+
+
+if(auth) auth.onAuthStateChanged(user=>{
+  if(user){
+    currentUser = user;
+
+
+    // Show user info and logout button in header
+    const syncEl=document.getElementById('sync-status');
+    if(syncEl){
+      syncEl.style.cursor='pointer';
+      syncEl.title='Klikk for å logge ut';
+      syncEl.onclick=()=>{ if(confirm('Logge ut?')) signOut(); };
+    }
+    // Add user name to header
+    const userEl=document.getElementById('user-info');
+    if(userEl) userEl.textContent=user.displayName||user.email;
+    fbLoad().then(()=>{
+      renderUkesplan();
+      document.getElementById('ugrid').innerHTML='';
+      renderUkesplan();
+      renderStats();
+      fbListen();
+    });
+  } else {
+    currentUser = null;
+
+
+  }
+});
+
+// Firebase REST API — ingen script-avhengighet
+const FB_URL = "https://firestore.googleapis.com/v1/projects/lopeprogram2026/databases/(default)/documents/logg/maria";
+const FB_KEY = "AIzaSyBzaReuu3Zsm7-YGmfODXYdZL_-vQdcido";
+const DOC = true; // always available
+
+function setSyncStatus(txt, col){
+  const el=document.getElementById('sync-status');
+  if(el){el.textContent=txt;el.style.color=col||'var(--m)';}
+}
+
+// Save ALL data to Firebase (simple overwrite — single user)
+async function fbSave(){
+  setSyncStatus('● Lagrer...','var(--or)');
+  try{
+    const body={fields:{
+      l:{stringValue:JSON.stringify(loggL)},
+      s:{stringValue:JSON.stringify(loggS)},
+      ts:{integerValue:Date.now()}
+    }};
+    const res=await fetch(FB_URL+'?key='+FB_KEY,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    setSyncStatus('● Synkronisert','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Feil: '+e.message,'var(--or)');
+    console.error(e);
+  }
+}
+
+// Load from Firebase on startup
+async function fbLoad(){
+  setSyncStatus('● Henter data...','var(--m)');
+  try{
+    const res=await fetch(FB_URL+'?key='+FB_KEY);
+    if(res.status===404){setSyncStatus('● Klar – ingen data ennå','var(--a2)');return;}
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    const fields=d.fields||{};
+    if(fields.l) loggL=JSON.parse(fields.l.stringValue);
+    if(fields.s) loggS=JSON.parse(fields.s.stringValue);
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+    setSyncStatus('● Lastet fra sky','var(--a2)');
+  }catch(e){
+    setSyncStatus('● Offline ('+e.message+')','var(--or)');
+    console.error(e);
+  }
+}
+
+// Listen for real-time changes from other devices
+let userTyping=false;
+let typingTimer=null;
+document.addEventListener('input',()=>{
+  userTyping=true;
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{ userTyping=false; },5000);
+});
+
+function fbListen(){
+  setInterval(async()=>{
+    // Don't overwrite while user is typing
+    if(userTyping) return;
+    try{
+      const res=await fetch(FB_URL+'?key='+FB_KEY);
+      if(!res.ok) return;
+      const d=await res.json();
+      const fields=d.fields||{};
+      if(fields.l){
+        const remoteL=JSON.parse(fields.l.stringValue);
+        const remoteS=fields.s?JSON.parse(fields.s.stringValue):{};
+        // Only update if remote timestamp is newer
+        const remoteTs=fields.ts?parseInt(fields.ts.integerValue):0;
+        const localTs=parseInt(localStorage.getItem('hpm_ts')||'0');
+        if(remoteTs<=localTs) return;
+        loggL=remoteL; loggS=remoteS;
+        localStorage.setItem('hpm_l',JSON.stringify(loggL));
+        localStorage.setItem('hpm_s',JSON.stringify(loggS));
+        localStorage.setItem('hpm_ts',String(remoteTs));
+        document.getElementById('ugrid').innerHTML='';
+        renderUkesplan(); renderStats();
+        const rv=document.getElementById('v-reg');
+        if(rv&&rv.classList.contains('active')) renderReg();
+        setSyncStatus('● Synkronisert','var(--a2)');
+      }
+    }catch(e){ console.warn('Poll error:',e); }
+  },15000);
+  setSyncStatus('● Tilkoblet','var(--a2)');
+}
+
+// Patch all save functions to also call fbSave
+const _origSaveOkt=saveOkt;
+window.saveOkt=function(key,msgId){
+  _origSaveOkt(key,msgId);
+  fbSave();
+};
+const _origSavelReg=savelReg;
+window.savelReg=function(){
+  _origSavelReg();
+  fbSave();
+};
+const _origIkke=ikkeUtfort;
+window.ikkeUtfort=function(key,msgId){
+  _origIkke(key,msgId);
+  fbSave();
+};
+const _origIkkeStr=ikkeUtfortStr;
+window.ikkeUtfortStr=function(uke,okt,msgId){
+  _origIkkeStr(uke,okt,msgId);
+  fbSave();
+};
+
+// Init: load then listen
+// Auth handles init
+
+</script>
+</body>
+</html>
