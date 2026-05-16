@@ -706,7 +706,7 @@ function renderStats(){
     const col=d.ikke>0&&d.km===0?'var(--or)':[1,7,8,18,19,24].includes(d.uke)?'var(--or)':[4,8,12,16].includes(d.uke)?'var(--pu)':d.km>0?'var(--a)':'var(--b)';
     const bar=document.createElement('div');
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
-    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.km>0?d.km:d.ikke>0?'✗':'')+'</div>'
+    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:30px;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;display:flex;align-items:center;justify-content:center">'+(d.km>0?d.km:d.ikke>0?'✗':'')+'</div>'
       +'<div style="width:100%;background:'+col+';border-radius:2px 2px 0 0;height:'+Math.max(pct,d.km>0||d.ikke>0?2:0)+'%;min-height:'+(d.km>0||d.ikke>0?'3px':'0')+'"></div>'
       +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>';
     barInner.appendChild(bar);
@@ -747,7 +747,7 @@ function renderStats(){
     const pct=d.mins/maxMins*100;
     const bar=document.createElement('div');
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
-    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:14px;line-height:14px;text-align:center">'+(d.label||'')+'</div>'
+    bar.innerHTML='<div style="font-size:9px;color:var(--m);height:30px;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;display:flex;align-items:center;justify-content:center">'+(d.label||'')+'</div>'
       +'<div style="width:100%;background:'+(d.mins>0?'var(--a2)':'var(--b)')+';height:'+pct+'%;border-radius:2px 2px 0 0;min-height:'+(d.mins>0?'2px':'0')+'"></div>'
       +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.uke+'</div>';
     timeInner.appendChild(bar);
