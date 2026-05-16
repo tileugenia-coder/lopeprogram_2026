@@ -345,8 +345,12 @@ function renderUkesplan(){
       const isLogged=lKey&&loggL[lKey]&&(loggL[lKey]['var']||loggL[lKey].tid||loggL[lKey].sn||loggL[lKey].km||loggL[lKey].fol||loggL[lKey].tempo);
       const isIkke=lKey&&loggL[lKey]&&loggL[lKey].ikkeUtfort;
       // Styrke A (lor only, not race weeks) and Styrke B (tir only)
-      const sKeyA=`${w.uke}_A_0_s1`;
-      const sKeyB=`${w.uke}_B_0_s1`;
+      const saFirst=(SA[String(w.uke)]||[])[0]||'';
+      const sbFirst=(SB[String(w.uke)]||[])[0]||'';
+      const saName=saFirst.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+      const sbName=sbFirst.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+      const sKeyA=`${w.uke}_A_${saName}_s1`;
+      const sKeyB=`${w.uke}_B_${sbName}_s1`;
       const raceUkes=[1,7,8,19,20,24];
       // lor: show checkmark if Styrke A logged (only non-race weeks)
       // Find actual days for Styrke A and B
@@ -1377,7 +1381,9 @@ function renderReg(){
     if(!isStrToday) card.style.border='1px dashed var(--b)';
     const strId='hpm-str-'+uke+'-'+okt;
     card.id=strId;
-    const strSv2=loggS[uke+'_'+okt+'_0_s1']||{};
+    const _strFirst=(okt==='A'?SA:SB)[String(uke)]?.[0]||'';
+    const _strFirstName=_strFirst.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+    const strSv2=loggS[uke+'_'+okt+'_'+_strFirstName+'_s1']||{};
     const strLogged2=!!(strSv2.vekt||strSv2.reps);
     if(strLogged2) card.classList.add('hpm-collapsed','hpm-done');
     const strSum='✓ Utført';
