@@ -653,6 +653,17 @@ function renderStats(){
 
   const snittFol=folList.length?Math.round(folList.reduce((a,b)=>a+b,0)/folList.length*10)/10:null;
 
+  // Puls per uke (for triple chart)
+  const pulsData=[];
+  const folData2=[];
+  W.forEach(w=>{
+    let list=[];
+    ['roligLop','langtur'].forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if(sv.sn)list.push(parseFloat(sv.sn));});
+    if(list.length) pulsData.push({uke:w.uke,puls:Math.round(list.reduce((a,b)=>a+b,0)/list.length)});
+    const folList2=['roligLop','langtur','tempo','intervall'].map(k=>loggL[w.uke+'_'+k]||{}).filter(sv=>sv.fol).map(sv=>parseFloat(sv.fol));
+    if(folList2.length) folData2.push({uke:w.uke,fol:Math.round(folList2.reduce((a,b)=>a+b,0)/folList2.length*10)/10});
+  });
+
   // ── Søvn-data ────────────────────────────────────────────────────────────
   const sovnByUke={};
   let sovnAllMins=[];
@@ -830,35 +841,6 @@ function renderStats(){
   sb.appendChild(timeWrap);
 
   // Puls over tid
-  const t2=document.createElement('h2');
-  t2.style.cssText='font-size:16px;font-weight:500;color:var(--or);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
-  t2.textContent='Snitt puls over tid (rolig)';
-  sb.appendChild(t2);
-
-  const pulsData=[];
-  W.forEach(w=>{
-    let list=[];
-    loktKeys.forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if((k==='roligLop'||k==='langtur')&&sv.sn)list.push(parseFloat(sv.sn));});
-    if(list.length) pulsData.push({uke:w.uke,kaluke:w.kaluke,puls:Math.round(list.reduce((a,b)=>a+b,0)/list.length)});
-  });
-
-  
-    if(!window.Chart){setTimeout(renderStats,200);return;}if(window._chartPuls) window._chartPuls.destroy();
-    window._chartPuls=new Chart(document.getElementById('chartPuls'),{
-      type:'line',
-      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
-        datasets:[{label:'Snitt puls (rolig)',data:allPulsData,borderColor:'#D4537E',backgroundColor:'rgba(212,83,126,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#D4537E',borderWidth:2,spanGaps:false}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Snitt puls: '+c.parsed.y+' bpm'}}},
-        scales:{
-          y:{ticks:{color:isDark?'#aaa':'#888',font:{size:11}},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
-          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
-        }
-      }
-    });
-  
-
-  // Snitt tempo over tid (rolig løpetur + langtur)
   const tempoTitle=document.createElement('h2');
   tempoTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a2);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
   tempoTitle.textContent='Snitt tempo over tid (rolig)';
@@ -907,22 +889,7 @@ function renderStats(){
   }
     sb.appendChild(tempoWrap);
 
-  // Følelse over tid
-  const t3=document.createElement('h2');
-  t3.style.cssText='font-size:16px;font-weight:500;color:var(--pu);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
-  t3.textContent='Snitt følelse over tid (1–5)';
-  sb.appendChild(t3);
-
-  const folData2=[];
-  W.forEach(w=>{
-    let list=[];
-    loktKeys.forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if(sv.fol)list.push(parseFloat(sv.fol));});
-    if(list.length) folData2.push({uke:w.uke,kaluke:w.kaluke,fol:Math.round(list.reduce((a,b)=>a+b,0)/list.length*10)/10});
-  });
-
-  
-
-  // ── Søvn-diagram ──────────────────────────────────────────────────────────
+  // Snitt søvn per uke
   const sovnWrap=document.createElement('div');
   sovnWrap.style.cssText='background:var(--s);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid var(--b)';
   const sovnTitle=document.createElement('h2');
@@ -964,7 +931,66 @@ function renderStats(){
   // ── Korrelasjon søvn vs følelse ────────────────────────────────────────────
   
 
+  // ── Snitthvilepuls, snittpuls og snittfølelse ────────────────────────────
+  const tripleWrap=document.createElement('div');
+  tripleWrap.style.cssText='background:var(--s);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid var(--b)';
+  const tripleTitle=document.createElement('h2');
+  tripleTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  tripleTitle.textContent='Snitthvilepuls, snittpuls og snittfølelse';
+  tripleWrap.appendChild(tripleTitle);
+  sb.appendChild(tripleWrap);
 
+  const isDarkT=matchMedia('(prefers-color-scheme: dark)').matches;
+  const triLeg=document.createElement('div');
+  triLeg.style.cssText='display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px;font-size:12px;color:var(--m)';
+  triLeg.innerHTML=`
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:2px;background:#C0306A;display:inline-block"></span>Snitthvilepuls</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:0;border-top:2px dashed #7030A0;display:inline-block"></span>Snittpuls (rolig)</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:2px;background:#1D9E75;display:inline-block"></span>Snittfølelse</span>
+  `;
+  tripleWrap.appendChild(triLeg);
+
+  const triHvile=Array.from({length:24},(_,i)=>hvilepulsByUke[i+1]||null);
+  const triPuls=Array.from({length:24},(_,i)=>{const f=pulsData.find(d=>d.uke===i+1);return f?f.puls:null;});
+  const triFol=Array.from({length:24},(_,i)=>{const f=folData2.find(d=>d.uke===i+1);return f?f.fol:null;});
+  const hasTriData=[...triHvile,...triPuls,...triFol].some(x=>x!==null);
+
+  if(!hasTriData){
+    tripleWrap.innerHTML+='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen data ennå – logg hvilepuls, løpeturer og følelse for å se korrelasjonen.</p>';
+  } else {
+    const triCanvas=document.createElement('div');
+    triCanvas.style.cssText='position:relative;width:100%;height:240px';
+    triCanvas.innerHTML='<canvas id="chartTriple" role="img" aria-label="Snitthvilepuls, snittpuls og snittfølelse over tid">Korrelasjon mellom hvilepuls, snittpuls og følelse.</canvas>';
+    tripleWrap.appendChild(triCanvas);
+    if(window._chartTriple) window._chartTriple.destroy();
+    window._chartTriple=new Chart(document.getElementById('chartTriple'),{
+      type:'line',
+      data:{
+        labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[
+          {label:'Snitthvilepuls',data:triHvile,borderColor:'#C0306A',backgroundColor:'transparent',fill:false,tension:0.4,pointRadius:4,pointBackgroundColor:'#C0306A',borderWidth:2,spanGaps:false,yAxisID:'y'},
+          {label:'Snittpuls (rolig)',data:triPuls,borderColor:'#7030A0',backgroundColor:'transparent',fill:false,tension:0.4,pointRadius:3,pointBackgroundColor:'#7030A0',borderWidth:2,borderDash:[5,4],spanGaps:false,yAxisID:'y'},
+          {label:'Snittfølelse',data:triFol,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#1D9E75',borderWidth:2,spanGaps:false,yAxisID:'y2'},
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:c=>{
+            if(c.datasetIndex===2) return 'Følelse: '+c.parsed.y.toFixed(1)+' / 5';
+            return c.dataset.label+': '+c.parsed.y+' bpm';
+          }}}
+        },
+        scales:{
+          y:{position:'left',ticks:{color:isDarkT?'#aaa':'#888',font:{size:10},callback:v=>v+' bpm'},grid:{color:isDarkT?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          y2:{position:'right',min:1,max:5,ticks:{color:isDarkT?'#aaa':'#888',font:{size:10},stepSize:1},grid:{display:false},border:{display:false}},
+          x:{ticks:{color:isDarkT?'#aaa':'#888',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
+    });
+  }
 
   // ── Styrke progresjon ────────────────────────────────────────────────
   const strPTitle=document.createElement('h2');
@@ -1111,8 +1137,8 @@ function renderStats(){
     raceWrap.appendChild(card);
   });
   sb.appendChild(raceWrap);
-
 }
+
 function renderStyrke(){
   const sb=document.getElementById('styrke-body');
   sb.innerHTML='';
