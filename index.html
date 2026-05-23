@@ -647,6 +647,43 @@ function renderStats(){
 
   const snittFol=folList.length?Math.round(folList.reduce((a,b)=>a+b,0)/folList.length*10)/10:null;
 
+  // ── Søvn-data ────────────────────────────────────────────────────────────
+  const sovnByUke={};
+  let sovnAllMins=[];
+  W.forEach(w=>{
+    const sv=loggL[w.uke+'_sovn']||{};
+    const dayMins=['man','tir','ons','tor','fre','lor','son'].map(d=>{
+      const v=sv['var_'+d]||'';
+      if(!v) return null;
+      const parts=v.split(':');
+      if(parts.length>=2){const h=parseInt(parts[0])||0;const m=parseInt(parts[1])||0;return h*60+m;}
+      return null;
+    }).filter(x=>x!==null);
+    if(dayMins.length){
+      const avg=Math.round(dayMins.reduce((a,b)=>a+b,0)/dayMins.length);
+      sovnByUke[w.uke]={avg,count:dayMins.length};
+      dayMins.forEach(m=>sovnAllMins.push(m));
+    }
+  });
+  const totalSovnMin=sovnAllMins.length?Math.round(sovnAllMins.reduce((a,b)=>a+b,0)/sovnAllMins.length):null;
+  const snittSovn=totalSovnMin?(Math.floor(totalSovnMin/60)+'t '+(totalSovnMin%60).toString().padStart(2,'0')+'m'):null;
+  const sovnNetter=sovnAllMins.length||null;
+
+  // Korrelasjon søvn vs følelse
+  const sovnFolKorr=[];
+  W.forEach(w=>{
+    if(!sovnByUke[w.uke]) return;
+    const folUke=[];
+    ['roligLop','langtur','intervall','tempo'].forEach(k=>{
+      const sv=loggL[w.uke+'_'+k]||{};
+      if(sv.fol) folUke.push(parseFloat(sv.fol));
+    });
+    if(folUke.length){
+      const snittFolUke=Math.round(folUke.reduce((a,b)=>a+b,0)/folUke.length*10)/10;
+      sovnFolKorr.push({uke:w.uke,sovn:sovnByUke[w.uke].avg/60,fol:snittFolUke});
+    }
+  });
+
   // Streak: consecutive weeks with at least one logged session
   let streak=0, streakActive=true;
   const loggedWeekNums=W.map(w=>{
@@ -679,6 +716,8 @@ function renderStats(){
     {l:'Snitt tempo (rolig)',v:snittTempoStr||'–',c:'var(--a2)'},
     {l:'Snitt puls (intervall)',v:snittIntervallPuls?snittIntervallPuls+' bpm':'–',c:'#e05b00'},
     {l:'Snitt følelse',v:snittFol?snittFol+' / 5':'–',c:'var(--pu)'},
+    {l:'Snitt søvn',v:snittSovn?snittSovn:'–',c:'#2a7abf'},
+    {l:'Netter registrert',v:sovnNetter?sovnNetter+' netter':'–',c:'#2a7abf'},
   ];
   const grid=document.createElement('div');
   grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:28px';
@@ -891,6 +930,77 @@ function renderStats(){
     });
   }
     sb.appendChild(folWrap);
+
+  // ── Søvn-diagram ──────────────────────────────────────────────────────────
+  const sovnWrap=document.createElement('div');
+  sovnWrap.style.cssText='background:var(--s);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid var(--b)';
+  const sovnTitle=document.createElement('h2');
+  sovnTitle.style.cssText='font-size:16px;font-weight:500;color:#2a7abf;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  sovnTitle.textContent='Snitt søvn per uke';
+  sovnWrap.appendChild(sovnTitle);
+  sb.appendChild(sovnWrap);
+
+  if(!Object.keys(sovnByUke).length){
+    sovnWrap.innerHTML+='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen søvndata ennå.</p>';
+  } else {
+    const allSovnData=Array.from({length:24},(_,i)=>{
+      const d=sovnByUke[i+1];
+      return d?Math.round(d.avg/6)/10:null;
+    });
+    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+    const sovnCanvas=document.createElement('div');
+    sovnCanvas.style.cssText='position:relative;width:100%;height:160px';
+    sovnCanvas.innerHTML='<canvas id="chartSovn" role="img" aria-label="Snitt sovn per uke">Søvn over tid.</canvas>';
+    sovnWrap.appendChild(sovnCanvas);
+    if(window._chartSovn) window._chartSovn.destroy();
+    window._chartSovn=new Chart(document.getElementById('chartSovn'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[{label:'Snitt søvn (timer)',data:allSovnData,borderColor:'#2a7abf',backgroundColor:'rgba(42,122,191,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#2a7abf',borderWidth:2,spanGaps:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Snitt søvn: '+c.parsed.y+'t'}}},
+        scales:{
+          y:{min:4,max:10,ticks:{color:isDark?'#aaa':'#888',font:{size:11},callback:v=>v+'t'},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
+    });
+  }
+
+  // ── Korrelasjon søvn vs følelse ────────────────────────────────────────────
+  const korrWrap=document.createElement('div');
+  korrWrap.style.cssText='background:var(--s);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid var(--b)';
+  const korrTitle=document.createElement('h2');
+  korrTitle.style.cssText='font-size:16px;font-weight:500;color:#2a7abf;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  korrTitle.textContent='Søvn vs. følelse';
+  korrWrap.appendChild(korrTitle);
+  sb.appendChild(korrWrap);
+
+  if(sovnFolKorr.length<2){
+    korrWrap.innerHTML+='<p style="color:var(--m);font-style:italic;font-size:12px">Trenger data fra minst 2 uker.</p>';
+  } else {
+    const isDark2=matchMedia('(prefers-color-scheme: dark)').matches;
+    const korrCanvas=document.createElement('div');
+    korrCanvas.style.cssText='position:relative;width:100%;height:160px';
+    korrCanvas.innerHTML='<canvas id="chartKorr" role="img" aria-label="Sovn vs folelse">Søvn vs følelse.</canvas>';
+    korrWrap.appendChild(korrCanvas);
+    if(window._chartKorr) window._chartKorr.destroy();
+    window._chartKorr=new Chart(document.getElementById('chartKorr'),{
+      type:'scatter',
+      data:{datasets:[{
+        label:'Søvn vs følelse',
+        data:sovnFolKorr.map(d=>({x:Math.round(d.sovn*10)/10,y:d.fol,uke:d.uke})),
+        backgroundColor:'rgba(42,122,191,0.7)',pointRadius:6,pointHoverRadius:8
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'U'+c.raw.uke+': '+c.raw.x+'t søvn, følelse '+c.raw.y}}},
+        scales:{
+          x:{title:{display:true,text:'Snitt søvn (timer)',color:isDark2?'#aaa':'#888',font:{size:10}},min:4,max:10,ticks:{color:isDark2?'#aaa':'#888',font:{size:10},callback:v=>v+'t'},grid:{color:isDark2?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          y:{title:{display:true,text:'Snitt følelse',color:isDark2?'#aaa':'#888',font:{size:10}},min:1,max:5,ticks:{color:isDark2?'#aaa':'#888',font:{size:10},stepSize:1},grid:{color:isDark2?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}}
+        }
+      }
+    });
+  }
 
   // ── Styrke progresjon ────────────────────────────────────────────────
   const strPTitle=document.createElement('h2');
@@ -1516,6 +1626,103 @@ function renderReg(){
     sSection.appendChild(noMsg);
   }
   rb.appendChild(sSection);
+
+  // ── Søvn-kort ────────────────────────────────────────────────────────────
+  const sovnCard = document.createElement('div');
+  sovnCard.className = 'scard';
+  sovnCard.style.cssText = 'background:var(--s);border-radius:8px;padding:0;margin-bottom:16px;border:1px solid var(--b)';
+  
+  const sovnKey = `${uke}_sovn`;
+  const sovnSv = loggL[sovnKey] || {};
+  const sovnLogged = Object.keys(sovnSv).some(k => k.startsWith('var_') && sovnSv[k]);
+  
+  const sovnId = `hpm_${uke}_sovn`;
+  sovnCard.id = sovnId;
+  
+  if (sovnLogged) {
+    sovnCard.classList.add('hpm-collapsed');
+    const daysLogged = ['man','tir','ons','tor','fre','lor','son']
+      .filter(d => sovnSv['var_'+d]).length;
+    sovnCard.innerHTML = `
+      <div class="hpm-preview" onclick="this.closest('.scard').classList.remove('hpm-collapsed')">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <span style="font-weight:500;font-size:13px">Søvn</span>
+          <span style="font-size:11px;color:var(--m)">${daysLogged} dager registrert</span>
+        </div>
+        <span style="color:var(--a2);font-size:12px">✓ Utfort</span>
+      </div>
+      <div class="hpm-body"></div>`;
+    const bodyDiv = sovnCard.querySelector('.hpm-body');
+    bodyDiv.appendChild(buildSøvnBody(uke, sovnSv));
+  } else {
+    const header = document.createElement('div');
+    header.style.cssText = 'padding:12px 14px 8px;border-bottom:1px solid var(--b)';
+    header.innerHTML = '<h3 style="font-size:13px;font-weight:500;color:var(--t);margin:0">Søvn</h3>';
+    sovnCard.appendChild(header);
+    sovnCard.appendChild(buildSøvnBody(uke, sovnSv));
+  }
+  
+  rb.appendChild(sovnCard);
+}
+
+function buildSøvnBody(uke, sovnSv) {
+  const body = document.createElement('div');
+  body.style.cssText = 'padding:12px 14px';
+  const days = [
+    {k:'man', l:'Mandag'},{k:'tir', l:'Tirsdag'},{k:'ons', l:'Onsdag'},
+    {k:'tor', l:'Torsdag'},{k:'fre', l:'Fredag'},{k:'lor', l:'Lordag'},
+    {k:'son', l:'Sondag'}
+  ];
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px';
+  
+  days.forEach(({k, l}) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:4px';
+    const lbl = document.createElement('label');
+    lbl.style.cssText = 'font-size:11px;color:var(--m);font-weight:500';
+    lbl.textContent = l;
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = 'tt:mm';
+    inp.value = sovnSv['var_'+k] || '';
+    inp.style.cssText = 'padding:6px 8px;border:1px solid var(--b);border-radius:4px;font-size:12px;font-family:var(--mono,monospace);background:var(--s2);color:var(--t);width:100%;box-sizing:border-box';
+    inp.oninput = () => {
+      if(!loggL[`${uke}_sovn`]) loggL[`${uke}_sovn`] = {};
+      loggL[`${uke}_sovn`]['var_'+k] = inp.value;
+    };
+    const kom = document.createElement('input');
+    kom.type = 'text';
+    kom.placeholder = 'Kommentar';
+    kom.value = sovnSv['kom_'+k] || '';
+    kom.style.cssText = 'padding:6px 8px;border:1px solid var(--b);border-radius:4px;font-size:11px;background:var(--s2);color:var(--t);width:100%;box-sizing:border-box';
+    kom.oninput = () => {
+      if(!loggL[`${uke}_sovn`]) loggL[`${uke}_sovn`] = {};
+      loggL[`${uke}_sovn`]['kom_'+k] = kom.value;
+    };
+    wrap.appendChild(lbl);
+    wrap.appendChild(inp);
+    wrap.appendChild(kom);
+    grid.appendChild(wrap);
+  });
+  
+  body.appendChild(grid);
+  
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'sbtn';
+  saveBtn.style.cssText = 'background:var(--a);color:#fff;border:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--mono,monospace)';
+  saveBtn.textContent = 'LAGRE SØVN';
+  saveBtn.onclick = () => {
+    if(!loggL[`${uke}_sovn`]) loggL[`${uke}_sovn`] = {};
+    localStorage.setItem('hpm_l', JSON.stringify(loggL));
+    fbSave();
+    const daysLogged = ['man','tir','ons','tor','fre','lor','son']
+      .filter(d => loggL[`${uke}_sovn`]['var_'+d]).length;
+    hpmCollapse(`hpm_${uke}_sovn`, `${daysLogged} dager registrert`);
+    setTimeout(() => renderStats(), 1400);
+  };
+  body.appendChild(saveBtn);
+  return body;
 }
 
 function ikkeUtfort(key, msgId){
