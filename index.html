@@ -675,6 +675,22 @@ function renderStats(){
   const snittSovn=totalSovnMin?(Math.floor(totalSovnMin/60)+'t '+(totalSovnMin%60).toString().padStart(2,'0')+'m'):null;
   const sovnNetter=sovnAllMins.length||null;
 
+  // Hvilepuls data
+  const hvilepulsByUke={};let hvilepulsAll=[];
+  W.forEach(w=>{
+    const sv=loggL[w.uke+'_sovn']||{};
+    const pulsList=['man','tir','ons','tor','fre','lor','son'].map(d=>{
+      const v=sv['puls_'+d];return v?parseFloat(v):null;
+    }).filter(x=>x!==null);
+    if(pulsList.length){
+      const avg=Math.round(pulsList.reduce((a,b)=>a+b,0)/pulsList.length);
+      hvilepulsByUke[w.uke]=avg;
+      pulsList.forEach(p=>hvilepulsAll.push(p));
+    }
+  });
+  const snittHvilepuls=hvilepulsAll.length?Math.round(hvilepulsAll.reduce((a,b)=>a+b,0)/hvilepulsAll.length):null;
+  const minHvilepuls=hvilepulsAll.length?Math.min(...hvilepulsAll):null;
+
   // Korrelasjon søvn vs følelse
   const sovnFolKorr=[];
   W.forEach(w=>{
@@ -723,6 +739,8 @@ function renderStats(){
     {l:'Snitt puls (intervall)',v:snittIntervallPuls?snittIntervallPuls+' bpm':'–',c:'#e05b00'},
     {l:'Snitt følelse',v:snittFol?snittFol+' / 5':'–',c:'var(--pu)'},
     {l:'Snitt søvn',v:snittSovn?snittSovn:'–',c:'#2a7abf'},
+    {l:'Snitt hvilepuls',v:snittHvilepuls?snittHvilepuls+' bpm':'–',c:'#2a7abf'},
+    {l:'Lavest hvilepuls',v:minHvilepuls?minHvilepuls+' bpm':'–',c:'#2a7abf'},
     {l:'Netter registrert',v:sovnNetter?sovnNetter+' netter':'–',c:'#2a7abf'},
   ];
   const grid=document.createElement('div');
@@ -968,6 +986,39 @@ function renderStats(){
         scales:{
           y:{min:4,max:10,ticks:{color:isDark?'#aaa':'#888',font:{size:11},callback:v=>v+'t'},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
           x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
+        }
+      }
+    });
+  }
+
+  // ── Hvilepuls diagram ─────────────────────────────────────────────────────
+  const hpWrap=document.createElement('div');
+  hpWrap.style.cssText='background:var(--s);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid var(--b)';
+  const hpTitle=document.createElement('h2');
+  hpTitle.style.cssText='font-size:16px;font-weight:500;color:#2a7abf;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  hpTitle.textContent='Snitt hvilepuls per uke';
+  hpWrap.appendChild(hpTitle);
+  sb.appendChild(hpWrap);
+
+  if(!Object.keys(hvilepulsByUke).length){
+    hpWrap.innerHTML+='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen hvilepulsdata ennå.</p>';
+  } else {
+    const allHpData=Array.from({length:24},(_,i)=>hvilepulsByUke[i+1]||null);
+    const isDarkHp=matchMedia('(prefers-color-scheme: dark)').matches;
+    const hpCanvas=document.createElement('div');
+    hpCanvas.style.cssText='position:relative;width:100%;height:160px';
+    hpCanvas.innerHTML='<canvas id="chartHp" role="img" aria-label="Snitt hvilepuls per uke">Hvilepuls over tid.</canvas>';
+    hpWrap.appendChild(hpCanvas);
+    if(window._chartHp) window._chartHp.destroy();
+    window._chartHp=new Chart(document.getElementById('chartHp'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
+        datasets:[{label:'Hvilepuls',data:allHpData,borderColor:'#2a7abf',backgroundColor:'rgba(42,122,191,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#2a7abf',borderWidth:2,spanGaps:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Hvilepuls: '+c.parsed.y+' bpm'}}},
+        scales:{
+          y:{ticks:{color:isDarkHp?'#aaa':'#888',font:{size:11},callback:v=>v+' bpm'},grid:{color:isDarkHp?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
+          x:{ticks:{color:isDarkHp?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
         }
       }
     });
@@ -1697,17 +1748,28 @@ function buildSøvnBody(uke, sovnSv) {
       if(!loggL[`${uke}_sovn`]) loggL[`${uke}_sovn`] = {};
       loggL[`${uke}_sovn`]['var_'+k] = inp.value;
     };
+    const puls = document.createElement('input');
+    puls.type = 'number';
+    puls.placeholder = 'Hvilepuls';
+    puls.value = sovnSv['puls_'+k] || '';
+    puls.min = 30; puls.max = 100;
+    puls.style.cssText = 'padding:6px 8px;border:1px solid var(--b);border-radius:4px;font-size:12px;background:var(--s2);color:var(--t);width:100%;box-sizing:border-box;margin-top:3px';
+    puls.oninput = () => {
+      if(!loggL[`${uke}_sovn`]) loggL[`${uke}_sovn`] = {};
+      loggL[`${uke}_sovn`]['puls_'+k] = puls.value;
+    };
     const kom = document.createElement('input');
     kom.type = 'text';
     kom.placeholder = 'Kommentar';
     kom.value = sovnSv['kom_'+k] || '';
-    kom.style.cssText = 'padding:6px 8px;border:1px solid var(--b);border-radius:4px;font-size:11px;background:var(--s2);color:var(--t);width:100%;box-sizing:border-box';
+    kom.style.cssText = 'padding:6px 8px;border:1px solid var(--b);border-radius:4px;font-size:11px;background:var(--s2);color:var(--t);width:100%;box-sizing:border-box;margin-top:3px';
     kom.oninput = () => {
       if(!loggL[`${uke}_sovn`]) loggL[`${uke}_sovn`] = {};
       loggL[`${uke}_sovn`]['kom_'+k] = kom.value;
     };
     wrap.appendChild(lbl);
     wrap.appendChild(inp);
+    wrap.appendChild(puls);
     wrap.appendChild(kom);
     grid.appendChild(wrap);
   });
