@@ -387,14 +387,14 @@ function renderUkesplan(){
         const hasStryrkeB=txt.includes('Styrke B');
         if(hasIntervall && hasStryrkeB){
           const intIcon=isIkke?'✗':isLogged?'✓':'';
-          const intColor=isIkke?'var(--or)':isLogged?'var(--a2)':'var(--t)';
+          const intIconColor=isIkke?'var(--or)':isLogged?'var(--a2)':'var(--t)';
           const intDeco=isLogged?'line-through':'none';
           const strIcon=isStrB?'✓':'';
-          const strColor=isStrB?'var(--a2)':'var(--m)';
+          const strIconColor=isStrB?'var(--a2)':'var(--m)';
           const strDeco=isStrB?'line-through':'none';
           d.innerHTML=`<div style="line-height:1.5">
-            <div style="color:${intColor}"><span>${intIcon}</span> <span style="text-decoration:${intDeco};opacity:${isLogged?'.6':'1'}">Intervall</span></div>
-            <div style="color:${strColor};border-top:1px solid var(--b);margin-top:2px;padding-top:2px"><span>${strIcon}</span> <span style="text-decoration:${strDeco};opacity:${isStrB?'.6':'1'}">Styrke B</span></div>
+            <div><span style="color:${intIconColor}">${intIcon}</span> <span style="text-decoration:${intDeco};opacity:${isLogged?'.6':'1'};color:var(--t)">Intervall</span></div>
+            <div style="border-top:1px solid var(--b);margin-top:2px;padding-top:2px"><span style="color:${strIconColor}">${strIcon}</span> <span style="text-decoration:${strDeco};opacity:${isStrB?'.6':'1'};color:var(--t)">Styrke B</span></div>
           </div>`;
         } else if(hasStryrkeB && !hasIntervall){
           const strIcon=isStrB?'✓ ':'';
