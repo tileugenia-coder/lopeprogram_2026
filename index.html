@@ -842,16 +842,7 @@ function renderStats(){
     if(list.length) pulsData.push({uke:w.uke,kaluke:w.kaluke,puls:Math.round(list.reduce((a,b)=>a+b,0)/list.length)});
   });
 
-  const pulsWrap=document.createElement('div');
-  pulsWrap.style.cssText='background:var(--s);border-radius:8px;padding:8px;margin-bottom:16px';
-  if(!pulsData.length){
-    pulsWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen pulsdata ennå.</p>';
-    sb.appendChild(pulsWrap);
-  } else {
-    const allPulsData=Array.from({length:24},(_,i)=>{const f=pulsData.find(d=>d.uke===i+1);return f?f.puls:null;});
-    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
-    pulsWrap.innerHTML='<div style="position:relative;width:100%;height:160px"><canvas id="chartPuls" role="img" aria-label="Snitt puls rolig over tid">Puls over tid.</canvas></div>';
-    sb.appendChild(pulsWrap);
+  
     if(!window.Chart){setTimeout(renderStats,200);return;}if(window._chartPuls) window._chartPuls.destroy();
     window._chartPuls=new Chart(document.getElementById('chartPuls'),{
       type:'line',
@@ -865,7 +856,7 @@ function renderStats(){
         }
       }
     });
-  }
+  
 
   // Snitt tempo over tid (rolig løpetur + langtur)
   const tempoTitle=document.createElement('h2');
@@ -929,31 +920,7 @@ function renderStats(){
     if(list.length) folData2.push({uke:w.uke,kaluke:w.kaluke,fol:Math.round(list.reduce((a,b)=>a+b,0)/list.length*10)/10});
   });
 
-  const folWrap=document.createElement('div');
-  folWrap.style.cssText='background:var(--s);border-radius:8px;padding:8px;margin-bottom:16px';
-  if(!folData2.length){
-    folWrap.innerHTML='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen følelsesdata ennå.</p>';
-    sb.appendChild(folWrap);
-  } else {
-    const allFolData=Array.from({length:24},(_,i)=>{const f=folData2.find(d=>d.uke===i+1);return f?f.fol:null;});
-    const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
-    folWrap.innerHTML='<div style="position:relative;width:100%;height:160px"><canvas id="chartFol" role="img" aria-label="Snitt følelse over tid">Følelse over tid.</canvas></div>';
-    sb.appendChild(folWrap);
-    if(window._chartFol) window._chartFol.destroy();
-    window._chartFol=new Chart(document.getElementById('chartFol'),{
-      type:'line',
-      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
-        datasets:[{label:'Snitt følelse',data:allFolData,borderColor:'#7030A0',backgroundColor:'rgba(112,48,160,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#7030A0',borderWidth:2,spanGaps:false}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Følelse: '+c.parsed.y+' / 5'}}},
-        scales:{
-          y:{min:1,max:5,ticks:{color:isDark?'#aaa':'#888',font:{size:11},stepSize:1},grid:{color:isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
-          x:{ticks:{color:isDark?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
-        }
-      }
-    });
-  }
-    sb.appendChild(folWrap);
+  
 
   // ── Søvn-diagram ──────────────────────────────────────────────────────────
   const sovnWrap=document.createElement('div');
@@ -992,72 +959,12 @@ function renderStats(){
   }
 
   // ── Hvilepuls diagram ─────────────────────────────────────────────────────
-  const hpWrap=document.createElement('div');
-  hpWrap.style.cssText='background:var(--s);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid var(--b)';
-  const hpTitle=document.createElement('h2');
-  hpTitle.style.cssText='font-size:16px;font-weight:500;color:#2a7abf;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
-  hpTitle.textContent='Snitt hvilepuls per uke';
-  hpWrap.appendChild(hpTitle);
-  sb.appendChild(hpWrap);
-
-  if(!Object.keys(hvilepulsByUke).length){
-    hpWrap.innerHTML+='<p style="color:var(--m);font-style:italic;font-size:12px">Ingen hvilepulsdata ennå.</p>';
-  } else {
-    const allHpData=Array.from({length:24},(_,i)=>hvilepulsByUke[i+1]||null);
-    const isDarkHp=matchMedia('(prefers-color-scheme: dark)').matches;
-    const hpCanvas=document.createElement('div');
-    hpCanvas.style.cssText='position:relative;width:100%;height:160px';
-    hpCanvas.innerHTML='<canvas id="chartHp" role="img" aria-label="Snitt hvilepuls per uke">Hvilepuls over tid.</canvas>';
-    hpWrap.appendChild(hpCanvas);
-    if(window._chartHp) window._chartHp.destroy();
-    window._chartHp=new Chart(document.getElementById('chartHp'),{
-      type:'line',
-      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),
-        datasets:[{label:'Hvilepuls',data:allHpData,borderColor:'#2a7abf',backgroundColor:'rgba(42,122,191,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#2a7abf',borderWidth:2,spanGaps:false}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Hvilepuls: '+c.parsed.y+' bpm'}}},
-        scales:{
-          y:{ticks:{color:isDarkHp?'#aaa':'#888',font:{size:11},callback:v=>v+' bpm'},grid:{color:isDarkHp?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
-          x:{ticks:{color:isDarkHp?'#aaa':'#888',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}}
-        }
-      }
-    });
-  }
+  
 
   // ── Korrelasjon søvn vs følelse ────────────────────────────────────────────
-  const korrWrap=document.createElement('div');
-  korrWrap.style.cssText='background:var(--s);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid var(--b)';
-  const korrTitle=document.createElement('h2');
-  korrTitle.style.cssText='font-size:16px;font-weight:500;color:#2a7abf;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
-  korrTitle.textContent='Søvn vs. følelse';
-  korrWrap.appendChild(korrTitle);
-  sb.appendChild(korrWrap);
+  
 
-  if(sovnFolKorr.length<2){
-    korrWrap.innerHTML+='<p style="color:var(--m);font-style:italic;font-size:12px">Trenger data fra minst 2 uker.</p>';
-  } else {
-    const isDark2=matchMedia('(prefers-color-scheme: dark)').matches;
-    const korrCanvas=document.createElement('div');
-    korrCanvas.style.cssText='position:relative;width:100%;height:160px';
-    korrCanvas.innerHTML='<canvas id="chartKorr" role="img" aria-label="Sovn vs folelse">Søvn vs følelse.</canvas>';
-    korrWrap.appendChild(korrCanvas);
-    if(window._chartKorr) window._chartKorr.destroy();
-    window._chartKorr=new Chart(document.getElementById('chartKorr'),{
-      type:'scatter',
-      data:{datasets:[{
-        label:'Søvn vs følelse',
-        data:sovnFolKorr.map(d=>({x:Math.round(d.sovn*10)/10,y:d.fol,uke:d.uke})),
-        backgroundColor:'rgba(42,122,191,0.7)',pointRadius:6,pointHoverRadius:8
-      }]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'U'+c.raw.uke+': '+c.raw.x+'t søvn, følelse '+c.raw.y}}},
-        scales:{
-          x:{title:{display:true,text:'Snitt søvn (timer)',color:isDark2?'#aaa':'#888',font:{size:10}},min:4,max:10,ticks:{color:isDark2?'#aaa':'#888',font:{size:10},callback:v=>v+'t'},grid:{color:isDark2?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}},
-          y:{title:{display:true,text:'Snitt følelse',color:isDark2?'#aaa':'#888',font:{size:10}},min:1,max:5,ticks:{color:isDark2?'#aaa':'#888',font:{size:10},stepSize:1},grid:{color:isDark2?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'},border:{display:false}}
-        }
-      }
-    });
-  }
+
 
   // ── Styrke progresjon ────────────────────────────────────────────────
   const strPTitle=document.createElement('h2');
@@ -1204,8 +1111,8 @@ function renderStats(){
     raceWrap.appendChild(card);
   });
   sb.appendChild(raceWrap);
-}
 
+}
 function renderStyrke(){
   const sb=document.getElementById('styrke-body');
   sb.innerHTML='';
