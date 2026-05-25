@@ -171,6 +171,7 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
   <button onclick="nav('stats',this)">Statistikk</button>
   <button onclick="nav('progresjon',this)">Løpeprogresjon</button>
   <button onclick="nav('styrke',this)">Styrkeprogram</button>
+  <button onclick="nav('prognose',this)">Prognose</button>
 </nav>
 <main>
 
@@ -227,6 +228,10 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
 
 <div class="view" id="v-stats">
   <div id="stats-body"></div>
+</div>
+
+<div class="view" id="v-prognose">
+  <div id="prognose-body"></div>
 </div>
 </main>
 <script>
@@ -293,15 +298,21 @@ function nullstillUke(){
 }
 
 // ── Firebase ─────────────────────────────────────────────────────────────
-const W=[{"uke": 1, "kaluke": "U19", "dato": "04.05 – 10.05", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 2×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n20 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Backyard Ultra 18 km\n09.05.2026", "son": "Hvile"}, {"uke": 2, "kaluke": "U20", "dato": "11.05 – 17.05", "fase": "Basis", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×8\nSingle arm-shoulder press – 3×10\nSeated row – 3×12\nPlank – 3×maks sek\nCalf raise – 3×20\nSuperman – 3×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n22 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "fre": "Hvile", "lor": "Styrke A\nSmith squat – 3×8\nDead bug – 3×10\nRomanian deadlift (RDL) – 3×8\nPallof press – 3×10\nBulgarian split squat – 3×10\nSingle-leg RDL – 3×10\nLeg extension – 3×12\nSingle-leg calf raise – 3×15", "son": "Rolig langtur\n65 min\n130–150 bpm"}, {"uke": 3, "kaluke": "U21", "dato": "18.05 – 24.05", "fase": "Basis", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n24 min\n130–150 bpm\n4–6 stigningsløp", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 10 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n65 min\n130–150 bpm"}, {"uke": 4, "kaluke": "U22", "dato": "25.05 – 31.05", "fase": "Basis", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n26 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 11 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 5, "kaluke": "U23", "dato": "01.06 – 07.06", "fase": "Basis", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n28 min\n130–150 bpm\n[DELOAD –40%] 4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 12 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n75 min\n130–150 bpm"}, {"uke": 6, "kaluke": "U24", "dato": "08.06 – 14.06", "fase": "Basis", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 13 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 7, "kaluke": "U25", "dato": "15.06 – 21.06", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n28 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "🏁 Sommernattsløpet 5 km\n20.06.2026", "son": "Hvile"}, {"uke": 8, "kaluke": "U26", "dato": "22.06 – 28.06", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n26 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "fre": "Hvile", "lor": "🏁 EcoTrail Bergen 12 km\n27.06.2026", "son": "Hvile"}, {"uke": 9, "kaluke": "U27", "dato": "29.06 – 05.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Hvile", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 10, "kaluke": "U28", "dato": "06.07 – 12.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n33 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 18 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 11, "kaluke": "U29", "dato": "13.07 – 19.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n36 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 19 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 12, "kaluke": "U30", "dato": "20.07 – 26.07", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n22 min\n[DELOAD –40%]\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 18 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n48 min\n[DELOAD –40%]\n130–150 bpm"}, {"uke": 13, "kaluke": "U31", "dato": "27.07 – 02.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\n[DELOAD –40%] 4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 19 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n60 min\n130–150 bpm"}, {"uke": 14, "kaluke": "U32", "dato": "03.08 – 09.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n33 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 20 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 15, "kaluke": "U33", "dato": "10.08 – 16.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n36 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 22 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 16, "kaluke": "U34", "dato": "17.08 – 23.08", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n22 min\n[DELOAD –40%]\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 20 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n48 min\n[DELOAD –40%]\n130–150 bpm"}, {"uke": 17, "kaluke": "U35", "dato": "24.08 – 30.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n33 min\n130–150 bpm\n[DELOAD –40%] 4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 22 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n60 min\n130–150 bpm"}, {"uke": 18, "kaluke": "U36", "dato": "31.08 – 06.09", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 24 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 19, "kaluke": "U37", "dato": "07.09 – 13.09", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n22 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "🏁 Jentemila 5 km\n05.09.2026\n10–15 min oppvarming 130–150 bpm → løp → 10 min nedkjøling", "son": "Hvile"}, {"uke": 20, "kaluke": "U38", "dato": "14.09 – 20.09", "fase": "Gjenoppbygging", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n30 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "fre": "Hvile", "lor": "🏁 Oslo Maraton 10 km\n12.09.2026", "son": "Hvile"}, {"uke": 21, "kaluke": "U39", "dato": "21.09 – 27.09", "fase": "Gjenoppbygging", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n33 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Hvile", "son": "Rolig langtur\n60 min\n130–150 bpm"}, {"uke": 22, "kaluke": "U40", "dato": "28.09 – 04.10", "fase": "Gjenoppbygging", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n36 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 22 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 23, "kaluke": "U41", "dato": "05.10 – 11.10", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 18 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n30 min\n130–150 bpm"}, {"uke": 24, "kaluke": "U42", "dato": "12.10 – 18.10", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\n164–171 bpm under drag\nAktiv pause: 130–150 bpm\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n26 min\n130–150 bpm\n4–6 stigningsløp på 40–60 m / 1 min pause", "fre": "Hvile", "lor": "🏁 Hytteplanmila 10 km\n17.10.2026", "son": "Hvile"}];
+const W=[{"uke": 1, "kaluke": "U19", "dato": "04.05 – 10.05", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×8\nSingle arm-shoulder press – 3×10\nSeated row – 3×12\nPlank – 3×maks sek\nCalf raise – 3×20\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n20 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Hvile", "fre": "Hvile", "lor": "🏁 Backyard Ultra 18 km\n09.05.2026", "son": "Hvile"}, {"uke": 2, "kaluke": "U20", "dato": "11.05 – 17.05", "fase": "Basis", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×8\nSingle arm-shoulder press – 3×10\nSeated row – 3×12\nPlank – 3×maks sek\nCalf raise – 3×20\nSuperman – 3×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n22 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "fre": "Hvile", "lor": "Styrke A\nSmith squat – 3×8\nDead bug – 3×10\nRomanian deadlift (RDL) – 3×8\nPallof press – 3×10\nBulgarian split squat – 3×10\nSingle-leg RDL – 3×10\nLeg extension – 3×12\nSingle-leg calf raise – 3×15", "son": "Rolig langtur\n65 min\n130–150 bpm"}, {"uke": 3, "kaluke": "U21", "dato": "18.05 – 24.05", "fase": "Basis", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n24 min\n130–150 bpm\n4–6 stigningsløp", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 10 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n65 min\n130–150 bpm"}, {"uke": 4, "kaluke": "U22", "dato": "25.05 – 31.05", "fase": "Basis", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n26 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 11 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 5, "kaluke": "U23", "dato": "01.06 – 07.06", "fase": "Basis", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n26 min\n130–150 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 12 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n68 min\n130–150 bpm"}, {"uke": 6, "kaluke": "U24", "dato": "08.06 – 14.06", "fase": "Basis", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n28 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 13 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n70 min\n130–150 bpm"}, {"uke": 7, "kaluke": "U25", "dato": "15.06 – 21.06", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n28 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "🏁 Sommernattsløpet 5 km\n20.06.2026", "son": "Hvile"}, {"uke": 8, "kaluke": "U26", "dato": "22.06 – 28.06", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n28 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "fre": "Hvile", "lor": "🏁 EcoTrail Bergen 12 km\n27.06.2026", "son": "Hvile"}, {"uke": 9, "kaluke": "U27", "dato": "29.06 – 05.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Hvile", "son": "Rolig langtur\n75 min\n130–150 bpm"}, {"uke": 10, "kaluke": "U28", "dato": "06.07 – 12.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n33 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 18 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 11, "kaluke": "U29", "dato": "13.07 – 19.07", "fase": "Oppbygging", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n36 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 19 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 12, "kaluke": "U30", "dato": "20.07 – 26.07", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n40 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 18 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n80 min\n130–150 bpm"}, {"uke": 13, "kaluke": "U31", "dato": "27.07 – 02.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 19 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n48 min\n130–150 bpm"}, {"uke": 14, "kaluke": "U32", "dato": "03.08 – 09.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n33 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 20 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n52 min\n130–150 bpm"}, {"uke": 15, "kaluke": "U33", "dato": "10.08 – 16.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n36 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 22 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n57 min\n130–150 bpm"}, {"uke": 16, "kaluke": "U34", "dato": "17.08 – 23.08", "fase": "⚡ Deload", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 20 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n35 min\n130–150 bpm"}, {"uke": 17, "kaluke": "U35", "dato": "24.08 – 30.08", "fase": "Toppform", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 3×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n33 min\n130–150 bpm\n[DELOAD –40%] Svært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 3×6–12\nDead bug – 3×6–12\nRomanian deadlift (RDL) – 3×6–12\nPallof press – 3×6–12\nBulgarian split squat – 3×6–12\nSingle-leg RDL – 3×6–12\nLeg extension – 3×6–12\nSingle-leg calf raise – 3×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 22 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n38 min\n130–150 bpm"}, {"uke": 18, "kaluke": "U36", "dato": "31.08 – 06.09", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 3×6–12\nSingle arm-shoulder press – 3×6–12\nSeated row – 3×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 3×maks", "ons": "Rolig løpetur + SL\n36 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 24 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n41 min\n130–150 bpm"}, {"uke": 19, "kaluke": "U37", "dato": "07.09 – 13.09", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n36 min\n130–150 bpm", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "🏁 Jentemila 5 km\n05.09.2026\n10–15 min oppvarming 130–150 bpm → løp → 10 min nedkjøling", "son": "Hvile"}, {"uke": 20, "kaluke": "U38", "dato": "14.09 – 20.09", "fase": "Gjenoppbygging", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n30 min\n130–150 bpm", "fre": "Hvile", "lor": "🏁 Oslo Maraton 10 km\n12.09.2026\nStyrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "son": "Hvile"}, {"uke": 21, "kaluke": "U39", "dato": "21.09 – 27.09", "fase": "Gjenoppbygging", "man": "Hvile", "tir": "Styrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n33 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Hvile", "son": "Rolig langtur\n60 min\n130–150 bpm"}, {"uke": 22, "kaluke": "U40", "dato": "28.09 – 04.10", "fase": "Gjenoppbygging", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n36 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 22 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n45 min\n130–150 bpm"}, {"uke": 23, "kaluke": "U41", "dato": "05.10 – 11.10", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Rolig løpetur + SL\n30 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "tor": "Styrke A\nSmith squat – 2×6–12\nDead bug – 2×6–12\nRomanian deadlift (RDL) – 2×6–12\nPallof press – 2×6–12\nBulgarian split squat – 2×6–12\nSingle-leg RDL – 2×6–12\nLeg extension – 2×6–12\nSingle-leg calf raise – 2×8–15", "fre": "Hvile", "lor": "Tempoøkt\n10 min oppvarming, 18 min tempo, 10 min nedkjøling\n5:30–6:19 min/km", "son": "Rolig langtur\n30 min\n130–150 bpm"}, {"uke": 24, "kaluke": "U42", "dato": "12.10 – 18.10", "fase": "⏬ Nedtrapping", "man": "Hvile", "tir": "Intervall\n15 min oppvarming, planlagte intervaller, 10 min nedkjøling\nStyrke B\nLat Pulldown – 2×6–12\nSingle arm-shoulder press – 2×6–12\nSeated row – 2×6–12\nPlank – 3×maks sek\nCalf raise – 2×8–15\nSuperman – 2×maks", "ons": "Hvile", "tor": "Rolig løpetur + SL\n26 min\n130–150 bpm\nSvært lett. Full restitusjon. Kan snakke uanstrengt hele tiden.\n4–6 stigningsløp på 40–60 m / 1 min pause (løp lett og kontrollert)", "fre": "Hvile", "lor": "🏁 Hytteplanmila 10 km\n17.10.2026", "son": "Hvile"}];
 
 const IV=[{"uke": 1, "arbeidstid": 16, "drag": "4×4 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 4, "arbeidstid": 16, "drag": "4×4 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 5, "arbeidstid": 20, "drag": "4×5 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 6, "arbeidstid": 20, "drag": "4×5 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 7, "arbeidstid": 16, "drag": "4×4 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 8, "arbeidstid": 16, "drag": "4×4 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 10, "arbeidstid": 20, "drag": "4×5 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 11, "arbeidstid": 24, "drag": "4×6 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 12, "arbeidstid": 24, "drag": "3×8 min / 2 min aktiv pause", "type": "Lang – Deload"}, {"uke": 13, "arbeidstid": 27, "drag": "3×9 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 14, "arbeidstid": 27, "drag": "3×9 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 15, "arbeidstid": 30, "drag": "5×6 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 16, "arbeidstid": 20, "drag": "4×5 min / 2 min aktiv pause", "type": "Lang – Deload"}, {"uke": 17, "arbeidstid": 30, "drag": "5×6 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 18, "arbeidstid": 25, "drag": "5×5 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 19, "arbeidstid": 20, "drag": "4×5 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 20, "arbeidstid": 24, "drag": "4×6 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 22, "arbeidstid": 30, "drag": "5×6 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 23, "arbeidstid": 20, "drag": "4×5 min / 2 min aktiv pause", "type": "Lang"}, {"uke": 24, "arbeidstid": 16, "drag": "4×4 min / 2 min aktiv pause", "type": "Lang"}];
 
-const RC=[{"uke": 1, "navn": "Backyard Ultra", "km": 18, "dato": "09.05.2026"}, {"uke": 7, "navn": "Sommernattsløpet", "km": 5, "dato": "20.06.2026"}, {"uke": 8, "navn": "EcoTrail Bergen", "km": 12, "dato": "27.06.2026"}, {"uke": 18, "navn": "Jentemila", "km": 5, "dato": "05.09.2026"}, {"uke": 19, "navn": "Oslo Maraton", "km": 10, "dato": "12.09.2026"}, {"uke": 24, "navn": "Hytteplanmila", "km": 10, "dato": "17.10.2026"}];
+const RC=[{"uke": 1, "navn": "Backyard Ultra", "km": 18, "dato": "09.05.2026"}, {"uke": 7, "navn": "Sommernattsløpet", "km": 5, "dato": "20.06.2026"}, {"uke": 8, "navn": "EcoTrail Bergen", "km": 12, "dato": "27.06.2026"}, {"uke": 19, "navn": "Jentemila", "km": 5, "dato": "05.09.2026"}, {"uke": 20, "navn": "Oslo Maraton", "km": 10, "dato": "12.09.2026"}, {"uke": 24, "navn": "Hytteplanmila", "km": 10, "dato": "17.10.2026"}];
 
-const SA={"2": ["Smith squat – 3×8", "Dead bug – 3×10", "Romanian deadlift (RDL) – 3×8", "Pallof press – 3×10", "Bulgarian split squat – 3×10", "Single-leg RDL – 3×10", "Leg extension – 3×12", "Single-leg calf raise – 3×15"], "3": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "4": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "5": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "6": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "9": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "10": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "11": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "12": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "13": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "14": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "15": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "16": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "17": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "20": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "21": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "22": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "23": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "7": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "8": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "18": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "19": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"]};
+// Løp gjennomført før treningsplanen startet
+const PRE_RACE=[
+  {navn:"Bislett Indoor 5 km", dato:"06.02.2026", km:5, tid:"29:35", sn:164, mx:174, tempo:"5:55"},
+  {navn:"Lørenløpet 5 km",     dato:"02.05.2026", km:5, tid:"32:28", sn:159, mx:170, tempo:"6:22"},
+];
 
-const SB={"1": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "2": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "3": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "4": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "5": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "6": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "7": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "8": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "9": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "10": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "11": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "12": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "13": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "14": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "15": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "16": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "17": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "18": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "19": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "20": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "21": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "22": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "23": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "24": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"]};
+const SA={"2": ["Smith squat – 3×8", "Dead bug – 3×10", "Romanian deadlift (RDL) – 3×8", "Pallof press – 3×10", "Bulgarian split squat – 3×10", "Single-leg RDL – 3×10", "Leg extension – 3×12", "Single-leg calf raise – 3×15"], "3": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "4": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "5": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "6": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "9": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "10": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "11": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "12": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "13": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "14": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "15": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "16": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "17": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "20": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "21": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "22": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "23": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "7": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "8": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "18": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "19": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"]};
+
+const SB={"1": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "2": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "3": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "4": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "5": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "6": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "7": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "8": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "9": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "10": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "11": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "12": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "13": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "14": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "15": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "16": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "17": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "18": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "19": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "20": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "21": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "22": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "23": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "24": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"]};
 
 let loggL={},loggS={};
 try{loggL=JSON.parse(localStorage.getItem('hpm_l')||'{}');}catch(e){}
@@ -320,6 +331,7 @@ function nav(id,btn){
   if(id==='styrke') renderStyrke();
   if(id==='progresjon') renderProgresjon();
   if(id==='stats') renderStats();
+  if(id==='prognose') renderPrognose();
 }
 
 function gw(n){curW=n;document.querySelector('#wsel').value=n;rdw();document.querySelectorAll('nav button')[1].click();}
@@ -461,7 +473,6 @@ function renderWeek(n){
     }
     if(d.k==='tir'&&SB[String(n)]&&SB[String(n)].length){
       const lines=txt.split('\n');
-      // Keep all non-strength lines (incl. intensity info like bpm/I-4 lines)
       const nonStr=lines.filter(l=>!l.startsWith('Styrke B')&&!SB[String(n)].some(e=>l.startsWith(e.split(' – ')[0])));
       // Insert IV drag after "planlagte intervaller" line
       const iv=IV.find(x=>x.uke===n);
@@ -1525,7 +1536,7 @@ function renderReg(){
       +`<div class="hpm-body"><div class="scardh" style="background:var(--s2)"><h3>Styrke ${okt} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${isStrToday?'var(--pu)':'var(--b)'};color:${isStrToday?'#fff':'var(--m)'};">${isStrToday?'Planlagt i dag':okt==='A'?'Planlagt Tor':'Planlagt Tir'}</span></h3><span>${okt==='A'?'Styrke A':'Styrke B'}</span></div>`;
 
     const tbl=document.createElement('table');tbl.className='stbl';
-    tbl.innerHTML=`<thead><tr><th>Øvelse</th><th>Plan</th><th>Sett</th><th>Vekt (kg)</th><th>Reps / Sek</th></tr></thead>`;
+    tbl.innerHTML=`<thead><tr><th>Øvelse</th><th>Sett</th><th>Vekt (kg)</th><th>Reps / Sek</th></tr></thead>`;
     const tbody=document.createElement('tbody');
 
     ovs.forEach((ov,i)=>{
@@ -1533,7 +1544,7 @@ function renderReg(){
       const setsMatch=plan.match(/(\d+)×/);const numSets=setsMatch?parseInt(setsMatch[1]):3;
       const htr=document.createElement('tr');
       htr.style.background='var(--s2)';
-      htr.innerHTML=`<td colspan="5" style="padding:8px 11px;font-weight:500;color:var(--a);border-bottom:1px solid var(--b)">${name} <span style="color:var(--m);font-size:10px;font-weight:400">– ${plan}</span></td>`;
+      htr.innerHTML=`<td colspan="4" style="padding:8px 11px;font-weight:500;color:var(--a);border-bottom:1px solid var(--b)">${name} <span style="color:var(--m);font-size:10px;font-weight:400">– ${plan}</span></td>`;
       tbody.appendChild(htr);
       for(let s=1;s<=numSets;s++){
         const safeName=name.replace(/[^a-zA-Z0-9]/g,'-');const sk=`${uke}_${okt}_${safeName}_s${s}`;const ssv=loggS[sk]||{};
@@ -1549,9 +1560,8 @@ function renderReg(){
         const hintReps=prevReps?`S:${prevReps}`:(isTime?'sek':'reps');
         const tr=document.createElement('tr');
         tr.innerHTML=`
-          <td style="color:var(--m);padding-left:20px">Sett ${s}</td>
-          <td style="color:var(--m);font-size:10px">${plan}</td>
-          <td style="color:var(--a);font-weight:500">${s} / ${numSets}</td>
+          <td style="color:var(--m);padding-left:20px;white-space:nowrap">Sett ${s}</td>
+          <td style="color:var(--a);font-weight:500;white-space:nowrap">${s} / ${numSets}</td>
           <td><input type="text" placeholder="${hintVekt}" value="${ssv.vekt||''}" onchange="upS('${sk}','vekt',this.value)" style="width:70px"></td>
           <td><input type="text" placeholder="${hintReps}" value="${ssv.reps||''}" onchange="upS('${sk}','reps',this.value)" style="width:70px"></td>
         `;
@@ -1587,19 +1597,10 @@ function renderReg(){
     
     // Save row
     const saveRow=document.createElement('div');
-    saveRow.style.cssText='padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--b)';
+    saveRow.style.cssText='padding:10px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--b)';
     const saveBtnEl=document.createElement('button');
     saveBtnEl.className='sbtn';saveBtnEl.style.padding='6px 14px';
     saveBtnEl.textContent='Lagre Styrke '+okt;
-    // Ny: Lagre-knapp som kun lagrer uten kollaps
-    const saveOnlyBtn=document.createElement('button');
-    saveOnlyBtn.textContent='Lagre';
-    saveOnlyBtn.style.cssText='background:var(--s2);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:500';
-    saveOnlyBtn.onmouseenter=function(){this.style.borderColor='var(--a)';this.style.color='var(--a)';};
-    saveOnlyBtn.onmouseleave=function(){this.style.borderColor='var(--b)';this.style.color='var(--t)';};
-    saveOnlyBtn.onclick=(function(uid,o2){return function(){
-      saveStrOnly('msg_str_'+uid+'_'+o2);
-    };})(uke,okt);
     const ikkeBtn=document.createElement('button');
     ikkeBtn.textContent='Ikke utført';
     ikkeBtn.style.cssText='background:none;border:1px solid var(--b);color:var(--m);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer';
@@ -1611,7 +1612,7 @@ function renderReg(){
     angreBtn.textContent='↩ Angre';
     angreBtn.style.cssText='background:none;border:1px solid var(--b);color:var(--m);font-family:"DM Mono",monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer';
     angreBtn.onclick=()=>nullstillStrOkt(uke,okt,'msg_str_'+uke+'_'+okt);
-    saveRow.appendChild(saveBtnEl);saveRow.appendChild(saveOnlyBtn);saveRow.appendChild(ikkeBtn);saveRow.appendChild(angreBtn);saveRow.appendChild(saveMsgEl);
+    saveRow.appendChild(saveBtnEl);saveRow.appendChild(ikkeBtn);saveRow.appendChild(angreBtn);saveRow.appendChild(saveMsgEl);
     const hpmBodyEl = card.querySelector('.hpm-body') || card;
     hpmBodyEl.appendChild(tbl);
     hpmBodyEl.appendChild(varDiv);
@@ -2063,16 +2064,6 @@ function saveOkt(key, msgId){
   }catch(e){console.warn('Storage unavailable');}
 }
 
-function saveStrOnly(msgId){
-  try{
-    localStorage.setItem('hpm_l',JSON.stringify(loggL));
-    localStorage.setItem('hpm_s',JSON.stringify(loggS));
-    fbSave();
-    const el=document.getElementById(msgId);
-    if(el){el.textContent='✓ Lagret';setTimeout(()=>el.textContent='',2000);}
-  }catch(e){console.warn('Storage unavailable');}
-}
-
 function savelReg(){
   try{
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
@@ -2289,10 +2280,6 @@ function fbListen(){
 }
 
 // Patch all save functions to also call fbSave
-const _origSaveStrOnly=saveStrOnly;
-window.saveStrOnly=function(msgId){
-  _origSaveStrOnly(msgId);
-};
 const _origSaveOkt=saveOkt;
 window.saveOkt=function(key,msgId){
   _origSaveOkt(key,msgId);
@@ -2325,7 +2312,231 @@ fbLoad().then(()=>{
 });
 
 
-// ── Auth ─────────────────────────────────────────────────────────────────
+// ── Prognose ─────────────────────────────────────────────────────────────
+function renderPrognose(){
+  const sb=document.getElementById('prognose-body');
+  sb.innerHTML='';
+
+  // ── Helper: parse "h:mm:ss" or "m:ss" → total seconds
+  function tidTilSek(s){
+    if(!s) return null;
+    const p=s.trim().split(':').map(Number);
+    if(p.length===3) return p[0]*3600+p[1]*60+p[2];
+    if(p.length===2) return p[0]*60+p[1];
+    return null;
+  }
+
+  // ── Helper: seconds → "h:mm:ss" or "mm:ss"
+  function sekTilTid(s){
+    s=Math.round(s);
+    const h=Math.floor(s/3600);
+    const m=Math.floor((s%3600)/60);
+    const sc=s%60;
+    if(h>0) return h+':'+String(m).padStart(2,'0')+':'+String(sc).padStart(2,'0');
+    return m+':'+String(sc).padStart(2,'0');
+  }
+
+  // ── Helper: seconds/km → "m:ss min/km"
+  function sekPerKmTilTempo(spk){
+    const m=Math.floor(spk/60);
+    const s=Math.round(spk%60);
+    return m+':'+String(s).padStart(2,'0')+' min/km';
+  }
+
+  // ── Riegel formula: T2 = T1 * (D2/D1)^1.06
+  function riegel(t1, d1, d2){ return t1 * Math.pow(d2/d1, 1.06); }
+
+  // ── All races with logged data
+  const racesList=[
+    {uke:1,navn:'Backyard Ultra',km:18,dato:'09.05.2026'},
+    {uke:7,navn:'Sommernattsløpet',km:5,dato:'20.06.2026'},
+    {uke:8,navn:'EcoTrail Bergen',km:12,dato:'27.06.2026'},
+    {uke:19,navn:'Jentemila',km:5,dato:'05.09.2026'},
+    {uke:20,navn:'Oslo Maraton',km:10,dato:'12.09.2026'},
+    {uke:24,navn:'Hytteplanmila',km:10,dato:'17.10.2026'},
+  ];
+
+  // ── Collect all usable reference points (race + tempo + langtur)
+  let refs=[];
+
+  // From pre-plan historical races
+  PRE_RACE.forEach(r=>{
+    const sek=tidTilSek(r.tid);
+    if(sek&&r.km) refs.push({kilde:r.navn+' ('+r.dato+')', km:r.km, sek, type:'løp', pre:true});
+  });
+
+  // From races
+  racesList.forEach(r=>{
+    const sv=loggL[r.uke+'_race']||{};
+    const sek=tidTilSek(sv.tid);
+    const dist=parseFloat(sv.km)||r.km;
+    if(sek&&dist) refs.push({kilde:r.navn+' ('+r.dato+')',km:dist,sek,type:'løp'});
+  });
+
+
+
+  // ── Target distances
+  const targets=[
+    {label:'5 km',dist:5,emoji:'🏃'},
+    {label:'10 km',dist:10,emoji:'🏃'},
+    {label:'Halvmaraton (21,1 km)',dist:21.0975,emoji:'🏅'},
+    {label:'Maraton (42,2 km)',dist:42.195,emoji:'🏆'},
+  ];
+
+  // ── Goal for Hytteplanmila
+  const GOAL_DIST=10;
+  const GOAL_SEK=55*60; // 55:00
+
+  // ── Header
+  const hdr=document.createElement('div');
+  hdr.style.cssText='margin-bottom:28px';
+  hdr.innerHTML='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:900;color:var(--a);margin-bottom:6px">Løpsprognose</h2>'
+    +'<p style="color:var(--m);font-size:12px;max-width:560px">Estimerte sluttider beregnet med Riegel-formelen (T₂ = T₁ × (D₂/D₁)^1,06) basert på dine registrerte løp og tempoøkter.</p>';
+  sb.appendChild(hdr);
+
+  // ── Historiske løp (før plan)
+  const preTitle=document.createElement('h3');
+  preTitle.style.cssText='font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--m);margin-bottom:10px;font-weight:500';
+  preTitle.textContent='Historiske løp (grunnlag)';
+  sb.appendChild(preTitle);
+
+  const preWrap=document.createElement('div');
+  preWrap.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px';
+  PRE_RACE.forEach(r=>{
+    const c=document.createElement('div');
+    c.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:12px 15px;font-size:11px;min-width:200px';
+    c.innerHTML='<div style="font-size:10px;color:var(--m);margin-bottom:3px">'+r.dato+'</div>'
+      +'<div style="font-weight:500;color:var(--t);margin-bottom:8px">'+r.navn+'</div>'
+      +'<div style="display:flex;gap:14px;flex-wrap:wrap">'
+      +'<div><div style="font-size:9px;color:var(--m)">TID</div><div style="font-weight:500;color:var(--or)">'+r.tid+'</div></div>'
+      +'<div><div style="font-size:9px;color:var(--m)">TEMPO</div><div style="font-weight:500;color:var(--a2)">'+r.tempo+' /km</div></div>'
+      +'<div><div style="font-size:9px;color:var(--m)">SNITTPULS</div><div style="font-weight:500">'+r.sn+' bpm</div></div>'
+      +'<div><div style="font-size:9px;color:var(--m)">MAKSPULS</div><div style="font-weight:500">'+r.mx+' bpm</div></div>'
+      +'</div>';
+    preWrap.appendChild(c);
+  });
+  sb.appendChild(preWrap);
+
+  if(refs.length===0){
+    const empty=document.createElement('div');
+    empty.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:28px 20px;color:var(--m);font-size:12px;text-align:center';
+    empty.innerHTML='<div style="font-size:24px;margin-bottom:10px">📋</div>'
+      +'<div style="font-weight:500;color:var(--t);margin-bottom:6px">Ingen data å beregne fra ennå</div>'
+      +'<div>Registrer løpsresultater (tid + distanse) under <strong>Registrering</strong> for å se prognoser her.</div>';
+    sb.appendChild(empty);
+    return;
+  }
+
+  // ── Best estimate per target: use the reference point giving lowest time
+  // (most recent race is also shown separately)
+
+  // For each reference, compute all target estimates
+  const allEstimates=refs.map(ref=>{
+    const ests=targets.map(t=>{
+      const sek=riegel(ref.sek, ref.km, t.dist);
+      return {dist:t.dist,label:t.label,emoji:t.emoji,sek};
+    });
+    return {ref, ests};
+  });
+
+  // ── Prognose-kort: én rad per target, beste estimat + goal-indikator
+  const progTitle=document.createElement('h3');
+  progTitle.style.cssText='font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--m);margin-bottom:14px;font-weight:500';
+  progTitle.textContent='Beste estimat per distanse';
+  sb.appendChild(progTitle);
+
+  const progGrid=document.createElement('div');
+  progGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:32px';
+
+  targets.forEach(t=>{
+    // Find best (fastest) estimate across all refs
+    let best=null;
+    allEstimates.forEach(ae=>{
+      const e=ae.ests.find(x=>x.dist===t.dist);
+      if(e&&(!best||e.sek<best.sek)) best={sek:e.sek,ref:ae.ref};
+    });
+
+    const card=document.createElement('div');
+    const isGoalDist=(t.dist===GOAL_DIST);
+    const goalDiff=isGoalDist&&best? best.sek-GOAL_SEK : null;
+    const aheadOfGoal=goalDiff!==null&&goalDiff<=0;
+    const borderColor=isGoalDist?'var(--a)':'var(--b)';
+
+    card.style.cssText='background:var(--s);border:2px solid '+borderColor+';border-radius:10px;padding:18px 16px;position:relative;overflow:hidden';
+
+    let goalBadge='';
+    if(isGoalDist&&best){
+      const diffStr=Math.abs(Math.round(goalDiff));
+      const diffMin=Math.floor(diffStr/60);
+      const diffSek=diffStr%60;
+      const diffLabel=diffMin>0?diffMin+':'+String(diffSek).padStart(2,'0'):diffSek+' sek';
+      goalBadge='<div style="margin-top:10px;padding:6px 10px;border-radius:6px;font-size:10px;background:'
+        +(aheadOfGoal?'rgba(0,140,0,.12)':'rgba(192,48,106,.1)')
+        +';color:'+(aheadOfGoal?'#2a7a2a':'var(--a)')
+        +';font-weight:500">★ Mål 55:00 — '
+        +(aheadOfGoal?diffLabel+' foran plan':'Mangler '+diffLabel+' på planen')
+        +'</div>';
+    }
+
+    card.innerHTML=
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+      +'<span style="font-size:22px">'+t.emoji+'</span>'
+      +'<div><div style="font-size:14px;font-weight:500;color:var(--t)">'+t.label+'</div>'
+      +(isGoalDist?'<div style="font-size:10px;color:var(--a)">Hytteplanmila ★</div>':'')
+      +'</div></div>'
+      +(best?
+        '<div style="font-size:28px;font-family:\'Fraunces\',serif;font-weight:900;color:var(--a);line-height:1">'+sekTilTid(best.sek)+'</div>'
+        +'<div style="font-size:10px;color:var(--m);margin-top:4px">'+sekPerKmTilTempo(best.sek/t.dist)+'</div>'
+        +'<div style="font-size:10px;color:var(--m);margin-top:6px;border-top:1px solid var(--b);padding-top:6px">Grunnlag: '+best.ref.kilde+'</div>'
+        +goalBadge
+        :'<div style="color:var(--m);font-size:12px;font-style:italic">Ingen data</div>');
+    progGrid.appendChild(card);
+  });
+  sb.appendChild(progGrid);
+
+  // ── Detaljert tabell: alle referanser × alle distanser
+  const tblTitle=document.createElement('h3');
+  tblTitle.style.cssText='font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--m);margin-bottom:14px;font-weight:500';
+  tblTitle.textContent='Alle estimater per referanseøkt';
+  sb.appendChild(tblTitle);
+
+  const tblWrap=document.createElement('div');
+  tblWrap.style.cssText='overflow-x:auto;margin-bottom:28px';
+
+  const tbl=document.createElement('table');
+  tbl.className='ltbl';
+  tbl.style.minWidth='600px';
+
+  const thead=document.createElement('thead');
+  thead.innerHTML='<tr>'
+    +'<th>Referanse</th>'
+    +'<th>Distanse</th>'
+    +'<th>Tid</th>'
+    +'<th style="color:var(--a)">5 km</th>'
+    +'<th style="color:var(--a)">10 km</th>'
+    +'<th style="color:var(--a)">21,1 km</th>'
+    +'<th style="color:var(--a)">42,2 km</th>'
+    +'</tr>';
+  tbl.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+  allEstimates.forEach(ae=>{
+    const tr=document.createElement('tr');
+    const preLabel=ae.ref.pre?'<span style="font-size:9px;background:var(--s2);border:1px solid var(--b);border-radius:3px;padding:1px 5px;color:var(--m);margin-left:5px;vertical-align:middle">før plan</span>':'';
+    tr.innerHTML='<td style="color:var(--t);max-width:180px;white-space:normal">'+ae.ref.kilde+preLabel+'</td>'
+      +'<td>'+ae.ref.km+' km</td>'
+      +'<td style="font-weight:500">'+sekTilTid(ae.ref.sek)+'</td>'
+      +ae.ests.map(e=>'<td style="font-family:\'Fraunces\',serif;font-weight:900;color:var(--a2)">'+sekTilTid(e.sek)+'<div style="font-size:9px;color:var(--m);font-family:\'DM Mono\',monospace;font-weight:400">'+sekPerKmTilTempo(e.sek/e.dist)+'</div></td>').join('');
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+  tblWrap.appendChild(tbl);
+  sb.appendChild(tblWrap);
+
+
+}
+
+
 var _auth = null;
 
 function authAction() {
