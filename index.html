@@ -2160,10 +2160,35 @@ async function fbLoad(){
 // Listen for real-time changes from other devices
 let userTyping=false;
 let typingTimer=null;
+let autoSaveTimer=null;
+
+function autoSaveLocal(){
+  try{
+    localStorage.setItem('hpm_l',JSON.stringify(loggL));
+    localStorage.setItem('hpm_s',JSON.stringify(loggS));
+  }catch(e){}
+}
+
+// Auto-save to localStorage 2 sec after last keystroke — catches unsaved input fields
 document.addEventListener('input',()=>{
   userTyping=true;
   clearTimeout(typingTimer);
+  clearTimeout(autoSaveTimer);
   typingTimer=setTimeout(()=>{ userTyping=false; },5000);
+  autoSaveTimer=setTimeout(()=>{ autoSaveLocal(); },2000);
+});
+
+// Save immediately when screen locks or app goes to background
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){
+    autoSaveLocal();
+    fbSave();
+  }
+});
+
+// Save when page is unloaded (navigating away, app killed)
+window.addEventListener('pagehide',()=>{
+  autoSaveLocal();
 });
 
 function fbListen(){
