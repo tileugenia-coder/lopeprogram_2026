@@ -589,7 +589,8 @@ function renderStats(){
   W.forEach(w=>{
     loktKeys.forEach(k=>{
       const sv=loggL[w.uke+'_'+k]||{};
-      if(sv['var']||sv.tid||sv.sn||sv.km) totalUtfort++;
+      if(sv.ikkeUtfort){ totalIkke++; return; }
+      if((sv['var']||sv.tid||sv.sn||sv.km)) totalUtfort++;
       // Sum total time
       const timeStr=sv['var']||sv.tid||'';
       if(timeStr){
@@ -597,7 +598,6 @@ function renderStats(){
         if(p.length===3) totalSecs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);
         else if(p.length===2) totalSecs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);
       }
-      if(sv.ikkeUtfort) totalIkke++;
       if(sv.km) totalKm+=parseFloat(sv.km)||0;
       // Snitt puls fra rolig løpetur og langtur
       if((k==='roligLop'||k==='langtur')&&sv.sn) roligPulsList.push(parseFloat(sv.sn));
@@ -620,16 +620,12 @@ function renderStats(){
       const src=okt==='A'?SA:SB;
       const ovs=src[String(w.uke)]||[];
       if(!ovs.length) return;
-      const sk=w.uke+'_'+okt+'_0_s1';
+      // Use first exercise name to build correct key
+      const firstOv=ovs[0]||'';
+      const firstName=firstOv.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
+      const sk=w.uke+'_'+okt+'_'+firstName+'_s1';
       const sv=loggS[sk]||{};
       if(sv.vekt||sv.reps) totalUtfort++;
-      // Add strength varighet to totalSecs and følelse to folList
-      const strVarSk=w.uke+'_'+okt+'_varighet';
-      const strVarSv=loggS[strVarSk]||{};
-      if(strVarSv.var){const p=strVarSv.var.split(':');if(p.length===3)totalSecs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)totalSecs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
-      if(strVarSv.fol) folList.push(parseFloat(strVarSv.fol));
-      const skIkke=w.uke+'_'+okt+'_0';
-      if(loggS[skIkke]&&loggS[skIkke].ikkeUtfort) totalIkke++;
     });
   });
   totalKm=Math.round(totalKm*10)/10;
@@ -727,7 +723,7 @@ function renderStats(){
 
   // Goal: 55 min on 10 km = 5:30/km
   // Best race tempo so far
-  const raceTimes=['1','7','8','18','19','24'].map(u=>{
+  const raceTimes=['1','7','8','19','20','24'].map(u=>{
     const sv=loggL[u+'_race']||{};
     return sv.tempo||null;
   }).filter(Boolean);
@@ -766,8 +762,8 @@ function renderStats(){
     let km=0, ikke=0;
     loktKeys.forEach(k=>{
       const sv=loggL[w.uke+'_'+k]||{};
+      if(sv.ikkeUtfort){ ikke++; return; }
       if(sv.km) km+=parseFloat(sv.km)||0;
-      if(sv.ikkeUtfort) ikke++;
     });
     return{uke:w.uke,km:Math.round(km*10)/10,ikke};
   });
@@ -780,7 +776,7 @@ function renderStats(){
 
   kmData.forEach(d=>{
     const pct=d.km/maxKm*100;
-    const col=d.ikke>0&&d.km===0?'var(--or)':[1,7,8,18,19,24].includes(d.uke)?'var(--or)':[4,8,12,16].includes(d.uke)?'var(--pu)':d.km>0?'var(--a)':'var(--b)';
+    const col=d.ikke>0&&d.km===0?'var(--or)':[1,7,8,19,20,24].includes(d.uke)?'var(--or)':[4,8,12,16].includes(d.uke)?'var(--pu)':d.km>0?'var(--a)':'var(--b)';
     const bar=document.createElement('div');
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
     bar.innerHTML='<div style="font-size:9px;color:var(--m);height:30px;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;display:flex;align-items:center;justify-content:center">'+(d.km>0?d.km:d.ikke>0?'✗':'')+'</div>'
@@ -801,13 +797,9 @@ function renderStats(){
     let secs=0;
     loktKeys.forEach(k=>{
       const sv=loggL[w.uke+'_'+k]||{};
+      if(sv.ikkeUtfort) return;
       const t=sv['var']||sv.tid||'';
       if(t){const p=t.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
-    });
-    // Add strength varighet
-    ['A','B'].forEach(okt=>{
-      const svk=loggS[w.uke+'_'+okt+'_varighet']||{};
-      if(svk.var){const p=svk.var.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
     });
     const mins=Math.round(secs/60);
     const hh=Math.floor(mins/60);
@@ -1431,7 +1423,7 @@ function renderReg(){
   sSection.innerHTML=`<h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--pu);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Styrkeøkter – Uke ${uke}</h2>`;
 
   // Check if today is a race day (Lørdag = lor)
-  const races=[{"uke":1,"navn":"Backyard Ultra","km":18,"dato":"09.05.2026"},{"uke":7,"navn":"Sommernattsløpet","km":5,"dato":"20.06.2026"},{"uke":8,"navn":"EcoTrail Bergen","km":12,"dato":"27.06.2026"},{"uke":18,"navn":"Jentemila","km":5,"dato":"05.09.2026"},{"uke":19,"navn":"Oslo Maraton","km":10,"dato":"12.09.2026"},{"uke":24,"navn":"Hytteplanmila","km":10,"dato":"17.10.2026"}];
+  const races=[{"uke":1,"navn":"Backyard Ultra","km":18,"dato":"09.05.2026"},{"uke":7,"navn":"Sommernattsløpet","km":5,"dato":"20.06.2026"},{"uke":8,"navn":"EcoTrail Bergen","km":12,"dato":"27.06.2026"},{"uke":19,"navn":"Jentemila","km":5,"dato":"05.09.2026"},{"uke":20,"navn":"Oslo Maraton","km":10,"dato":"12.09.2026"},{"uke":24,"navn":"Hytteplanmila","km":10,"dato":"17.10.2026"}];
   const todayRace=races.find(r=>r.uke===uke);
 
   // Race logging card
