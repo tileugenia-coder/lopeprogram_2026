@@ -801,6 +801,11 @@ function renderStats(){
       const t=sv['var']||sv.tid||'';
       if(t){const p=t.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
     });
+    // Add strength varighet (stored in loggS under {uke}_{okt}_varighet)
+    ['A','B'].forEach(okt=>{
+      const svk=loggS[`${w.uke}_${okt}_varighet`]||{};
+      if(svk.var){const p=svk.var.split(':');if(p.length===3)secs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)secs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
+    });
     const mins=Math.round(secs/60);
     const hh=Math.floor(mins/60);
     const mm=(mins%60).toString().padStart(2,'0');
@@ -1296,41 +1301,41 @@ function renderReg(){
       <div style="padding:8px 12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px">
         <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Tid</div>
-          <input type="text" placeholder="tt:mm:ss" value="${sv['var']||''}" onchange="upL('${key}','var',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="text" placeholder="tt:mm:ss" value="${sv['var']||''}" oninput="upL('${key}','var',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">km</div>
-          <input type="number" step="0.1" placeholder="0.0" value="${sv.km||''}" onchange="upL('${key}','km',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="number" step="0.1" placeholder="0.0" value="${sv.km||''}" oninput="upL('${key}','km',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         ${o.k!=='intervall'?`
         <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Tempo</div>
-          <input type="text" placeholder="5:30" value="${sv.tempo||''}" onchange="upL('${key}','tempo',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="text" placeholder="5:30" value="${sv.tempo||''}" oninput="upL('${key}','tempo',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Snittpuls</div>
-          <input type="number" placeholder="bpm" value="${sv.sn||''}" onchange="upL('${key}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="number" placeholder="bpm" value="${sv.sn||''}" oninput="upL('${key}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Makspuls</div>
-          <input type="number" placeholder="bpm" value="${sv.mx||''}" onchange="upL('${key}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="number" placeholder="bpm" value="${sv.mx||''}" oninput="upL('${key}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         `:`
         <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Snittpuls</div>
-          <input type="number" placeholder="bpm" value="${sv.sn||''}" onchange="upL('${key}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="number" placeholder="bpm" value="${sv.sn||''}" oninput="upL('${key}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Makspuls</div>
-          <input type="number" placeholder="bpm" value="${sv.mx||''}" onchange="upL('${key}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="number" placeholder="bpm" value="${sv.mx||''}" oninput="upL('${key}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         `}        <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Følelse</div>
-          <input type="number" min="1" max="5" placeholder="1–5" value="${sv.fol||''}" onchange="upL('${key}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="number" min="1" max="5" placeholder="1–5" value="${sv.fol||''}" oninput="upL('${key}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         <div style="grid-column:1/-1">
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Kommentar</div>
-          <input type="text" placeholder="Kommentar..." value="${sv.kom||''}" onchange="upL('${key}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+          <input type="text" placeholder="Kommentar..." value="${sv.kom||''}" oninput="upL('${key}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
         ${o.k==='intervall'?`
         <div style="grid-column:1/-1;border-top:1px solid var(--b);padding-top:10px;margin-top:4px">
@@ -1374,17 +1379,17 @@ function renderReg(){
             <td style="padding:5px 8px;border-bottom:1px solid var(--b);font-weight:500;color:var(--pu)">${d}</td>
             <td style="padding:5px 8px;border-bottom:1px solid var(--b)">
               <input type="text" placeholder="5:10" value="${dSv.tempo||''}"
-                onchange="upLDrag('${key}',${d},'tempo',this.value)"
+                oninput="upLDrag('${key}',${d},'tempo',this.value)"
                 style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:4px 8px;border-radius:4px;width:80px">
             </td>
             <td style="padding:5px 8px;border-bottom:1px solid var(--b)">
               <input type="number" placeholder="bpm" value="${dSv.puls||''}"
-                onchange="upLDrag('${key}',${d},'puls',this.value)"
+                oninput="upLDrag('${key}',${d},'puls',this.value)"
                 style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:4px 8px;border-radius:4px;width:70px">
             </td>
             <td style="padding:5px 8px;border-bottom:1px solid var(--b)">
               <input type="number" placeholder="bpm" value="${dSv.mx||''}"
-                onchange="upLDrag('${key}',${d},'mx',this.value)"
+                oninput="upLDrag('${key}',${d},'mx',this.value)"
                 style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:4px 8px;border-radius:4px;width:70px">
             </td>`;
           tbody.appendChild(tr);
@@ -1464,19 +1469,19 @@ function renderReg(){
       </div>
       <div style="padding:8px 12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px">
         <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Tid</div>
-          <input type="text" placeholder="tt:mm:ss" value="${rsv.tid||''}" onchange="upL('${rKey}','tid',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
+          <input type="text" placeholder="tt:mm:ss" value="${rsv.tid||''}" oninput="upL('${rKey}','tid',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
         <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">km</div>
-          <input type="number" step="0.1" placeholder="0.0" value="${rsv.km||''}" onchange="upL('${rKey}','km',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
+          <input type="number" step="0.1" placeholder="0.0" value="${rsv.km||''}" oninput="upL('${rKey}','km',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
         <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Snittpuls</div>
-          <input type="number" placeholder="bpm" value="${rsv.sn||''}" onchange="upL('${rKey}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
+          <input type="number" placeholder="bpm" value="${rsv.sn||''}" oninput="upL('${rKey}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
         <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Makspuls</div>
-          <input type="number" placeholder="bpm" value="${rsv.mx||''}" onchange="upL('${rKey}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
+          <input type="number" placeholder="bpm" value="${rsv.mx||''}" oninput="upL('${rKey}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
         <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Tempo</div>
-          <input type="text" placeholder="5:30" value="${rsv.tempo||''}" onchange="upL('${rKey}','tempo',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
+          <input type="text" placeholder="5:30" value="${rsv.tempo||''}" oninput="upL('${rKey}','tempo',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
         <div><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Følelse</div>
-          <input type="number" min="1" max="5" placeholder="1–5" value="${rsv.fol||''}" onchange="upL('${rKey}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
+          <input type="number" min="1" max="5" placeholder="1–5" value="${rsv.fol||''}" oninput="upL('${rKey}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
         <div style="grid-column:1/-1"><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Kommentar</div>
-          <input type="text" placeholder="Kommentar..." value="${rsv.kom||''}" onchange="upL('${rKey}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
+          <input type="text" placeholder="Kommentar..." value="${rsv.kom||''}" oninput="upL('${rKey}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%"></div>
         <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:4px">
           <button class="sbtn" onclick="saveOkt('${rKey}','msg_${rKey}');setTimeout(()=>{const sv=loggL['${rKey}']||{};const p=[];if(sv.tid)p.push(sv.tid);if(sv.km)p.push(sv.km+' km');if(sv.tempo)p.push(sv.tempo+'/km');hpmCollapse('${rKey}'.replace(/_/g,'-'),p.join(' · ')||'✓ Utført',false);},1200)" style="padding:6px 14px">Lagre løp</button>
           <button onclick="ikkeUtfort('${rKey}','msg_${rKey}');setTimeout(()=>hpmCollapse('${rKey}'.replace(/_/g,'-'),'✗ Ikke utført',true),1200)" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
@@ -1566,7 +1571,7 @@ function renderReg(){
     varInput.type='text';varInput.placeholder='tt:mm:ss';
     varInput.value=strVarSv.var||'';
     varInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
-    varInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].var=normalizeTime(this.value);};
+    varInput.oninput=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].var=normalizeTime(this.value);};
     varDivInp1.appendChild(varInput);
     varDiv.appendChild(varDivInp1);
 
@@ -1576,7 +1581,7 @@ function renderReg(){
     folInput.type='number';folInput.min='1';folInput.max='5';folInput.placeholder='1–5';
     folInput.value=strVarSv.fol||'';
     folInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
-    folInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].fol=this.value;};
+    folInput.oninput=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].fol=this.value;};
     varDivInp2.appendChild(folInput);
     varDiv.appendChild(varDivInp2);
     
