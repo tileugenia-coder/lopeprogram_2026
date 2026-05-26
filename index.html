@@ -522,6 +522,16 @@ function calcSnittPuls(drags, num){
   return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)+' bpm';
 }
 
+function calcMaksPuls(drags, num){
+  const vals=[];
+  for(let i=1;i<=num;i++){
+    const d=drags[i]||{};
+    if(d.mx) vals.push(parseFloat(d.mx));
+  }
+  if(!vals.length) return '–';
+  return Math.max(...vals)+' bpm';
+}
+
 function upS(k,f,v){if(!loggS[k])loggS[k]={};loggS[k][f]=v;}
 
 function setF(key,n,btn){
@@ -1313,8 +1323,16 @@ function renderReg(){
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Makspuls</div>
           <input type="number" placeholder="bpm" value="${sv.mx||''}" onchange="upL('${key}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
-        `:''}
+        `:`
         <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Snittpuls</div>
+          <input type="number" placeholder="bpm" value="${sv.sn||''}" onchange="upL('${key}','sn',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Makspuls</div>
+          <input type="number" placeholder="bpm" value="${sv.mx||''}" onchange="upL('${key}','mx',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
+        </div>
+        `}        <div>
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Følelse</div>
           <input type="number" min="1" max="5" placeholder="1–5" value="${sv.fol||''}" onchange="upL('${key}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:5px 8px;border-radius:4px;width:100%">
         </div>
@@ -1332,6 +1350,7 @@ function renderReg(){
                 <th style="padding:5px 8px;text-align:left;border-bottom:1px solid var(--b);color:var(--m);font-weight:500;font-size:10px;text-transform:uppercase">Drag</th>
                 <th style="padding:5px 8px;text-align:left;border-bottom:1px solid var(--b);color:var(--m);font-weight:500;font-size:10px;text-transform:uppercase">Tempo</th>
                 <th style="padding:5px 8px;text-align:left;border-bottom:1px solid var(--b);color:var(--m);font-weight:500;font-size:10px;text-transform:uppercase">Snitt puls</th>
+                <th style="padding:5px 8px;text-align:left;border-bottom:1px solid var(--b);color:var(--m);font-weight:500;font-size:10px;text-transform:uppercase">Maks puls</th>
               </tr>
             </thead>
             <tbody id="drag-rows-${key.replace(/_/g,'-')}"></tbody>
@@ -1360,7 +1379,7 @@ function renderReg(){
           const tr=document.createElement('tr');
           const dSv=savedDrags[d]||{};
           tr.innerHTML=`
-            <td style="padding:5px 8px;border-bottom:1px solid var(--b);font-weight:500;color:var(--pu)">Drag ${d}</td>
+            <td style="padding:5px 8px;border-bottom:1px solid var(--b);font-weight:500;color:var(--pu)">${d}</td>
             <td style="padding:5px 8px;border-bottom:1px solid var(--b)">
               <input type="text" placeholder="5:10" value="${dSv.tempo||''}"
                 onchange="upLDrag('${key}',${d},'tempo',this.value)"
@@ -1369,6 +1388,11 @@ function renderReg(){
             <td style="padding:5px 8px;border-bottom:1px solid var(--b)">
               <input type="number" placeholder="bpm" value="${dSv.puls||''}"
                 onchange="upLDrag('${key}',${d},'puls',this.value)"
+                style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:4px 8px;border-radius:4px;width:70px">
+            </td>
+            <td style="padding:5px 8px;border-bottom:1px solid var(--b)">
+              <input type="number" placeholder="bpm" value="${dSv.mx||''}"
+                onchange="upLDrag('${key}',${d},'mx',this.value)"
                 style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:4px 8px;border-radius:4px;width:70px">
             </td>`;
           tbody.appendChild(tr);
@@ -1383,6 +1407,9 @@ function renderReg(){
           </td>
           <td style="padding:6px 8px" id="snitt-puls-${(`${uke}_${o.k}`).replace(/_/g,'-')}">
             <span style="font-weight:500;color:var(--pu);font-size:12px">${calcSnittPuls(savedDrags,numDrags)}</span>
+          </td>
+          <td style="padding:6px 8px">
+            <span style="font-weight:500;color:var(--pu);font-size:12px">${calcMaksPuls(savedDrags,numDrags)}</span>
           </td>`;
         tbody.appendChild(snittr);
       }
