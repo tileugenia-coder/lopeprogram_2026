@@ -787,28 +787,6 @@ function renderStats(){
   barWrap.appendChild(barInner);
   sb.appendChild(barWrap);
 
-  // ── DEBUG: show raw varighet keys ─────────────────────────────────────
-  const dbg=document.createElement('details');
-  dbg.style.cssText='margin-bottom:16px;font-size:10px;color:var(--m);font-family:"DM Mono",monospace';
-  dbg.innerHTML='<summary style="cursor:pointer;color:var(--m)">Debug: varighet-data</summary>';
-  const dbgPre=document.createElement('pre');
-  dbgPre.style.cssText='font-size:9px;overflow-x:auto;margin-top:6px;padding:8px;background:var(--s);border-radius:4px';
-  const dbgLines=[];
-  W.forEach(w=>{
-    ['A','B'].forEach(okt=>{
-      const k=`${w.uke}_${okt}_varighet`;
-      const v=loggS[k];
-      if(v&&v.var) dbgLines.push(`loggS[${k}].var = "${v.var}" → ${(function(t){const p=t.split(':');if(p.length===3)return parseInt(p[0])*3600+parseInt(p[1])*60+parseInt(p[2]);if(p.length===2)return parseInt(p[0])*60+parseInt(p[1]);return 0;})(v.var)/60} min`);
-    });
-    ['intervall','roligLop','tempo','langtur','race'].forEach(k=>{
-      const sv=loggL[`${w.uke}_${k}`];
-      if(sv&&(sv.var||sv.tid)) dbgLines.push(`loggL[${w.uke}_${k}].var/tid = "${sv.var||sv.tid}"`);
-    });
-  });
-  dbgPre.textContent=dbgLines.length?dbgLines.join('\n'):'(ingen data)';
-  dbg.appendChild(dbgPre);
-  sb.appendChild(dbg);
-
 
   const timeTitle=document.createElement('h2');
   timeTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
