@@ -231,7 +231,7 @@ function nullstillUke(){
   const uke=parseInt(uv);
   if(!confirm('Nullstille all logging for uke '+uke+'?')) return;
   // Delete all running sessions
-  ['intervall','roligLop','langtur','valgfri1','valgfri2','race'].forEach(k=>{
+  ['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3','race'].forEach(k=>{
     delete loggL[uke+'_'+k];
   });
   // Delete all strength sessions
@@ -284,13 +284,14 @@ function strOkter(uke){
   return r;
 }
 function runOkter(uke){
-  // Løpeprogrammeringen brukes ikke lenger – 3 faste + 2 valgfrie løpeøkter hver uke.
+  // Løpeprogrammeringen brukes ikke lenger – 3 faste + 3 valgfrie løpeøkter hver uke.
   return [
     {k:'intervall', l:'Intervall', txt:''},
     {k:'roligLop', l:'Rolig løpetur + SL', txt:''},
     {k:'langtur', l:'Rolig langtur', txt:''},
     {k:'valgfri1', l:'Valgfri økt 1', txt:''},
-    {k:'valgfri2', l:'Valgfri økt 2', txt:''}
+    {k:'valgfri2', l:'Valgfri økt 2', txt:''},
+    {k:'valgfri3', l:'Valgfri økt 3', txt:''}
   ];
 }
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -378,8 +379,8 @@ function renderUkesplan(){
     chips.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
     let html2='';
     const alleOkter=runOkter(w.uke);
-    const fasteLop=alleOkter.filter(o=>o.k!=='valgfri1'&&o.k!=='valgfri2');
-    const valgfrie=alleOkter.filter(o=>o.k==='valgfri1'||o.k==='valgfri2');
+    const fasteLop=alleOkter.filter(o=>o.k!=='valgfri1'&&o.k!=='valgfri2'&&o.k!=='valgfri3');
+    const valgfrie=alleOkter.filter(o=>o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3');
     function runChip(o){
       const custom=(loggL[w.uke+'_'+o.k]||{}).type;
       html2+=chip(custom||runLabel[o.k]||o.l, runStatus(w.uke,o.k), 'var(--a)');
@@ -452,16 +453,16 @@ function renderWeek(n){
     }
     else if(o.k==='roligLop'){badge='Rolig løp + ST';bcls='rol';}
     else if(o.k==='langtur'){badge='Langtur';bcls='rol';}
-    else if(o.k==='valgfri1'||o.k==='valgfri2'){badge='Valgfri';bcls='rol';}
+    else if(o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3'){badge='Valgfri';bcls='rol';}
     const sv=loggL[n+'_'+o.k]||{};
-    const tittel=(o.k==='valgfri1'||o.k==='valgfri2')?(sv.type||o.l):o.l;
-    if((o.k==='valgfri1'||o.k==='valgfri2')&&sv.watt) rest.push('Snitt watt: '+sv.watt+' W');
+    const tittel=(o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3')?(sv.type||o.l):o.l;
+    if((o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3')&&sv.watt) rest.push('Snitt watt: '+sv.watt+' W');
     card(tittel, badge, bcls, rest.length?rest:['–']);
   }
 
   const alleOkter=runOkter(n);
-  const fasteLop=alleOkter.filter(o=>o.k!=='valgfri1'&&o.k!=='valgfri2');
-  const valgfrie=alleOkter.filter(o=>o.k==='valgfri1'||o.k==='valgfri2');
+  const fasteLop=alleOkter.filter(o=>o.k!=='valgfri1'&&o.k!=='valgfri2'&&o.k!=='valgfri3');
+  const valgfrie=alleOkter.filter(o=>o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3');
 
   // Løpeøkter
   fasteLop.forEach(runCard);
@@ -577,7 +578,7 @@ function renderStats(){
   if(!sb){console.error('stats-body not found');return;}
   sb.innerHTML='';
 
-  const loktKeys=['intervall','roligLop','langtur','valgfri1','valgfri2','race'];
+  const loktKeys=['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3','race'];
   let totalKm=0,totalUtfort=0,totalIkke=0,totalSecs=0;
   const roligPulsList=[],intervallPulsList=[],folList=[],roligTempoList=[];
 
@@ -647,7 +648,7 @@ function renderStats(){
     let list=[];
     ['roligLop','langtur'].forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if(sv.sn)list.push(parseFloat(sv.sn));});
     if(list.length) pulsData.push({uke:w.uke,puls:Math.round(list.reduce((a,b)=>a+b,0)/list.length)});
-    const folList2=['roligLop','langtur','intervall','valgfri1','valgfri2'].map(k=>loggL[w.uke+'_'+k]||{}).filter(sv=>sv.fol).map(sv=>parseFloat(sv.fol));
+    const folList2=['roligLop','langtur','intervall','valgfri1','valgfri2','valgfri3'].map(k=>loggL[w.uke+'_'+k]||{}).filter(sv=>sv.fol).map(sv=>parseFloat(sv.fol));
     if(folList2.length) folData2.push({uke:w.uke,fol:Math.round(folList2.reduce((a,b)=>a+b,0)/folList2.length*10)/10});
   });
 
@@ -694,7 +695,7 @@ function renderStats(){
   W.forEach(w=>{
     if(!sovnByUke[w.uke]) return;
     const folUke=[];
-    ['roligLop','langtur','intervall','valgfri1','valgfri2'].forEach(k=>{
+    ['roligLop','langtur','intervall','valgfri1','valgfri2','valgfri3'].forEach(k=>{
       const sv=loggL[w.uke+'_'+k]||{};
       if(sv.fol) folUke.push(parseFloat(sv.fol));
     });
@@ -707,7 +708,7 @@ function renderStats(){
   // Streak: consecutive weeks with at least one logged session
   let streak=0, streakActive=true;
   const loggedWeekNums=W.map(w=>{
-    const loktK=['intervall','roligLop','langtur','valgfri1','valgfri2','race'];
+    const loktK=['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3','race'];
     return loktK.some(k=>{const sv=loggL[w.uke+'_'+k]||{};return sv['var']||sv.tid||sv.sn||sv.km;});
   });
   for(let i=loggedWeekNums.length-1;i>=0;i--){
@@ -1253,7 +1254,7 @@ function renderReg(){
   loktMap.forEach(o=>{
     const txt=o.txt||'';
     const key=`${uke}_${o.k}`;const sv=loggL[key]||{};
-    const isValgfri=(o.k==='valgfri1'||o.k==='valgfri2');
+    const isValgfri=(o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3');
     const visningsnavn=isValgfri?(sv.type||o.l):o.l;
     const card=document.createElement('div');
     card.className='scard';
@@ -1407,7 +1408,7 @@ function renderReg(){
         tbody.appendChild(snittr);
       }
     }
-    if(o.k==='valgfri1'||o.k==='valgfri2'){ vSection.appendChild(card); }
+    if(o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3'){ vSection.appendChild(card); }
     else { lSection.appendChild(card); }
   });
   // If no running session today, show message
@@ -2366,12 +2367,12 @@ function eksporterExcel(){
     const lopRows=[];
     for(let uke=1;uke<=24;uke++){
       const w=W.find(x=>x.uke===uke)||{};
-      ['intervall','roligLop','langtur','valgfri1','valgfri2'].forEach(type=>{
+      ['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3'].forEach(type=>{
         const sv=loggL[uke+'_'+type];
         if(!sv) return;
         const harData=sv['var']||sv.km||sv.tempo||sv.sn||sv.mx||sv.fol||sv.kom||sv.watt||sv.ikkeUtfort;
         if(!harData) return;
-        const isValgfri=(type==='valgfri1'||type==='valgfri2');
+        const isValgfri=(type==='valgfri1'||type==='valgfri2'||type==='valgfri3');
         const typeNavn=isValgfri?(sv.type||('Valgfri økt '+type.slice(-1))):runLabelX[type];
         lopRows.push({
           'Uke':uke,'Periode':w.dato||'','Type':typeNavn,'Dato':sv.dato||'',
