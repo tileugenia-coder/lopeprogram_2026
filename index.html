@@ -1508,9 +1508,12 @@ function renderReg(){
     const _strFirstName=_strFirst.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
     const strSv2=loggS[uke+'_'+okt+'_'+_strFirstName+'_s1']||{};
     const strLogged2=!!(strSv2.vekt||strSv2.reps);
+    const strIkke2=!strLogged2&&!!strSv2.ikkeUtfort;
     if(strLogged2) card.classList.add('hpm-collapsed','hpm-done');
-    const strSum='✓ Utført';
-    card.innerHTML=(strLogged2?`<div class="hpm-preview" onclick="this.closest('.scard').classList.remove('hpm-collapsed')"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:500;color:var(--t)">Styrke ${okt}</span><span style="font-size:10px;color:var(--a2)">✓ Utført</span></div><span style="color:var(--a);white-space:nowrap">↕ Rediger</span></div>`:'')
+    if(strIkke2) card.classList.add('hpm-collapsed','hpm-ikke');
+    const strSum=strIkke2?'✗ Ikke utført':'✓ Utført';
+    const strSumColor=strIkke2?'var(--or)':'var(--a2)';
+    card.innerHTML=((strLogged2||strIkke2)?`<div class="hpm-preview" onclick="this.closest('.scard').classList.remove('hpm-collapsed')"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:500;color:var(--t)">Styrke ${okt}</span><span style="font-size:10px;color:${strSumColor}">${strSum}</span></div><span style="color:var(--a);white-space:nowrap">↕ Rediger</span></div>`:'')
       +`<div class="hpm-body"><div class="scardh" style="background:var(--s2)"><h3>Styrke ${okt} – ${STR_LABEL[okt]} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:var(--b);color:var(--m);">Planlagt denne uken</span></h3><span>Styrke ${okt}</span></div>`;
 
     const tbl=document.createElement('table');tbl.className='stbl';
