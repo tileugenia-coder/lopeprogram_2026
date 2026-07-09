@@ -989,12 +989,15 @@ function renderStats(){
   let noenStyrkeData=false;
   ['A','B','C'].forEach(okt=>{
     const src=strSrc(okt);
-    // Collect all unique exercise names
+    // Collect all unique exercise names – kun gjeldende program (uke 10+)
     const exNames=[];
-    Object.values(src).forEach(ovs=>ovs.forEach(ov=>{
-      const n=ov.split(' – ')[0];
-      if(!exNames.includes(n)) exNames.push(n);
-    }));
+    Object.entries(src).forEach(([ukeStr,ovs])=>{
+      if(parseInt(ukeStr)<10) return;
+      ovs.forEach(ov=>{
+        const n=ov.split(' – ')[0];
+        if(!exNames.includes(n)) exNames.push(n);
+      });
+    });
 
     // Build data per exercise
     const exWithData=[];
@@ -1003,6 +1006,7 @@ function renderStats(){
       const pts=[];
       Object.entries(src).forEach(([ukeStr,ovs])=>{
         const uke=parseInt(ukeStr);
+        if(uke<10) return;
         const idx=ovs.findIndex(o=>o.split(' – ')[0]===name);
         if(idx===-1) return;
         const plan=ovs[idx].split(' – ').slice(1).join(' – ');
@@ -1261,7 +1265,8 @@ function renderReg(){
     const cardId='hpm_'+((`${uke}_${o.k}`).replace(/_/g,'-'));
     card.id=cardId;
     const cksv2=loggL[`${uke}_${o.k}`]||{};
-    const ckLogged2=cksv2['var']||cksv2.tid||cksv2.sn||cksv2.km||cksv2.watt;
+    const ckHasDrags=cksv2.drags&&Object.values(cksv2.drags).some(d=>d&&(d.tempo||d.puls||d.makspuls));
+    const ckLogged2=cksv2['var']||cksv2.tid||cksv2.sn||cksv2.km||cksv2.watt||ckHasDrags;
     const ckIkke2=cksv2.ikkeUtfort;
     if(ckLogged2) card.classList.add('hpm-collapsed','hpm-done');
     if(ckIkke2) card.classList.add('hpm-collapsed','hpm-ikke');
