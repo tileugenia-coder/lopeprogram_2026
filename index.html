@@ -499,10 +499,10 @@ function upLDrag(k,dragNum,field,val){
   if(!loggL[k].drags) loggL[k].drags={};
   if(!loggL[k].drags[dragNum]) loggL[k].drags[dragNum]={};
   loggL[k].drags[dragNum][field]=val;
-  // Update snitt display
+  // Update snitt display – sjekk alltid alle 6 mulige drag, uansett hvilke som er fylt ut
   const baseId=k.replace(/_/g,'-');
   const drags=loggL[k].drags;
-  const num=Object.keys(drags).length;
+  const num=6;
   const tEl=document.getElementById('snitt-tempo-'+baseId);
   const pEl=document.getElementById('snitt-puls-'+baseId);
   const mEl=document.getElementById('snitt-makspuls-'+baseId);
@@ -1763,7 +1763,10 @@ function ikkeUtfort(key, msgId){
     localStorage.setItem('hpm_l',JSON.stringify(loggL));
         const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
-    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
+    hpmCollapse(key.replace(/_/g,'-'), '✗ Ikke utført', true);
+    setTimeout(()=>{
+      document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
+    }, 800);
 
   }catch(e){}
 }
@@ -1784,7 +1787,21 @@ function ikkeUtfortStr(uke, okt, msgId){
     localStorage.setItem('hpm_s',JSON.stringify(loggS));
         const el=document.getElementById(msgId);
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
-    document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
+    const c=document.getElementById('hpm-str-'+uke+'-'+okt);
+    if(c){
+      c.classList.add('hpm-collapsed','hpm-ikke');
+      let pv=c.querySelector('.hpm-preview');
+      if(!pv){
+        pv=document.createElement('div');
+        pv.className='hpm-preview';
+        pv.onclick=function(){hpmExpand(this);};
+        c.insertBefore(pv,c.firstChild);
+      }
+      pv.innerHTML='<div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:500;color:var(--t)">Styrke '+okt+'</span><span style="font-size:10px;color:var(--or)">✗ Ikke utført</span></div><span style="color:var(--a);white-space:nowrap">↕ Rediger</span>';
+    }
+    setTimeout(()=>{
+      document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
+    }, 800);
   }catch(e){}
 }
 
