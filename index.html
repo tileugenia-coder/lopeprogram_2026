@@ -326,10 +326,9 @@ function gw(n){curW=n;document.querySelector('#wsel').value=n;rdw();document.que
 
 function renderUkesplan(){
   const g=document.getElementById('ugrid');
-  g.className='';                 // ikke lenger dag-rutenett
-  g.style.display='flex';
-  g.style.flexDirection='column';
-  g.style.gap='10px';
+  g.className='ugrid';
+  g.style.display='grid';
+  g.style.gridTemplateColumns='64px 96px 1fr';
   g.innerHTML='';
 
   const runLabel={intervall:'Intervall',roligLop:'Rolig løp + ST',langtur:'Langtur'};
@@ -337,7 +336,7 @@ function renderUkesplan(){
   function runStatus(uke,k){
     const sv=loggL[uke+'_'+k]||{};
     if(sv.ikkeUtfort) return 'ikke';
-    if(sv['var']||sv.tid||sv.sn||sv.km||sv.tempo||sv.fol||sv.watt) return 'done';
+    if(sv['var']||sv.tid||sv.sn||sv.km||sv.tempo||sv.fol||sv.watt||sv.type) return 'done';
     return 'open';
   }
   function raceStatus(uke){
@@ -364,35 +363,52 @@ function renderUkesplan(){
       +'<span style="color:var(--t);text-decoration:'+deco+';opacity:'+op+'">'+label+'</span></span>';
   }
 
+  // Header-rad (samme stil som det gamle dag-rutenettet)
+  ['Uke','Periode','Økter'].forEach(h=>{
+    const d=document.createElement('div');
+    d.className='ucell uhdr';
+    d.textContent=h;
+    g.appendChild(d);
+  });
+
   W.forEach(w=>{
     const race=RC.find(r=>r.uke===w.uke);
-    const card=document.createElement('div');
-    card.style.cssText='border:1px solid var(--b);border-radius:8px;padding:12px 14px;background:var(--s)';
 
-    const head=document.createElement('div');
-    head.style.cssText='display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px';
-    head.innerHTML='<span class="uke-n" style="cursor:pointer;font-weight:700;color:var(--a);font-size:13px" onclick="gw('+w.uke+')">Uke '+w.uke+' · '+w.kaluke+'</span>'
-      +'<span style="font-size:11px;color:var(--m)">'+w.dato+'</span>';
-    card.appendChild(head);
+    const c1=document.createElement('div');
+    c1.className='ucell uke-n';
+    c1.onclick=()=>gw(w.uke);
+    c1.innerHTML='Uke '+w.uke+'<span style="font-size:9px;color:var(--m);font-weight:400">'+w.kaluke+'</span>';
+    g.appendChild(c1);
 
-    const chips=document.createElement('div');
-    chips.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
+    const c2=document.createElement('div');
+    c2.className='ucell';
+    c2.style.fontWeight='400';
+    c2.style.fontSize='10px';
+    c2.style.color='var(--m)';
+    c2.textContent=w.dato;
+    g.appendChild(c2);
+
+    const c3=document.createElement('div');
+    c3.className='ucell';
+    c3.style.cssText='flex-wrap:wrap;gap:6px;padding:8px';
     let html2='';
     const alleOkter=runOkter(w.uke);
     const fasteLop=alleOkter.filter(o=>o.k!=='valgfri1'&&o.k!=='valgfri2'&&o.k!=='valgfri3');
     const valgfrie=alleOkter.filter(o=>o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3');
     function runChip(o){
       const custom=(loggL[w.uke+'_'+o.k]||{}).type;
-      html2+=chip(custom||runLabel[o.k]||o.l, runStatus(w.uke,o.k), 'var(--a)');
+      const isValgfriChip=(o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3');
+      let status=runStatus(w.uke,o.k);
+      if(isValgfriChip && w.uke<10 && status==='open') status='ikke';
+      html2+=chip(custom||runLabel[o.k]||o.l, status, 'var(--a)');
     }
     fasteLop.forEach(runChip);
     if(race) html2+=chip('🏁 '+race.navn+' '+race.km+' km', raceStatus(w.uke), 'var(--or)');
     strOkter(w.uke).forEach(okt=>{ html2+=chip('Styrke '+okt+' · '+STR_LABEL[okt], strStatus(w.uke,okt), 'var(--pu)'); });
     valgfrie.forEach(runChip);
     if(!html2) html2='<span style="font-size:11px;color:var(--m);font-style:italic">Hvileuke</span>';
-    chips.innerHTML=html2;
-    card.appendChild(chips);
-    g.appendChild(card);
+    c3.innerHTML=html2;
+    g.appendChild(c3);
   });
 }
 
@@ -580,12 +596,19 @@ function renderStats(){
 
   const loktKeys=['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3','race'];
   let totalKm=0,totalUtfort=0,totalIkke=0,totalSecs=0;
+  let utfortLop=0,utfortStyrke=0,utfortValgfri=0;
   const roligPulsList=[],intervallPulsList=[],folList=[],roligTempoList=[];
 
   W.forEach(w=>{
     loktKeys.forEach(k=>{
       const sv=loggL[w.uke+'_'+k]||{};
-      if(sv['var']||sv.tid||sv.sn||sv.km) totalUtfort++;
+      const harDrags=k==='intervall'&&sv.drags&&Object.values(sv.drags).some(d=>d&&(d.tempo||d.puls||d.makspuls));
+      const erUtfort=!sv.ikkeUtfort && (sv['var']||sv.tid||sv.sn||sv.km||sv.tempo||sv.watt||sv.type||harDrags);
+      if(erUtfort){
+        totalUtfort++;
+        if(k==='valgfri1'||k==='valgfri2'||k==='valgfri3') utfortValgfri++;
+        else utfortLop++;
+      }
       // Sum total time
       const timeStr=sv['var']||sv.tid||'';
       if(timeStr){
@@ -619,7 +642,7 @@ function renderStats(){
       const _sn=ovs[0].split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-');
       const _fk=w.uke+'_'+okt+'_'+_sn+'_s1';
       const sv=loggS[_fk]||{};
-      if(sv.vekt||sv.reps) totalUtfort++;
+      if(!sv.ikkeUtfort && (sv.vekt||sv.reps)){ totalUtfort++; utfortStyrke++; }
       // Add strength varighet to totalSecs and følelse to folList
       const strVarSk=w.uke+'_'+okt+'_varighet';
       const strVarSv=loggS[strVarSk]||{};
@@ -732,7 +755,8 @@ function renderStats(){
   const cards=[
     {l:'Totalt løpt',v:totalKm+' km',c:'var(--a)'},
     {l:'Total treningstid',v:totalTimeStr,c:'var(--a2)'},
-    {l:'Gjennomført',v:totalUtfort+' økter',c:'var(--a2)'},
+    {l:'Gjennomført',v:totalUtfort+(totalUtfort===1?' økt':' økter'),c:'var(--a2)',
+      sub:'Løp '+utfortLop+' · Styrke '+utfortStyrke+' · Valgfri '+utfortValgfri},
     {l:'Snitt puls (rolig)',v:snittRoligPuls?snittRoligPuls+' bpm':'–',c:'var(--or)'},
     {l:'Snitt tempo (rolig)',v:snittTempoStr||'–',c:'var(--a2)'},
     {l:'Snitt puls (intervall)',v:snittIntervallPuls?snittIntervallPuls+' bpm':'–',c:'#e05b00'},
@@ -740,14 +764,14 @@ function renderStats(){
     {l:'Snitt søvn',v:snittSovn?snittSovn:'–',c:'#2a7abf'},
     {l:'Snitt hvilepuls',v:snittHvilepuls?snittHvilepuls+' bpm':'–',c:'#2a7abf'},
     {l:'Lavest hvilepuls',v:minHvilepuls?minHvilepuls+' bpm':'–',c:'#2a7abf'},
-    {l:'Netter registrert',v:sovnNetter?sovnNetter+' netter':'–',c:'#2a7abf'},
+    {l:'Netter registrert',v:sovnNetter?sovnNetter+(sovnNetter===1?' natt':' netter'):'–',c:'#2a7abf'},
   ];
   const grid=document.createElement('div');
   grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:28px';
   cards.forEach(c=>{
     const d=document.createElement('div');
     d.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:14px';
-    d.innerHTML='<div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+c.l+'</div><div style="font-size:22px;font-weight:500;color:'+c.c+'">'+c.v+'</div>';
+    d.innerHTML='<div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+c.l+'</div><div style="font-size:22px;font-weight:500;color:'+c.c+'">'+c.v+'</div>'+(c.sub?'<div style="font-size:10px;color:var(--m);margin-top:4px">'+c.sub+'</div>':'');
     grid.appendChild(d);
   });
   sb.appendChild(grid);
@@ -1266,7 +1290,7 @@ function renderReg(){
     card.id=cardId;
     const cksv2=loggL[`${uke}_${o.k}`]||{};
     const ckHasDrags=cksv2.drags&&Object.values(cksv2.drags).some(d=>d&&(d.tempo||d.puls||d.makspuls));
-    const ckLogged2=cksv2['var']||cksv2.tid||cksv2.sn||cksv2.km||cksv2.watt||ckHasDrags;
+    const ckLogged2=cksv2['var']||cksv2.tid||cksv2.sn||cksv2.km||cksv2.watt||cksv2.type||ckHasDrags;
     const ckIkke2=cksv2.ikkeUtfort;
     if(isValgfri){
       card.classList.add('hpm-collapsed');
@@ -1308,7 +1332,7 @@ function renderReg(){
         ${isValgfri?`
         <div style="grid-column:1/-1">
           <div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Type / navn på økt</div>
-          <input type="text" placeholder="f.eks. Yoga, Spinning, Hyrox, gruppetime..." value="${sv.type||''}" onchange="upL('${key}','type',this.value);renderReg();" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
+          <input type="text" placeholder="f.eks. Elipse, Yoga, Spinning, Hyrox, gruppetime..." value="${sv.type||''}" onchange="upL('${key}','type',this.value);renderReg();" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%">
         </div>
         `:''}
         <div>${datoInput(loggL,key,'upLDato')}</div>
@@ -1495,6 +1519,10 @@ function renderReg(){
           <input type="number" min="1" max="5" placeholder="1–5" value="${rsv.fol||''}" onchange="upL('${rKey}','fol',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
         <div style="grid-column:1/-1"><div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Kommentar</div>
           <input type="text" placeholder="Kommentar..." value="${rsv.kom||''}" onchange="upL('${rKey}','kom',this.value)" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%"></div>
+        <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;padding-top:4px">
+          <input type="checkbox" id="ekskl_${rKey}" ${rsv.ekskluderPrognose?'checked':''} onchange="upL('${rKey}','ekskluderPrognose',this.checked)" style="width:15px;height:15px;accent-color:var(--or);cursor:pointer">
+          <label for="ekskl_${rKey}" style="font-size:11px;color:var(--m);cursor:pointer">Ikke bruk dette resultatet i løpsprognosen</label>
+        </div>
         <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:4px">
           <button class="sbtn" onclick="saveOkt('${rKey}','msg_${rKey}');setTimeout(()=>{const sv=loggL['${rKey}']||{};const p=[];if(sv.tid)p.push(sv.tid);if(sv.km)p.push(sv.km+' km');if(sv.tempo)p.push(sv.tempo+'/km');hpmCollapse('${rKey}'.replace(/_/g,'-'),p.join(' · ')||'✓ Utført',false);},1200)" style="padding:6px 14px">Lagre løp</button>
           <button onclick="ikkeUtfort('${rKey}','msg_${rKey}');setTimeout(()=>hpmCollapse('${rKey}'.replace(/_/g,'-'),'✗ Ikke utført',true),1200)" style="background:none;border:1px solid var(--b);color:var(--m);font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer">Ikke utført</button>
@@ -2147,6 +2175,7 @@ function renderPrognose(){
   // From races
   racesList.forEach(r=>{
     const sv=loggL[r.uke+'_race']||{};
+    if(sv.ekskluderPrognose) return;
     const sek=tidTilSek(sv.tid);
     const dist=parseFloat(sv.km)||r.km;
     if(sek&&dist) refs.push({kilde:r.navn+' ('+r.dato+')',km:dist,sek,type:'løp'});
