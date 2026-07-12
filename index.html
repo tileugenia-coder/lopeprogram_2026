@@ -273,7 +273,7 @@ const SB={"1": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", 
 const SC={"10": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "11": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "12": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "13": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "14": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "15": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "16": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "17": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "18": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "19": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "20": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "21": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "22": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "23": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "24": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"]};
 
 // ── Styrke-/løpshjelpere (fleksible dager, A/B/C) ────────────────────────
-const STR_LABEL={A:'helkropp',B:'underkropp',C:'overkropp'};
+const STR_LABEL={A:'underkropp + core',B:'underkropp + core',C:'overkropp'};
 function strSrc(o){return o==='A'?SA:o==='B'?SB:SC;}
 function strOkter(uke){
   if(uke>=10) return ['A','B','C'];
@@ -1188,16 +1188,16 @@ function renderStyrke(){
 
   const note=document.createElement('p');
   note.style.cssText='font-size:11px;color:var(--m);margin:0 0 16px;font-style:italic';
-  note.textContent='Nye program A/B/C (helkropp / underkropp / overkropp) gjelder fra uke 10. Fleksible dager – tre styrkeøkter per uke. Uke 1–9 viser tidligere program.';
+  note.textContent='Nye program A/B/C (underkropp + core / underkropp + core / overkropp) gjelder fra uke 10. Fleksible dager – tre styrkeøkter per uke. Uke 1–9 viser tidligere program.';
   sb.appendChild(note);
 
-  buildTable('Styrke A – helkropp (fra uke 10)','var(--a)','var(--s2)',[
+  buildTable('Styrke A – underkropp + core (fra uke 10)','var(--a)','var(--s2)',[
     ['1','Hofte-stabiliserende step-up'],['2','Utfall fra kasse'],
     ['3','Markløft'],['4','B-stance hip thrust'],
     ['5','Supermann'],['6','Planke'],['7','Ett-bens tåhev']
   ],SA);
 
-  buildTable('Styrke B – underkropp (fra uke 10)','var(--pu)','var(--s2)',[
+  buildTable('Styrke B – underkropp + core (fra uke 10)','var(--pu)','var(--s2)',[
     ['1','Knebøy i Smith'],['2','Bulgarsk utfall'],
     ['3','Ett-bens markløft'],['4','Ett-bens hip thrust'],
     ['5','Skrå planke med dip'],['6','Tåhev i Smith']
@@ -1268,8 +1268,14 @@ function renderReg(){
     const ckHasDrags=cksv2.drags&&Object.values(cksv2.drags).some(d=>d&&(d.tempo||d.puls||d.makspuls));
     const ckLogged2=cksv2['var']||cksv2.tid||cksv2.sn||cksv2.km||cksv2.watt||ckHasDrags;
     const ckIkke2=cksv2.ikkeUtfort;
-    if(ckLogged2) card.classList.add('hpm-collapsed','hpm-done');
-    if(ckIkke2) card.classList.add('hpm-collapsed','hpm-ikke');
+    if(isValgfri){
+      card.classList.add('hpm-collapsed');
+      if(ckLogged2) card.classList.add('hpm-done');
+      if(ckIkke2) card.classList.add('hpm-ikke');
+    }else{
+      if(ckLogged2) card.classList.add('hpm-collapsed','hpm-done');
+      if(ckIkke2) card.classList.add('hpm-collapsed','hpm-ikke');
+    }
     const ckSum=[];
     if(cksv2.km) ckSum.push(cksv2.km+' km');
     if(cksv2.tempo) ckSum.push(cksv2.tempo+'/km');
@@ -1277,11 +1283,13 @@ function renderReg(){
     if(cksv2.watt) ckSum.push(cksv2.watt+' W');
     if(cksv2['var']) ckSum.push(cksv2['var']+' min');
     if(cksv2.tid) ckSum.push(cksv2.tid);
+    const previewColor=ckIkke2?'var(--or)':(ckLogged2?'var(--a2)':'var(--m)');
+    const previewText=ckIkke2?'✗ Ikke utført':(ckLogged2?(ckSum.join(' · ')||'✓ Utført'):'Ikke registrert – trykk for å legge til');
     card.innerHTML=`
       <div class="hpm-preview" onclick="hpmExpand(this)">
         <div style="display:flex;flex-direction:column;gap:2px">
           <span style="font-weight:500;color:var(--t)">${visningsnavn}</span>
-          <span style="font-size:10px;color:${ckIkke2?'var(--or)':'var(--a2)'}">${ckIkke2?'✗ Ikke utført':ckSum.join(' · ')||'✓ Utført'}</span>
+          <span style="font-size:10px;color:${previewColor}">${previewText}</span>
         </div>
         <span style="color:var(--a);white-space:nowrap">↕ Rediger</span>
       </div>
