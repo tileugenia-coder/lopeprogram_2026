@@ -2375,13 +2375,13 @@ function renderProgresjonTab(){
   const hdr=document.createElement('div');
   hdr.style.cssText='margin-bottom:20px';
   hdr.innerHTML='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:900;color:var(--a);margin-bottom:4px">Løpeprogresjon</h2>'
-    +'<p style="font-size:11px;color:var(--m)">Basert på faktisk loggede løpeøkter – tempo, tid og distanse, økt for økt og uke for uke.</p>';
+    +'<p style="font-size:11px;color:var(--m)">Basert på loggede løpeøkter – tempo, varighet og distanse, økt for økt og uke for uke.</p>';
   pb.appendChild(hdr);
 
   // ── Sammendragskort ──
   const cardDefs=[
     {l:'Snitt tempo',v:curStats?fmtTempo(curStats.tempoAvg):'–',d:dTempoCard,goodDir:-1},
-    {l:'Total tid/uke',v:curStats?fmtVar(curStats.varPerUke):'–',d:dVarCard,goodDir:1},
+    {l:'Total varighet/uke',v:curStats?fmtVar(curStats.varPerUke):'–',d:dVarCard,goodDir:1},
     {l:'Total km/uke',v:curStats?fmtKm(curStats.kmPerUke):'–',d:dKmCard,goodDir:1},
   ];
   const cardGrid=document.createElement('div');
@@ -2402,7 +2402,7 @@ function renderProgresjonTab(){
   // ── Metrikk-bryter + graf ──
   const togWrap=document.createElement('div');
   togWrap.style.cssText='display:flex;gap:6px;margin-bottom:10px';
-  const metrics=[{k:'tempo',l:'Tempo'},{k:'tid',l:'Tid'},{k:'km',l:'Km'}];
+  const metrics=[{k:'tempo',l:'Tempo'},{k:'tid',l:'Varighet'},{k:'km',l:'Km'}];
   let curMetric='tempo';
   metrics.forEach(m=>{
     const btn=document.createElement('span');
@@ -2491,7 +2491,7 @@ function renderProgresjonTab(){
   const tbl=document.createElement('table');
   tbl.style.cssText='width:100%;border-collapse:collapse;font-size:12px';
   const thead=document.createElement('tr');
-  ['Dato','Type','Tempo','Tid','Km'].forEach(h=>{
+  ['Dato','Type','Tempo','Varighet','Km'].forEach(h=>{
     const th=document.createElement('th');
     th.textContent=h;
     th.style.cssText='text-align:left;padding:6px 8px;color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b)';
