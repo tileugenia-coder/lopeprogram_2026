@@ -32,8 +32,7 @@ main{padding:20px 24px;max-width:1400px}
 .fl-T{border-left:3px solid #8a8a4a}.fl-N{border-left:3px solid #8a4a4a}
 .fl-D{border-left:3px solid var(--pu)}.fl-P{border-left:3px solid var(--a2)}
 
-.wsel{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.wsel select,.lctrl select{background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:7px 11px;border-radius:4px;cursor:pointer}
+.lctrl select{background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:7px 11px;border-radius:4px;cursor:pointer}
 .wnav{background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:14px;padding:5px 13px;border-radius:4px;cursor:pointer;transition:all .15s}
 .wnav:hover{border-color:var(--a);color:var(--a)}
 .winfo{background:var(--s2);border:1px solid var(--b);border-radius:6px;padding:11px 15px;margin-bottom:18px;display:flex;gap:22px;flex-wrap:wrap;font-size:11px}
@@ -166,11 +165,11 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
 </div>
 <nav>
   <button class="active" onclick="nav('reg',this)">Registrering</button>
-  <button onclick="nav('ukedetalj',this)">Ukesoversikt</button>
   <button onclick="nav('ukesplan',this)">Programplan</button>
   <button onclick="nav('stats',this)">Statistikk</button>
   <button onclick="nav('styrke',this)">Styrkeprogram</button>
   <button onclick="nav('prognose',this)">Prognose</button>
+  <button onclick="nav('progresjon',this)">Progresjon</button>
 </nav>
 <main>
 
@@ -178,15 +177,6 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
   <div style="overflow-x:auto"><div class="ugrid" id="ugrid"></div></div>
 </div>
 
-<div class="view" id="v-ukedetalj">
-  <div class="wsel">
-    <button class="wnav" onclick="cw(-1)">←</button>
-    <select id="wsel" onchange="rdw()"></select>
-    <button class="wnav" onclick="cw(1)">→</button>
-  </div>
-  <div class="winfo" id="winfo"></div>
-  <div class="wdet" id="wdet"></div>
-</div>
   <div style="overflow-x:auto">
   <table class="ltbl">
     
@@ -207,7 +197,7 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
 
 <div class="view active" id="v-reg">
   <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
-    <select id="reg-uke" onchange="renderReg();const wv=parseInt(this.value);if(wv){curW=wv;document.getElementById('wsel').value=wv;renderWeek(wv);}" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:7px 11px;border-radius:4px">
+    <select id="reg-uke" onchange="renderReg();" style="background:var(--s);border:1px solid var(--b);color:var(--t);font-family:'DM Mono',monospace;font-size:12px;padding:7px 11px;border-radius:4px">
       <option value="">Velg uke...</option>
     </select>
 
@@ -222,6 +212,10 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
 
 <div class="view" id="v-prognose">
   <div id="prognose-body"></div>
+</div>
+
+<div class="view" id="v-progresjon">
+  <div id="progresjon-body"></div>
 </div>
 </main>
 <script>
@@ -268,9 +262,9 @@ const PRE_RACE=[
 
 const SA={"2": ["Smith squat – 3×8", "Dead bug – 3×10", "Romanian deadlift (RDL) – 3×8", "Pallof press – 3×10", "Bulgarian split squat – 3×10", "Single-leg RDL – 3×10", "Leg extension – 3×12", "Single-leg calf raise – 3×15"], "3": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "4": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "5": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "6": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "7": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "8": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "9": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "10": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "11": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "12": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "13": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "14": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "15": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "16": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "17": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "18": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "19": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "20": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "21": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "22": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "23": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"], "24": ["Hofte-stabiliserende step-up – 3×10–12", "Utfall fra kasse – 3×6–8", "Markløft – 3×6–8", "B-stance hip thrust – 3×6–8", "Supermann – 3×maks reps", "Planke – 3×maks sek", "Ett-bens tåhev – 3×maks reps"]};
 
-const SB={"1": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "2": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "3": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "4": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "5": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "6": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "7": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "8": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "9": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "10": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "11": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "12": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "13": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "14": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "15": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "16": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "17": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "18": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "19": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "20": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "21": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "22": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "23": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"], "24": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×6–8"]};
+const SB={"1": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "2": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "3": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "4": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "5": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "6": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "7": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "8": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "9": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "10": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "11": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "12": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "13": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "14": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "15": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "16": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "17": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "18": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "19": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "20": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "21": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "22": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "23": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"], "24": ["Knebøy i Smith – 3×6–8", "Bulgarsk utfall – 3×6–8", "Ett-bens markløft – 3×6–8", "Ett-bens hip thrust – 3×6–8", "Skrå planke med dip – 3×6–8", "Tåhev i Smith – 3×maks reps"]};
 
-const SC={"10": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "11": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "12": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "13": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "14": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "15": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "16": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "17": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "18": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "19": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "20": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "21": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "22": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "23": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"], "24": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8"]};
+const SC={"10": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "11": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "12": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "13": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "14": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "15": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "16": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "17": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "18": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "19": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "20": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "21": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "22": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "23": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"], "24": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende skulderpress – 3×6–8", "En-arms brystpress med manualer – 3×6–8", "Roing med manualer – 3×6–8", "Tåhev – 3×maks reps"]};
 
 // ── Styrke-/løpshjelpere (fleksible dager, A/B/C) ────────────────────────
 const STR_LABEL={A:'underkropp + core',B:'underkropp + core',C:'overkropp'};
@@ -308,21 +302,24 @@ function datoInput(store,key,fn){
 let loggL={},loggS={};
 try{loggL=JSON.parse(localStorage.getItem('hpm_l')||'{}');}catch(e){}
 try{loggS=JSON.parse(localStorage.getItem('hpm_s')||'{}');}catch(e){}
-let curW=1;
 
 function nav(id,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('v-'+id).classList.add('active');
   btn.classList.add('active');
-  if(id==='ukedetalj') rdw();
   if(id==='ukesplan'){document.getElementById('ugrid').innerHTML='';renderUkesplan();}
   if(id==='styrke') renderStyrke();
   if(id==='stats') renderStats();
   if(id==='prognose') renderPrognose();
+  if(id==='progresjon') renderProgresjonTab();
 }
 
-function gw(n){curW=n;document.querySelector('#wsel').value=n;rdw();document.querySelectorAll('nav button')[1].click();}
+function gw(n){
+  document.getElementById('reg-uke').value=n;
+  renderReg();
+  document.querySelectorAll('nav button')[0].click();
+}
 
 function renderUkesplan(){
   const g=document.getElementById('ugrid');
@@ -412,92 +409,6 @@ function renderUkesplan(){
   });
 }
 
-function initWsel(){
-  const sel=document.getElementById('wsel');
-  W.forEach(w=>{const o=document.createElement('option');o.value=w.uke;o.textContent=`Uke ${w.uke} (${w.kaluke}) – ${w.dato}`;sel.appendChild(o);});
-}
-
-function cw(d){curW=Math.max(1,Math.min(24,curW+d));document.getElementById('wsel').value=curW;rdw();}
-
-function rdw(){
-  curW=parseInt(document.getElementById('wsel').value)||curW;
-  renderWeek(curW);
-}
-
-function rdwFromReg(){
-  // Called after save in Registrering - sync week to reg-uke
-  const regUke=parseInt(document.getElementById('reg-uke')?.value);
-  if(regUke){curW=regUke;document.getElementById('wsel').value=regUke;}
-  renderWeek(curW);
-}
-
-function renderWeek(n){
-  const w=W.find(x=>x.uke===n);if(!w)return;
-  document.getElementById('wsel').value=n;
-  const race=RC.find(r=>r.uke===n);
-  document.getElementById('winfo').innerHTML=`
-    <div class="ii"><div class="il">Uke</div><div class="iv ac">Uke ${n} (${w.kaluke})</div></div>
-    <div class="ii"><div class="il">Dato</div><div class="iv">${w.dato}</div></div>
-    ${race?`<div class="ii"><div class="il">Løp</div><div class="iv" style="color:var(--or)">🏁 ${race.navn} ${race.km} km</div></div>`:''}
-  `;
-  const det=document.getElementById('wdet');det.innerHTML='';
-  det.innerHTML='<div style="font-size:11px;color:var(--m);margin-bottom:10px">Fleksible dager – gjennomfør øktene når det passer i løpet av uken.</div>';
-
-  function card(title, badge, bcls, bodyLines){
-    const c=document.createElement('div');
-    c.className='dcard';
-    const body=bodyLines.filter(l=>l&&l.trim()!=='').map((l,i)=>i===0&&title?l:l).join('\n');
-    const fmt=bodyLines.filter(l=>l!==null).map(l=>{
-      if(l==='' ) return '';
-      if(l.startsWith('§H')) return '<strong style="color:var(--pu);display:block;margin-top:8px">'+l.slice(2)+'</strong>';
-      return l;
-    }).join('\n');
-    c.innerHTML='<div class="dhdr"><span class="dn">'+title+'</span><span class="dbadge '+bcls+'">'+badge+'</span></div><div class="dcont">'+fmt+'</div>';
-    det.appendChild(c);
-  }
-
-  function runCard(o){
-    let lines=o.txt.split('\n');
-    // fjern evt. innbakt styrke-seksjon
-    const strIdx=lines.findIndex(l=>l.trim().startsWith('Styrke '));
-    if(strIdx>=0) lines=lines.slice(0,strIdx);
-    // dropp første linje (typenavn) – vises som tittel
-    const rest=lines.slice(1).filter(l=>l.trim()!=='');
-    let badge='',bcls='rol';
-    if(o.k==='intervall'){badge='Intervall';bcls='int';
-      rest.push('Inntil 6 drag – fritt antall');
-    }
-    else if(o.k==='roligLop'){badge='Rolig løp + ST';bcls='rol';}
-    else if(o.k==='langtur'){badge='Langtur';bcls='rol';}
-    else if(o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3'){badge='Valgfri';bcls='rol';}
-    const sv=loggL[n+'_'+o.k]||{};
-    const tittel=(o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3')?(sv.type||o.l):o.l;
-    if((o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3')&&sv.watt) rest.push('Snitt watt: '+sv.watt+' W');
-    card(tittel, badge, bcls, rest.length?rest:['–']);
-  }
-
-  const alleOkter=runOkter(n);
-  const fasteLop=alleOkter.filter(o=>o.k!=='valgfri1'&&o.k!=='valgfri2'&&o.k!=='valgfri3');
-  const valgfrie=alleOkter.filter(o=>o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3');
-
-  // Løpeøkter
-  fasteLop.forEach(runCard);
-
-  // Race
-  if(race){
-    card('🏁 '+race.navn, 'Løp '+race.km+' km', 'lop', ['Dato: '+race.dato]);
-  }
-
-  // Styrkeøkter A/B/C
-  strOkter(n).forEach(okt=>{
-    const ovs=strSrc(okt)[String(n)]||[];
-    if(!ovs.length) return;
-    card('Styrke '+okt+' – '+STR_LABEL[okt], 'Styrke', 'str', ovs);
-  });
-
-  // Valgfrie økter
-  valgfrie.forEach(runCard);
-}
 
 function normalizeTime(v){
   if(!v) return v;
@@ -597,6 +508,7 @@ function renderStats(){
   const loktKeys=['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3','race'];
   let totalKm=0,totalUtfort=0,totalIkke=0,totalSecs=0;
   let utfortLop=0,utfortStyrke=0,utfortValgfri=0;
+  let ikkeLop=0,ikkeStyrke=0,ikkeValgfri=0;
   const roligPulsList=[],intervallPulsList=[],folList=[],roligTempoList=[];
 
   W.forEach(w=>{
@@ -616,7 +528,11 @@ function renderStats(){
         if(p.length===3) totalSecs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);
         else if(p.length===2) totalSecs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);
       }
-      if(sv.ikkeUtfort) totalIkke++;
+      if(sv.ikkeUtfort){
+        totalIkke++;
+        if(k==='valgfri1'||k==='valgfri2'||k==='valgfri3') ikkeValgfri++;
+        else ikkeLop++;
+      }
       if(sv.km) totalKm+=parseFloat(sv.km)||0;
       // Snitt puls fra rolig løpetur og langtur
       if((k==='roligLop'||k==='langtur')&&sv.sn) roligPulsList.push(parseFloat(sv.sn));
@@ -648,7 +564,7 @@ function renderStats(){
       const strVarSv=loggS[strVarSk]||{};
       if(strVarSv.var){const p=strVarSv.var.split(':');if(p.length===3)totalSecs+=parseInt(p[0]||0)*3600+parseInt(p[1]||0)*60+parseInt(p[2]||0);else if(p.length===2)totalSecs+=parseInt(p[0]||0)*60+parseInt(p[1]||0);}
       if(strVarSv.fol) folList.push(parseFloat(strVarSv.fol));
-      if(sv.ikkeUtfort) totalIkke++;
+      if(sv.ikkeUtfort){ totalIkke++; ikkeStyrke++; }
     });
   });
   totalKm=Math.round(totalKm*10)/10;
@@ -756,7 +672,8 @@ function renderStats(){
     {l:'Totalt løpt',v:totalKm+' km',c:'var(--a)'},
     {l:'Total treningstid',v:totalTimeStr,c:'var(--a2)'},
     {l:'Gjennomført',v:totalUtfort+(totalUtfort===1?' økt':' økter'),c:'var(--a2)',
-      sub:'Løp '+utfortLop+' · Styrke '+utfortStyrke+' · Valgfri '+utfortValgfri},
+      sub:'Løp '+utfortLop+' · Styrke '+utfortStyrke+' · Valgfri '+utfortValgfri
+        +'<br><span style="color:var(--or)">Ikke utført: Løp '+ikkeLop+' · Styrke '+ikkeStyrke+'</span>'},
     {l:'Snitt puls (rolig)',v:snittRoligPuls?snittRoligPuls+' bpm':'–',c:'var(--or)'},
     {l:'Snitt tempo (rolig)',v:snittTempoStr||'–',c:'var(--a2)'},
     {l:'Snitt puls (intervall)',v:snittIntervallPuls?snittIntervallPuls+' bpm':'–',c:'#e05b00'},
@@ -1230,7 +1147,7 @@ function renderStyrke(){
   buildTable('Styrke C – overkropp (fra uke 10)','var(--a2)','var(--s2)',[
     ['1','Push-ups'],['2','Nedtrekk'],
     ['3','Sittende skulderpress'],['4','En-arms brystpress med manualer'],
-    ['5','Roing med manualer']
+    ['5','Roing med manualer'],['6','Tåhev']
   ],SC);
 }
 
@@ -1245,8 +1162,6 @@ function initReg(){
   const curUke=Math.min(24,Math.max(1,Math.floor(diffDays/7)+1));
   sel.value=curUke;
   // Sync ukesoversikt to same week
-  const wsel=document.getElementById('wsel');
-  if(wsel){wsel.value=curUke;curW=curUke;renderWeek(curUke);}
   renderReg();
 }
 
@@ -1647,7 +1562,6 @@ function renderReg(){
         document.getElementById('ugrid').innerHTML='';
         renderUkesplan();
         renderStats();
-        rdwFromReg();
         c.classList.add('hpm-collapsed','hpm-done');
         const pv=c.querySelector('.hpm-preview');
         if(!pv){
@@ -1809,7 +1723,7 @@ function ikkeUtfort(key, msgId){
     if(el){el.textContent='✗ Ikke utført';el.style.color='var(--or)';setTimeout(()=>{el.textContent='';el.style.color='';},2000);}
     hpmCollapse(key.replace(/_/g,'-'), '✗ Ikke utført', true);
     setTimeout(()=>{
-      document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
+      document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
     }, 800);
 
   }catch(e){}
@@ -1844,7 +1758,7 @@ function ikkeUtfortStr(uke, okt, msgId){
       pv.innerHTML='<div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:500;color:var(--t)">Styrke '+okt+'</span><span style="font-size:10px;color:var(--or)">✗ Ikke utført</span></div><span style="color:var(--a);white-space:nowrap">↕ Rediger</span>';
     }
     setTimeout(()=>{
-      document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();rdwFromReg();
+      document.getElementById('ugrid').innerHTML='';renderUkesplan();renderStats();
     }, 800);
   }catch(e){}
 }
@@ -1894,7 +1808,6 @@ function saveOkt(key, msgId){
       document.getElementById('ugrid').innerHTML='';
       renderUkesplan();
       renderStats();
-      rdwFromReg(); // refresh ukesoversikt
     }, 1400);
   }catch(e){console.warn('Storage unavailable');}
 }
@@ -1918,7 +1831,7 @@ function saveOkt(key, msgId){
   if(label) label.textContent='Uke '+uke+' av 24 · '+pct+'%';
 })();
 
-renderUkesplan();initWsel();renderWeek(1);initReg();renderStats();
+renderUkesplan();initReg();renderStats();
 
 
 
@@ -2109,7 +2022,7 @@ window.ikkeUtfortStr=function(uke,okt,msgId){
 };
 
 // Init: load data for everyone (guests can see, only logged in can save)
-renderUkesplan();initWsel();renderWeek(1);initReg();
+renderUkesplan();initReg();
 fbLoad().then(()=>{
   renderUkesplan();
   document.getElementById('ugrid').innerHTML='';
@@ -2342,6 +2255,244 @@ function renderPrognose(){
 
 
 }
+
+// ── Progresjon-fane: faktisk logget tempo/tid/km over tid ──────────────────
+function renderProgresjonTab(){
+  const pb=document.getElementById('progresjon-body');
+  pb.innerHTML='';
+
+  function tSek(s){
+    if(!s) return null;
+    const p=String(s).trim().split(':').map(Number);
+    if(p.length===2 && !isNaN(p[0]) && !isNaN(p[1])) return p[0]*60+p[1];
+    return null;
+  }
+  function vSek(s){
+    if(!s) return null;
+    const p=String(s).trim().split(':').map(Number);
+    if(p.length===3) return p[0]*3600+p[1]*60+p[2];
+    if(p.length===2) return p[0]*60+p[1];
+    return null;
+  }
+  function fmtTempo(sek){ if(sek==null) return '–'; const m=Math.floor(sek/60), s=Math.round(sek%60); return m+':'+String(s).padStart(2,'0')+'/km'; }
+  function fmtVar(sek){ if(sek==null) return '–'; const h=Math.floor(sek/3600), m=Math.round((sek%3600)/60); return h>0?(h+'t '+m+'m'):(m+'m'); }
+  function fmtKm(km){ return km==null?'–':(Math.round(km*10)/10)+' km'; }
+  function pctStr(d){ if(d==null) return '–'; const sign=d>0?'+':''; return sign+(Math.round(d*10)/10)+'%'; }
+
+  const typeLabel={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur'};
+  const typeColorMap={intervall:'#c0306a',roligLop:'#7030a0',langtur:'#c05020',valgfri:'#8a5a65'};
+  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur',valgfri:'Valgfrie'};
+  const chartTypes=['intervall','roligLop','langtur','valgfri'];
+
+  // 1) Bygg full liste over alle logget økter med faktiske data
+  const entries=[];
+  for(let uke=1;uke<=24;uke++){
+    const w=W.find(x=>x.uke===uke);
+    ['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3'].forEach(k=>{
+      const sv=loggL[uke+'_'+k]||{};
+      const tempoSek=tSek(sv.tempo);
+      const varS=vSek(sv['var']);
+      const km=sv.km?parseFloat(sv.km):null;
+      if(tempoSek==null && varS==null && km==null) return;
+      const isValgfri=(k==='valgfri1'||k==='valgfri2'||k==='valgfri3');
+      const chartType=isValgfri?'valgfri':k;
+      const label=isValgfri?(sv.type||'Valgfri økt'):typeLabel[k];
+      entries.push({uke, chartType, label, dato:sv.dato||'', tempoSek, varS, km});
+    });
+  }
+
+  entries.sort((a,b)=>{
+    const aIso=/^\d{4}-\d{2}-\d{2}$/.test(a.dato), bIso=/^\d{4}-\d{2}-\d{2}$/.test(b.dato);
+    if(aIso&&bIso) return a.dato.localeCompare(b.dato);
+    return a.uke-b.uke;
+  });
+
+  // 2) Økt-til-økt endring – sammenlign med forrige økt av SAMME type
+  const lastByType={};
+  entries.forEach(e=>{
+    const prev=lastByType[e.chartType];
+    e.dTempo=(prev&&prev.tempoSek&&e.tempoSek)?(e.tempoSek-prev.tempoSek)/prev.tempoSek*100:null;
+    e.dVar=(prev&&prev.varS&&e.varS)?(e.varS-prev.varS)/prev.varS*100:null;
+    e.dKm=(prev&&prev.km&&e.km)?(e.km-prev.km)/prev.km*100:null;
+    lastByType[e.chartType]=e;
+  });
+
+  if(!entries.length){
+    const hdr=document.createElement('div');
+    hdr.innerHTML='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:900;color:var(--a);margin-bottom:12px">Progresjon</h2>'
+      +'<p style="color:var(--m);font-style:italic;font-size:12px">Ingen løpeøkter registrert ennå. Logg tempo, varighet eller distanse i Registrering, så vises progresjonen her.</p>';
+    pb.appendChild(hdr);
+    return;
+  }
+
+  // 3) Ukentlige aggregater per chartType (for graf)
+  const weekly={};
+  chartTypes.forEach(t=>weekly[t]={});
+  entries.forEach(e=>{
+    if(!weekly[e.chartType][e.uke]) weekly[e.chartType][e.uke]={tempoVals:[],varSum:0,kmSum:0};
+    const wk=weekly[e.chartType][e.uke];
+    if(e.tempoSek!=null) wk.tempoVals.push(e.tempoSek);
+    if(e.varS!=null) wk.varSum+=e.varS;
+    if(e.km!=null) wk.kmSum+=e.km;
+  });
+
+  // 4) Periode-sammenligning for sammendragskort (siste 4 uker med data vs 4 før)
+  const weeksWithData=[...new Set(entries.map(e=>e.uke))].sort((a,b)=>a-b);
+  const curPeriod=weeksWithData.slice(-4);
+  const prevPeriod=weeksWithData.slice(-8,-4);
+  function periodStats(weeks){
+    if(!weeks.length) return null;
+    let tempoVals=[],varTotal=0,kmTotal=0;
+    weeks.forEach(uke=>{
+      entries.filter(e=>e.uke===uke).forEach(e=>{
+        if(e.tempoSek!=null) tempoVals.push(e.tempoSek);
+        if(e.varS!=null) varTotal+=e.varS;
+        if(e.km!=null) kmTotal+=e.km;
+      });
+    });
+    return{
+      tempoAvg:tempoVals.length?tempoVals.reduce((a,b)=>a+b,0)/tempoVals.length:null,
+      varPerUke:varTotal/weeks.length,
+      kmPerUke:kmTotal/weeks.length
+    };
+  }
+  const curStats=periodStats(curPeriod), prevStats=periodStats(prevPeriod);
+  function pctChange(cur,prev){ if(cur==null||prev==null||!prev) return null; return (cur-prev)/prev*100; }
+  const dTempoCard=curStats&&prevStats?pctChange(curStats.tempoAvg,prevStats.tempoAvg):null;
+  const dVarCard=curStats&&prevStats?pctChange(curStats.varPerUke,prevStats.varPerUke):null;
+  const dKmCard=curStats&&prevStats?pctChange(curStats.kmPerUke,prevStats.kmPerUke):null;
+
+  // ── Header ──
+  const hdr=document.createElement('div');
+  hdr.style.cssText='margin-bottom:20px';
+  hdr.innerHTML='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:900;color:var(--a);margin-bottom:4px">Progresjon</h2>'
+    +'<p style="font-size:11px;color:var(--m)">Basert på faktisk loggede løpeøkter – tempo, tid og distanse, økt for økt og uke for uke.</p>';
+  pb.appendChild(hdr);
+
+  // ── Sammendragskort ──
+  const cardDefs=[
+    {l:'Snitt tempo',v:curStats?fmtTempo(curStats.tempoAvg):'–',d:dTempoCard,goodDir:-1},
+    {l:'Total tid/uke',v:curStats?fmtVar(curStats.varPerUke):'–',d:dVarCard,goodDir:1},
+    {l:'Total km/uke',v:curStats?fmtKm(curStats.kmPerUke):'–',d:dKmCard,goodDir:1},
+  ];
+  const cardGrid=document.createElement('div');
+  cardGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px';
+  cardDefs.forEach(c=>{
+    const good=c.d!=null&&(c.d*c.goodDir>0);
+    const bad=c.d!=null&&(c.d*c.goodDir<0);
+    const col=good?'var(--a2)':bad?'var(--or)':'var(--m)';
+    const d=document.createElement('div');
+    d.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:14px';
+    d.innerHTML='<div style="font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+c.l+'</div>'
+      +'<div style="font-size:20px;font-weight:500;color:var(--t)">'+c.v+'</div>'
+      +'<div style="font-size:11px;color:'+col+';margin-top:3px">'+(c.d==null?'– siste 4 uker':pctStr(c.d)+' siste 4 uker')+'</div>';
+    cardGrid.appendChild(d);
+  });
+  pb.appendChild(cardGrid);
+
+  // ── Metrikk-bryter + graf ──
+  const togWrap=document.createElement('div');
+  togWrap.style.cssText='display:flex;gap:6px;margin-bottom:10px';
+  const metrics=[{k:'tempo',l:'Tempo'},{k:'tid',l:'Tid'},{k:'km',l:'Km'}];
+  let curMetric='tempo';
+  metrics.forEach(m=>{
+    const btn=document.createElement('span');
+    btn.textContent=m.l;
+    btn.style.cssText='cursor:pointer;font-size:11px;padding:5px 12px;border-radius:99px;background:'+(m.k===curMetric?'var(--a)':'var(--s2)')+';color:'+(m.k===curMetric?'#fff':'var(--m)');
+    btn.dataset.metric=m.k;
+    btn.onclick=()=>{ curMetric=m.k; updateChart(); [...togWrap.children].forEach(b=>{
+      b.style.background=b.dataset.metric===curMetric?'var(--a)':'var(--s2)';
+      b.style.color=b.dataset.metric===curMetric?'#fff':'var(--m)';
+    });};
+    togWrap.appendChild(btn);
+  });
+  pb.appendChild(togWrap);
+
+  const canvasWrap=document.createElement('div');
+  canvasWrap.style.cssText='position:relative;width:100%;height:280px;margin-bottom:10px';
+  canvasWrap.innerHTML='<canvas id="progTabChart" role="img" aria-label="Progresjon per uke, alle løpeøkttyper">Viser tempo, tid eller distanse per uke, én linje per økttype.</canvas>';
+  pb.appendChild(canvasWrap);
+
+  const legend=document.createElement('div');
+  legend.style.cssText='display:flex;flex-wrap:wrap;gap:14px;margin-bottom:24px;font-size:11px;color:var(--m)';
+  legend.innerHTML=chartTypes.map(t=>'<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:'+typeColorMap[t]+';border-radius:2px;display:inline-block"></span>'+typeNameMap[t]+'</span>').join('');
+  pb.appendChild(legend);
+
+  function seriesFor(metric){
+    return chartTypes.map(t=>{
+      const data=[];
+      for(let uke=1;uke<=24;uke++){
+        const wk=weekly[t][uke];
+        if(!wk){ data.push(null); continue; }
+        if(metric==='tempo') data.push(wk.tempoVals.length?wk.tempoVals.reduce((a,b)=>a+b,0)/wk.tempoVals.length:null);
+        else if(metric==='tid') data.push(wk.varSum||null);
+        else data.push(wk.kmSum||null);
+      }
+      return {label:typeNameMap[t],data,borderColor:typeColorMap[t],backgroundColor:'transparent',borderWidth:2,tension:0.3,pointRadius:2,spanGaps:true};
+    });
+  }
+
+  let chartInst=null;
+  function updateChart(){
+    if(chartInst) chartInst.destroy();
+    chartInst=new Chart(document.getElementById('progTabChart'),{
+      type:'line',
+      data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),datasets:seriesFor(curMetric)},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          y:{ticks:{color:'#8a5a65',font:{size:10},callback:v=>{
+            if(curMetric==='tempo') return Math.floor(v/60)+':'+String(Math.round(v%60)).padStart(2,'0');
+            if(curMetric==='tid') return Math.round(v/60)+'m';
+            return v;
+          }},grid:{color:'#f5c0cc'}},
+          x:{ticks:{color:'#8a5a65',font:{size:10}},grid:{display:false}}
+        }
+      }
+    });
+  }
+  updateChart();
+
+  // ── Økt-til-økt-tabell ──
+  const tblTitle=document.createElement('h3');
+  tblTitle.style.cssText='font-size:14px;font-weight:500;color:var(--a);margin-bottom:10px';
+  tblTitle.textContent='Økt for økt';
+  pb.appendChild(tblTitle);
+
+  const tblWrap=document.createElement('div');
+  tblWrap.style.cssText='overflow-x:auto';
+  const tbl=document.createElement('table');
+  tbl.style.cssText='width:100%;border-collapse:collapse;font-size:12px';
+  const thead=document.createElement('tr');
+  ['Dato','Type','Tempo','Tid','Km'].forEach(h=>{
+    const th=document.createElement('th');
+    th.textContent=h;
+    th.style.cssText='text-align:left;padding:6px 8px;color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b)';
+    thead.appendChild(th);
+  });
+  tbl.appendChild(thead);
+  function deltaSpan(val,goodDir){
+    if(val==null) return '';
+    const good=val*goodDir>0, bad=val*goodDir<0;
+    const col=good?'var(--a2)':bad?'var(--or)':'var(--m)';
+    return ' <span style="color:'+col+';font-size:10px">'+pctStr(val)+'</span>';
+  }
+  entries.slice().reverse().forEach(e=>{
+    const tr=document.createElement('tr');
+    tr.style.borderBottom='1px solid var(--b)';
+    const datoTxt=/^\d{4}-\d{2}-\d{2}$/.test(e.dato)?e.dato:('Uke '+e.uke);
+    tr.innerHTML='<td style="padding:6px 8px;color:var(--t)">'+datoTxt+'</td>'
+      +'<td style="padding:6px 8px;color:var(--t)">'+e.label+'</td>'
+      +'<td style="padding:6px 8px;color:var(--t)">'+fmtTempo(e.tempoSek)+deltaSpan(e.dTempo,-1)+'</td>'
+      +'<td style="padding:6px 8px;color:var(--t)">'+fmtVar(e.varS)+deltaSpan(e.dVar,1)+'</td>'
+      +'<td style="padding:6px 8px;color:var(--t)">'+fmtKm(e.km)+deltaSpan(e.dKm,1)+'</td>';
+    tbl.appendChild(tr);
+  });
+  tblWrap.appendChild(tbl);
+  pb.appendChild(tblWrap);
+}
+
 
 
 var _auth = null;
