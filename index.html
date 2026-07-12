@@ -2492,17 +2492,34 @@ function renderProgresjonTab(){
     if(val==null) return '';
     const good=val*goodDir>0, bad=val*goodDir<0;
     const col=good?'var(--a2)':bad?'var(--or)':'var(--m)';
-    return ' <span style="color:'+col+';font-size:10px">'+pctStr(val)+'</span>';
+    const arrow=val>0?'↑':val<0?'↓':'';
+    return '<div style="color:'+col+';font-size:10px;margin-top:1px">'+arrow+' '+pctStr(val).replace(/^[+-]/,'')+'</div>';
   }
-  entries.slice().reverse().forEach(e=>{
+  function fmtDatoCelle(e){
+    let datoDel='';
+    if(/^\d{4}-\d{2}-\d{2}$/.test(e.dato)){
+      const [,m,d]=e.dato.split('-');
+      datoDel=d+'.'+m;
+    }
+    return '<div style="font-weight:500;color:var(--t)">Uke '+e.uke+'</div>'+(datoDel?'<div style="font-size:10px;color:var(--m)">'+datoDel+'</div>':'');
+  }
+  const sorted=entries.slice().reverse();
+  let lastUke=null;
+  sorted.forEach((e,i)=>{
+    if(e.uke!==lastUke){
+      const divTr=document.createElement('tr');
+      divTr.innerHTML='<td colspan="5" style="padding:10px 8px 4px;font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b)">Uke '+e.uke+(W.find(x=>x.uke===e.uke)?' · '+W.find(x=>x.uke===e.uke).dato:'')+'</td>';
+      tbl.appendChild(divTr);
+      lastUke=e.uke;
+    }
     const tr=document.createElement('tr');
-    tr.style.borderBottom='1px solid var(--b)';
-    const datoTxt=/^\d{4}-\d{2}-\d{2}$/.test(e.dato)?e.dato:('Uke '+e.uke);
-    tr.innerHTML='<td style="padding:6px 8px;color:var(--t)">'+datoTxt+'</td>'
-      +'<td style="padding:6px 8px;color:var(--t)">'+e.label+'</td>'
-      +'<td style="padding:6px 8px;color:var(--t)">'+fmtTempo(e.tempoSek)+deltaSpan(e.dTempo,-1)+'</td>'
-      +'<td style="padding:6px 8px;color:var(--t)">'+fmtVar(e.varS)+deltaSpan(e.dVar,1)+'</td>'
-      +'<td style="padding:6px 8px;color:var(--t)">'+fmtKm(e.km)+deltaSpan(e.dKm,1)+'</td>';
+    tr.style.cssText='border-bottom:1px solid var(--b);background:'+(i%2?'var(--s)':'transparent');
+    const dotCol=typeColorMap[e.chartType];
+    tr.innerHTML='<td style="padding:7px 8px;color:var(--t)">'+fmtDatoCelle(e)+'</td>'
+      +'<td style="padding:7px 8px;color:var(--t);white-space:nowrap"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+dotCol+';margin-right:6px"></span>'+e.label+'</td>'
+      +'<td style="padding:7px 8px;color:var(--t)">'+fmtTempo(e.tempoSek)+deltaSpan(e.dTempo,-1)+'</td>'
+      +'<td style="padding:7px 8px;color:var(--t)">'+fmtVar(e.varS)+deltaSpan(e.dVar,1)+'</td>'
+      +'<td style="padding:7px 8px;color:var(--t)">'+fmtKm(e.km)+deltaSpan(e.dKm,1)+'</td>';
     tbl.appendChild(tr);
   });
   tblWrap.appendChild(tbl);
