@@ -166,10 +166,10 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
 <nav>
   <button class="active" onclick="nav('reg',this)">Registrering</button>
   <button onclick="nav('ukesplan',this)">Programplan</button>
+  <button onclick="nav('progresjon',this)">Løpeprogresjon</button>
   <button onclick="nav('stats',this)">Statistikk</button>
   <button onclick="nav('styrke',this)">Styrkeprogram</button>
   <button onclick="nav('prognose',this)">Prognose</button>
-  <button onclick="nav('progresjon',this)">Progresjon</button>
 </nav>
 <main>
 
@@ -2280,23 +2280,22 @@ function renderProgresjonTab(){
   function pctStr(d){ if(d==null) return '–'; const sign=d>0?'+':''; return sign+(Math.round(d*10)/10)+'%'; }
 
   const typeLabel={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur'};
-  const typeColorMap={intervall:'#c0306a',roligLop:'#7030a0',langtur:'#c05020',valgfri:'#8a5a65'};
-  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur',valgfri:'Valgfrie'};
-  const chartTypes=['intervall','roligLop','langtur','valgfri'];
+  const typeColorMap={intervall:'#c0306a',roligLop:'#7030a0',langtur:'#c05020'};
+  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur'};
+  const chartTypes=['intervall','roligLop','langtur'];
 
-  // 1) Bygg full liste over alle logget økter med faktiske data
+  // 1) Bygg full liste over alle logget økter med faktiske data (kun faste løpeøkter – valgfrie holdes utenfor)
   const entries=[];
   for(let uke=1;uke<=24;uke++){
     const w=W.find(x=>x.uke===uke);
-    ['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3'].forEach(k=>{
+    ['intervall','roligLop','langtur'].forEach(k=>{
       const sv=loggL[uke+'_'+k]||{};
       const tempoSek=tSek(sv.tempo);
       const varS=vSek(sv['var']);
       const km=sv.km?parseFloat(sv.km):null;
       if(tempoSek==null && varS==null && km==null) return;
-      const isValgfri=(k==='valgfri1'||k==='valgfri2'||k==='valgfri3');
-      const chartType=isValgfri?'valgfri':k;
-      const label=isValgfri?(sv.type||'Valgfri økt'):typeLabel[k];
+      const chartType=k;
+      const label=typeLabel[k];
       entries.push({uke, chartType, label, dato:sv.dato||'', tempoSek, varS, km});
     });
   }
@@ -2319,7 +2318,7 @@ function renderProgresjonTab(){
 
   if(!entries.length){
     const hdr=document.createElement('div');
-    hdr.innerHTML='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:900;color:var(--a);margin-bottom:12px">Progresjon</h2>'
+    hdr.innerHTML='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:900;color:var(--a);margin-bottom:12px">Løpeprogresjon</h2>'
       +'<p style="color:var(--m);font-style:italic;font-size:12px">Ingen løpeøkter registrert ennå. Logg tempo, varighet eller distanse i Registrering, så vises progresjonen her.</p>';
     pb.appendChild(hdr);
     return;
@@ -2365,7 +2364,7 @@ function renderProgresjonTab(){
   // ── Header ──
   const hdr=document.createElement('div');
   hdr.style.cssText='margin-bottom:20px';
-  hdr.innerHTML='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:900;color:var(--a);margin-bottom:4px">Progresjon</h2>'
+  hdr.innerHTML='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:900;color:var(--a);margin-bottom:4px">Løpeprogresjon</h2>'
     +'<p style="font-size:11px;color:var(--m)">Basert på faktisk loggede løpeøkter – tempo, tid og distanse, økt for økt og uke for uke.</p>';
   pb.appendChild(hdr);
 
