@@ -2439,9 +2439,26 @@ function renderProgresjonTab(){
       data:{labels:Array.from({length:24},(_,i)=>'U'+(i+1)),datasets:seriesFor(curMetric)},
       options:{
         responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(item){
+                const v=item.parsed.y;
+                if(v==null) return item.dataset.label+': ingen data';
+                let valStr;
+                if(curMetric==='tempo') valStr=fmtTempo(v);
+                else if(curMetric==='tid') valStr=fmtVar(v);
+                else valStr=fmtKm(v);
+                return item.dataset.label+': '+valStr;
+              }
+            }
+          }
+        },
         scales:{
-          y:{ticks:{color:'#8a5a65',font:{size:10},callback:v=>{
+          y:{
+            title:{display:true,text:curMetric==='tempo'?'Min/km (lavere = raskere)':curMetric==='tid'?'Minutter':'Kilometer',color:'#8a5a65',font:{size:10}},
+            ticks:{color:'#8a5a65',font:{size:10},callback:v=>{
             if(curMetric==='tempo') return Math.floor(v/60)+':'+String(Math.round(v%60)).padStart(2,'0');
             if(curMetric==='tid') return Math.round(v/60)+'m';
             return v;
