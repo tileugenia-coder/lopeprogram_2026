@@ -2280,11 +2280,11 @@ function renderProgresjonTab(){
   function pctStr(d){ if(d==null) return '–'; const sign=d>0?'+':''; return sign+(Math.round(d*10)/10)+'%'; }
 
   const typeLabel={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur'};
-  const typeColorMap={intervall:'#c0306a',roligLop:'#7030a0',langtur:'#c05020'};
-  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur'};
-  const chartTypes=['intervall','roligLop','langtur'];
+  const typeColorMap={intervall:'#c0306a',roligLop:'#7030a0',langtur:'#c05020',race:'#2050a0'};
+  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur',race:'Løp'};
+  const chartTypes=['intervall','roligLop','langtur','race'];
 
-  // 1) Bygg full liste over alle logget økter med faktiske data (kun faste løpeøkter – valgfrie holdes utenfor)
+  // 1) Bygg full liste over alle logget økter med faktiske data (kun faste løpeøkter + løp – valgfrie holdes utenfor)
   const entries=[];
   for(let uke=1;uke<=24;uke++){
     const w=W.find(x=>x.uke===uke);
@@ -2298,6 +2298,16 @@ function renderProgresjonTab(){
       const label=typeLabel[k];
       entries.push({uke, chartType, label, dato:sv.dato||'', tempoSek, varS, km});
     });
+    const race=RC.find(r=>r.uke===uke);
+    if(race){
+      const rsv=loggL[uke+'_race']||{};
+      const tempoSek=tSek(rsv.tempo);
+      const varS=vSek(rsv.tid);
+      const km=rsv.km?parseFloat(rsv.km):null;
+      if(tempoSek!=null || varS!=null || km!=null){
+        entries.push({uke, chartType:'race', label:'🏁 '+race.navn, dato:rsv.dato||'', tempoSek, varS, km});
+      }
+    }
   }
 
   entries.sort((a,b)=>{
