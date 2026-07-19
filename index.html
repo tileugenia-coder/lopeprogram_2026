@@ -1090,6 +1090,53 @@ function renderStats(){
     raceWrap.appendChild(card);
   });
   sb.appendChild(raceWrap);
+
+  // ── Eldre styrkedata fra utskiftede/omdøpte øvelser ────────────────────
+  const orphans=[];
+  const validSafeNames={A:{},B:{},C:{}};
+  for(let uke=10;uke<=24;uke++){
+    ['A','B','C'].forEach(okt=>{
+      const exs=strSrc(okt)[String(uke)]||[];
+      validSafeNames[okt][uke]=exs.map(e=>e.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-'));
+    });
+  }
+  Object.keys(loggS).forEach(key=>{
+    const m=key.match(/^(\d+)_(A|B|C)_(.+)_s(\d)$/);
+    if(!m) return;
+    const uke=parseInt(m[1]),okt=m[2],safeName=m[3],sett=m[4];
+    if(uke<10) return; // uke 1–9 er kjent historikk, ikke "utskiftet"
+    const sv=loggS[key];
+    if(!sv||(!sv.vekt&&!sv.reps)) return;
+    const valid=(validSafeNames[okt][uke]||[]).includes(safeName);
+    if(!valid){
+      orphans.push({uke,okt,safeName,sett,vekt:sv.vekt,reps:sv.reps});
+    }
+  });
+  if(orphans.length){
+    const orphWrap=document.createElement('div');
+    orphWrap.style.cssText='margin-top:28px;background:var(--s);border:1px solid var(--or);border-radius:8px;padding:14px';
+    orphWrap.innerHTML='<h3 style="font-size:14px;font-weight:500;color:var(--or);margin-bottom:6px">Eldre styrkedata fra utskiftede øvelser</h3>'
+      +'<p style="font-size:11px;color:var(--m);margin-bottom:10px">Disse settene er logget på en øvelse som ikke lenger finnes i gjeldende Styrke A/B/C-program (den er byttet ut eller omdøpt). Dataene er ikke tapt – bare usynlige andre steder i appen.</p>';
+    const tbl=document.createElement('table');
+    tbl.style.cssText='width:100%;border-collapse:collapse;font-size:12px';
+    tbl.innerHTML='<tr><th style="text-align:left;padding:4px 8px;color:var(--m);font-size:10px;text-transform:uppercase">Uke</th>'
+      +'<th style="text-align:left;padding:4px 8px;color:var(--m);font-size:10px;text-transform:uppercase">Økt</th>'
+      +'<th style="text-align:left;padding:4px 8px;color:var(--m);font-size:10px;text-transform:uppercase">Øvelse (fra nøkkel)</th>'
+      +'<th style="text-align:left;padding:4px 8px;color:var(--m);font-size:10px;text-transform:uppercase">Sett</th>'
+      +'<th style="text-align:left;padding:4px 8px;color:var(--m);font-size:10px;text-transform:uppercase">Vekt/Reps</th></tr>';
+    orphans.sort((a,b)=>a.uke-b.uke).forEach(o=>{
+      const tr=document.createElement('tr');
+      tr.style.borderTop='1px solid var(--b)';
+      tr.innerHTML='<td style="padding:4px 8px">'+o.uke+'</td>'
+        +'<td style="padding:4px 8px">'+o.okt+'</td>'
+        +'<td style="padding:4px 8px">'+o.safeName.replace(/-/g,' ')+'</td>'
+        +'<td style="padding:4px 8px">'+o.sett+'</td>'
+        +'<td style="padding:4px 8px">'+(o.vekt?o.vekt+' kg':'')+(o.vekt&&o.reps?' · ':'')+(o.reps?o.reps+' reps':'')+'</td>';
+      tbl.appendChild(tr);
+    });
+    orphWrap.appendChild(tbl);
+    sb.appendChild(orphWrap);
+  }
 }
 
 function renderStyrke(){
