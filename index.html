@@ -268,6 +268,16 @@ const SC={"10": ["Push-ups – 3×maks reps", "Nedtrekk – 3×6–8", "Sittende
 
 // ── Styrke-/løpshjelpere (fleksible dager, A/B/C) ────────────────────────
 const STR_LABEL={A:'underkropp + core',B:'underkropp + core',C:'overkropp'};
+// Video-lenker per øvelse (test – kun Styrke A foreløpig)
+const EXERCISE_VIDEOS={
+  'Hofte-stabiliserende step-up':'https://www.youtube.com/watch?v=31D0yRUNMJk',
+  'Utfall fra kasse':'https://www.youtube.com/watch?v=I1IvDQibYLU',
+  'Markløft':'https://www.youtube.com/watch?v=03F_Qkbdmo8',
+  'B-stance hip thrust':'https://www.youtube.com/watch?v=OjNdmHWVSek',
+  'Supermann':'https://www.youtube.com/watch?v=JU0BKGxdL40',
+  'Planke':'https://www.youtube.com/watch?v=obWjBnagrFU',
+  'Ett-bens tåhev':'https://www.youtube.com/watch?v=xlhmUKcPVsc'
+};
 function strSrc(o){return o==='A'?SA:o==='B'?SB:SC;}
 function strOkter(uke){
   if(uke>=10) return ['A','B','C'];
@@ -289,6 +299,12 @@ function runOkter(uke){
   ];
 }
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function gjeldendeUke(){
+  const today=new Date();
+  const start=new Date('2026-05-04');
+  const diffDays=Math.floor((today-start)/(1000*60*60*24));
+  return Math.min(24,Math.max(1,Math.floor(diffDays/7)+1));
+}
 function upLDato(k,v){if(!loggL[k])loggL[k]={};loggL[k].dato=v;}
 function upSDato(k,v){if(!loggS[k])loggS[k]={};loggS[k].dato=v;}
 function datoInput(store,key,fn){
@@ -308,7 +324,12 @@ function nav(id,btn){
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('v-'+id).classList.add('active');
   btn.classList.add('active');
-  if(id==='ukesplan'){document.getElementById('ugrid').innerHTML='';renderUkesplan();}
+  if(id==='ukesplan'){
+    document.getElementById('ugrid').innerHTML='';
+    renderUkesplan();
+    const rad=document.getElementById('uke-row-'+gjeldendeUke());
+    if(rad) setTimeout(()=>rad.scrollIntoView({block:'start',behavior:'auto'}),0);
+  }
   if(id==='styrke') renderStyrke();
   if(id==='stats') renderStats();
   if(id==='prognose') renderPrognose();
@@ -373,6 +394,7 @@ function renderUkesplan(){
 
     const c1=document.createElement('div');
     c1.className='ucell uke-n';
+    c1.id='uke-row-'+w.uke;
     c1.onclick=()=>gw(w.uke);
     c1.innerHTML='Uke '+w.uke+'<span style="font-size:9px;color:var(--m);font-weight:400">'+w.kaluke+'</span>';
     g.appendChild(c1);
@@ -1110,7 +1132,9 @@ function renderStyrke(){
     exercises.forEach(([label, name],rowIdx)=>{
       const tr=document.createElement('tr');
       tr.style.background=rowIdx%2===0?'var(--s2)':'var(--s)';
-      let row='<td style="padding:6px 10px;font-weight:500;white-space:nowrap;position:sticky;left:0;background:'+(rowIdx%2===0?'var(--s2)':'var(--s)')+';z-index:1"><span style="color:var(--m);font-size:10px">'+label+'</span> '+name+'</td>';
+      const vidUrl=EXERCISE_VIDEOS[name];
+      const vidLink=vidUrl?` <a href="${vidUrl}" target="_blank" rel="noopener" style="color:var(--pu);font-size:10px;text-decoration:none">▶</a>`:'';
+      let row='<td style="padding:6px 10px;font-weight:500;white-space:nowrap;position:sticky;left:0;background:'+(rowIdx%2===0?'var(--s2)':'var(--s)')+';z-index:1"><span style="color:var(--m);font-size:10px">'+label+'</span> '+name+vidLink+'</td>';
       uker.forEach(u=>{
         const ovs=data[String(u)]||[];
         let plan='';
@@ -1156,10 +1180,7 @@ function initReg(){
   W.forEach(w=>{const o=document.createElement('option');o.value=w.uke;o.textContent=`Uke ${w.uke} (${w.kaluke}) – ${w.dato}`;sel.appendChild(o);});
 
   // Auto-detect current week based on today's date
-  const today=new Date();
-  const start=new Date('2026-05-04');
-  const diffDays=Math.floor((today-start)/(1000*60*60*24));
-  const curUke=Math.min(24,Math.max(1,Math.floor(diffDays/7)+1));
+  const curUke=gjeldendeUke();
   sel.value=curUke;
   // Sync ukesoversikt to same week
   renderReg();
@@ -1481,7 +1502,9 @@ function renderReg(){
       const setsMatch=plan.match(/(\d+)×/);const numSets=setsMatch?parseInt(setsMatch[1]):3;
       const htr=document.createElement('tr');
       htr.style.background='var(--s2)';
-      htr.innerHTML=`<td colspan="3" style="padding:8px 11px;font-weight:500;color:var(--a);border-bottom:1px solid var(--b)">${name} <span style="color:var(--m);font-size:10px;font-weight:400">– ${plan}</span></td>`;
+      const vidUrl=EXERCISE_VIDEOS[name];
+      const vidLink=vidUrl?` <a href="${vidUrl}" target="_blank" rel="noopener" style="color:var(--pu);font-size:10px;text-decoration:none;white-space:nowrap">▶ Video</a>`:'';
+      htr.innerHTML=`<td colspan="3" style="padding:8px 11px;font-weight:500;color:var(--a);border-bottom:1px solid var(--b)">${name} <span style="color:var(--m);font-size:10px;font-weight:400">– ${plan}</span>${vidLink}</td>`;
       tbody.appendChild(htr);
       for(let s=1;s<=numSets;s++){
         const safeName=name.replace(/[^a-zA-Z0-9]/g,'-');const sk=`${uke}_${okt}_${safeName}_s${s}`;const ssv=loggS[sk]||{};
