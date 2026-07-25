@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Treningsdagbok</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c0306a">
+<link rel="icon" type="image/png" href="icon-192.png">
+
+<!-- iOS PWA-støtte (ekstra, i tillegg til Android/Samsung) -->
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Treningsdagbok">
+
+<!-- Android/generell PWA-støtte -->
+<meta name="mobile-web-app-capable" content="yes">
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,900;1,300&display=swap');
 :root{--bg:#fff0f3;--s:#fff5f7;--s2:#ffe8ed;--b:#f5c0cc;--t:#2a1a1e;--m:#8a5a65;--a:#c0306a;--a2:#e05585;--or:#c05020;--pu:#7030a0;--bl:#2050a0}
@@ -2765,6 +2779,16 @@ function eksporterExcel(){
     msgEl.style.color='var(--or)';
     msgEl.textContent='Noe gikk galt under eksport: '+e.message;
   }
+}
+
+// Registrer service worker for PWA-støtte (offline-tilgang + "legg til på startskjerm").
+// Feiler stille hvis nettleseren ikke støtter det, eller hvis filen mangler.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(err){
+      console.warn('Service worker kunne ikke registreres:', err);
+    });
+  });
 }
 
 </script>
