@@ -374,7 +374,7 @@ function renderUkesplan(){
   const g=document.getElementById('ugrid');
   g.className='ugrid';
   g.style.display='grid';
-  g.style.gridTemplateColumns='64px 96px 1fr';
+  g.style.gridTemplateColumns='92px 1fr';
   g.innerHTML='';
 
   const runLabel={intervall:'Intervall',roligLop:'Rolig løp + ST',langtur:'Langtur'};
@@ -410,7 +410,7 @@ function renderUkesplan(){
   }
 
   // Header-rad (samme stil som det gamle dag-rutenettet)
-  ['Uke','Periode','Økter'].forEach(h=>{
+  ['Uke','Økter'].forEach(h=>{
     const d=document.createElement('div');
     d.className='ucell uhdr';
     d.textContent=h;
@@ -424,16 +424,13 @@ function renderUkesplan(){
     c1.className='ucell uke-n';
     c1.id='uke-row-'+w.uke;
     c1.onclick=()=>gw(w.uke);
-    c1.innerHTML='Uke '+w.uke+'<span style="font-size:9px;color:var(--m);font-weight:400">'+w.kaluke+'</span>';
+    const [datoFra,datoTil]=w.dato.split(' – ');
+    c1.innerHTML='<div>Uke '+w.uke+'</div>'
+      +'<div style="font-size:9px;color:var(--m);font-weight:400;margin-top:2px">'+w.kaluke+'</div>'
+      +'<div style="font-size:9px;color:var(--m);font-weight:400">'+datoFra+'</div>'
+      +'<div style="font-size:9px;color:var(--m);font-weight:400">-</div>'
+      +'<div style="font-size:9px;color:var(--m);font-weight:400">'+datoTil+'</div>';
     g.appendChild(c1);
-
-    const c2=document.createElement('div');
-    c2.className='ucell';
-    c2.style.fontWeight='400';
-    c2.style.fontSize='10px';
-    c2.style.color='var(--m)';
-    c2.textContent=w.dato;
-    g.appendChild(c2);
 
     const c3=document.createElement('div');
     c3.className='ucell';
