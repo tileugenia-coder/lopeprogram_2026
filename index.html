@@ -179,11 +179,13 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
 </div>
 <nav>
   <button class="active" onclick="nav('reg',this)">Registrering</button>
-  <button onclick="nav('ukesplan',this)">Programplan</button>
+  <button onclick="nav('ukesplan',this)">Øktoversikt</button>
   <button onclick="nav('progresjon',this)">Løpeprogresjon</button>
+  <button onclick="nav('styrkelogg',this)">Styrkelogg</button>
+  <button onclick="nav('lopelogg',this)">Løpelogg</button>
   <button onclick="nav('stats',this)">Statistikk</button>
-  <button onclick="nav('styrke',this)">Styrkeprogram</button>
   <button onclick="nav('lopeprogram',this)">Løpeprogram</button>
+  <button onclick="nav('styrke',this)">Styrkeprogram</button>
   <button onclick="nav('prognose',this)">Prognose</button>
 </nav>
 <main>
@@ -204,6 +206,14 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
 
 <div class="view" id="v-styrke">
   <div id="styrke-body" style="padding:8px 0"></div>
+</div>
+
+<div class="view" id="v-styrkelogg">
+  <div id="styrkelogg-body" style="padding:8px 0"></div>
+</div>
+
+<div class="view" id="v-lopelogg">
+  <div id="lopelogg-body" style="padding:8px 0"></div>
 </div>
 
 <div class="view" id="v-lopeprogram">
@@ -384,6 +394,8 @@ function nav(id,btn){
     if(rad) setTimeout(()=>rad.scrollIntoView({block:'start',behavior:'auto'}),0);
   }
   if(id==='styrke') renderStyrke();
+  if(id==='styrkelogg') renderStyrkelogg();
+  if(id==='lopelogg') renderLopelogg();
   if(id==='lopeprogram') renderLopeprogram();
   if(id==='stats') renderStats();
   if(id==='prognose') renderPrognose();
@@ -1008,119 +1020,6 @@ function renderStats(){
     });
   }
 
-  // ── Styrke progresjon ────────────────────────────────────────────────
-  const strPTitle=document.createElement('h2');
-  strPTitle.style.cssText='font-size:16px;font-weight:500;color:var(--a2);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
-  strPTitle.textContent='Progresjon styrkeøvelser';
-  sb.appendChild(strPTitle);
-
-  let noenStyrkeData=false;
-  ['A','B','C'].forEach(okt=>{
-    const src=strSrc(okt);
-    // Collect all unique exercise names – kun gjeldende program (uke 10+)
-    const exNames=[];
-    Object.entries(src).forEach(([ukeStr,ovs])=>{
-      if(parseInt(ukeStr)<10) return;
-      ovs.forEach(ov=>{
-        const n=ov.split(' – ')[0];
-        if(!exNames.includes(n)) exNames.push(n);
-      });
-    });
-
-    // Build data per exercise
-    const exWithData=[];
-    exNames.forEach(name=>{
-      const isTimeEx=/Plank|Superman|Planke|Supermann|Push-ups|tåhev|Skrå planke/.test(name);
-      const pts=[];
-      Object.entries(src).forEach(([ukeStr,ovs])=>{
-        const uke=parseInt(ukeStr);
-        if(uke<10) return;
-        const idx=ovs.findIndex(o=>o.split(' – ')[0]===name);
-        if(idx===-1) return;
-        const plan=ovs[idx].split(' – ').slice(1).join(' – ');
-        const setsM=plan.match(/(\d+)×/);
-        const numSets=setsM?parseInt(setsM[1]):3;
-        let maxVekt=null, lastReps=null;
-        for(let s=1;s<=numSets;s++){
-          const safeName2=name.replace(/[^a-zA-Z0-9]/g,'-');const sk=uke+'_'+okt+'_'+safeName2+'_s'+s;
-          const sv=loggS[sk]||{};
-          if(sv.vekt){ const v=parseFloat(sv.vekt); if(maxVekt===null||v>maxVekt) maxVekt=v; }
-          if(sv.reps && lastReps===null) lastReps=sv.reps;
-        }
-        if(maxVekt!==null||lastReps) pts.push({uke,vekt:maxVekt,reps:lastReps});
-      });
-      if(pts.length) exWithData.push({name,pts,okt,isTimeEx});
-    });
-
-    if(!exWithData.length) return;
-    noenStyrkeData=true;
-
-    const oktTitle=document.createElement('h3');
-    oktTitle.style.cssText='font-size:13px;font-weight:500;color:var(--pu);margin:18px 0 10px';
-    oktTitle.textContent='Styrke '+okt;
-    sb.appendChild(oktTitle);
-
-    const exGrid=document.createElement('div');
-    exGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:8px';
-
-    exWithData.forEach(({name,pts,isTimeEx})=>{
-      const first=pts[0],last=pts[pts.length-1];
-      // For time exercises use reps diff, otherwise vekt diff
-      const vektDiff=isTimeEx
-        ?(first.reps&&last.reps?Math.round((parseFloat(last.reps)-parseFloat(first.reps))*10)/10:null)
-        :(first.vekt&&last.vekt?Math.round((last.vekt-first.vekt)*10)/10:null);
-      const unit=isTimeEx?(name==='Plank'?' sek':' reps'):' kg';
-      const diffCol=vektDiff>0?'var(--a)':vektDiff<0?'var(--or)':'var(--m)';
-      const diffStr=vektDiff!==null?(vektDiff>0?'+'+vektDiff+unit:vektDiff+unit):'';
-
-      // Mini SVG line chart for vekt
-      let chartSvg='';
-      const chartPts=isTimeEx?pts.filter(p=>p.reps):pts.filter(p=>p.vekt);
-      const chartVal=p=>isTimeEx?parseFloat(p.reps):p.vekt;
-      const vPts=chartPts;
-      if(vPts.length>1){
-        const W=200,H=50;
-        const minV=Math.min(...vPts.map(p=>chartVal(p)));
-        const maxV=Math.max(...vPts.map(p=>chartVal(p)));
-        const rng=maxV-minV||1;
-        const coords=vPts.map((p,i)=>{
-          const x=8+i*(W-16)/(vPts.length-1);
-          const y=H-8-(chartVal(p)-minV)/rng*(H-16);
-          return{x,y,v:chartVal(p)};
-        });
-        const path=coords.map((c,i)=>(i?'L':'M')+c.x+','+c.y).join(' ');
-        const dots=coords.map(c=>'<circle cx="'+c.x+'" cy="'+c.y+'" r="2.5" fill="var(--a2)"/>').join('');
-        const firstLbl='<text x="'+coords[0].x+'" y="'+(coords[0].y+(coords[0].y<20?12:-4))+'" font-size="6" fill="var(--m)" text-anchor="middle">'+coords[0].v+'</text>';
-        const lastLbl='<text x="'+coords[coords.length-1].x+'" y="'+(coords[coords.length-1].y+(coords[coords.length-1].y<20?12:-4))+'" font-size="7" fill="var(--a2)" text-anchor="middle">'+coords[coords.length-1].v+'</text>';
-        chartSvg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="50" style="display:block;margin-top:6px">'
-          +'<path d="'+path+'" fill="none" stroke="var(--a2)" stroke-width="1.5" stroke-linejoin="round"/>'
-          +dots+firstLbl+lastLbl+'</svg>';
-      }
-
-      const card=document.createElement('div');
-      card.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;overflow:hidden';
-      card.innerHTML=
-        '<div style="padding:9px 12px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center">'
-        +'<strong style="font-size:11px">'+name+'</strong>'
-        +'<span style="font-size:11px;color:'+diffCol+'">'+diffStr+'</span>'
-        +'</div>'
-        +(chartSvg?'<div style="padding:4px 12px 0">'+chartSvg+'</div>':'')
-        +'<div style="padding:8px 12px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px">'
-        +(isTimeEx?'':last.vekt?'<div><span style="color:var(--m)">Siste vekt: </span><strong style="color:var(--a2)">'+last.vekt+' kg</strong></div>':'')
-        +(last.reps?'<div><span style="color:var(--m)">'+(isTimeEx&&name==='Plank'?'Siste tid: ':'Siste reps: ')+'</span><strong style="color:var(--a2)">'+last.reps+(isTimeEx&&name==='Plank'?' sek':'')+'</strong></div>':'')
-        +'<div><span style="color:var(--m)">Logginger: </span><strong>'+pts.length+'</strong></div>'
-        +'</div>';
-      exGrid.appendChild(card);
-    });
-    sb.appendChild(exGrid);
-  });
-  if(!noenStyrkeData){
-    const noStrMsg=document.createElement('p');
-    noStrMsg.style.cssText='color:var(--m);font-style:italic;font-size:12px;margin:-4px 0 16px';
-    noStrMsg.textContent='Ingen styrkedata registrert ennå. Logg vekt/reps for en øvelse i Registrering, så vises progresjonen her.';
-    sb.appendChild(noStrMsg);
-  }
-
   // ── Løpsresultater ───────────────────────────────────────────────────
   const raceTitle=document.createElement('h2');
   raceTitle.style.cssText='font-size:16px;font-weight:500;color:var(--or);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
@@ -1249,6 +1148,261 @@ function initReg(){
   renderReg();
 }
 
+function renderStyrkelogg(){
+  const sb=document.getElementById('styrkelogg-body');
+  sb.innerHTML='';
+
+  const h1=document.createElement('h2');
+  h1.style.cssText='font-family:"Fraunces",serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  h1.textContent='Styrkelogg';
+  sb.appendChild(h1);
+
+  const sub=document.createElement('p');
+  sub.style.cssText='font-size:11px;color:var(--m);margin:0 0 20px;font-style:italic';
+  sub.textContent='Alle loggførte styrkeøkter, gruppert per øvelse. Økning vises mot tyngste sett forrige gang øvelsen ble logget.';
+  sb.appendChild(sub);
+
+  // ── Bygg safeName -> visningsnavn-oppslag fra alle program (gammelt + nytt)
+  const nameBySafe={};
+  ['A','B','C'].forEach(okt=>{
+    const src=strSrc(okt);
+    Object.keys(src).forEach(uke=>{
+      src[uke].forEach(ex=>{
+        const name=ex.split(' – ')[0];
+        const safe=name.replace(/[^a-zA-Z0-9]/g,'-');
+        nameBySafe[okt+'|'+safe]=name;
+      });
+    });
+  });
+
+  // ── Skann all loggS for faktiske sett
+  const bySafe={}; // key: okt+'|'+safeName -> {uke -> {sett -> {vekt,reps}}}
+  Object.keys(loggS).forEach(key=>{
+    const m=key.match(/^(\d+)_(A|B|C)_(.+)_s(\d)$/);
+    if(!m) return;
+    const uke=parseInt(m[1]), okt=m[2], safeName=m[3], sett=parseInt(m[4]);
+    const sv=loggS[key];
+    if(!sv || (!sv.vekt && !sv.reps)) return;
+    const gk=okt+'|'+safeName;
+    if(!bySafe[gk]) bySafe[gk]={};
+    if(!bySafe[gk][uke]) bySafe[gk][uke]={};
+    bySafe[gk][uke][sett]={vekt:sv.vekt, reps:sv.reps};
+  });
+
+  const groupKeys=Object.keys(bySafe);
+  if(groupKeys.length===0){
+    const empty=document.createElement('div');
+    empty.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:28px 20px;color:var(--m);font-size:12px;text-align:center';
+    empty.innerHTML='<div style="font-size:24px;margin-bottom:10px">🏋️</div>'
+      +'<div style="font-weight:500;color:var(--t);margin-bottom:6px">Ingen styrkeøkter loggført ennå</div>'
+      +'<div>Registrer vekt/reps under <strong>Registrering</strong> for å se loggen her.</div>';
+    sb.appendChild(empty);
+    return;
+  }
+
+  // ── Sorter øvelser alfabetisk på visningsnavn
+  const groups=groupKeys.map(gk=>{
+    const [okt,safe]=gk.split('|');
+    const displayName=nameBySafe[gk]||safe.replace(/-/g,' ');
+    return {gk, okt, safe, displayName};
+  }).sort((a,b)=>a.displayName.localeCompare(b.displayName,'nb'));
+
+  groups.forEach(g=>{
+    const ukesData=bySafe[g.gk];
+    const ukeNumre=Object.keys(ukesData).map(Number).sort((a,b)=>a-b);
+
+    const wrap=document.createElement('div');
+    wrap.style.cssText='margin-bottom:28px;background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden';
+
+    const head=document.createElement('div');
+    head.style.cssText='padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap';
+    head.innerHTML='<div style="font-weight:600;color:var(--t);font-size:14px">'+g.displayName+'</div>'
+      +'<div style="font-size:10px;color:var(--m)">Styrke '+g.okt+'</div>';
+    wrap.appendChild(head);
+
+    let forrigeTyngste=null;
+    ukeNumre.forEach(uke=>{
+      const w=W.find(x=>x.uke===uke);
+      const setter=ukesData[uke];
+      const settNumre=Object.keys(setter).map(Number).sort((a,b)=>a-b);
+
+      // Finn tyngste sett denne økten
+      let tyngste=null;
+      settNumre.forEach(s=>{
+        const v=parseFloat(setter[s].vekt);
+        if(Number.isFinite(v)&&(!tyngste||v>tyngste)) tyngste=v;
+      });
+
+      const row=document.createElement('div');
+      row.style.cssText='padding:12px 16px;border-bottom:1px solid var(--b)';
+
+      let diffHtml='';
+      if(tyngste!=null&&forrigeTyngste!=null){
+        const diff=Math.round((tyngste-forrigeTyngste)*10)/10;
+        if(diff>0) diffHtml='<span style="color:#2a7a2a;font-weight:500">▲ +'+diff+' kg</span>';
+        else if(diff<0) diffHtml='<span style="color:var(--or)">▼ '+diff+' kg</span>';
+        else diffHtml='<span style="color:var(--m)">– uendret</span>';
+      } else if(tyngste!=null){
+        diffHtml='<span style="color:var(--m)">Første registrering</span>';
+      }
+
+      const setsTxt=settNumre.map(s=>{
+        const sv=setter[s];
+        const vekt=sv.vekt!=null&&sv.vekt!==''?sv.vekt+' kg':'–';
+        const reps=sv.reps!=null&&sv.reps!==''?sv.reps:'–';
+        return 'Sett '+s+': '+vekt+' × '+reps;
+      }).join(' &nbsp;·&nbsp; ');
+
+      row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:4px">'
+        +'<div style="font-weight:500;color:var(--t);font-size:12px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
+        +'<div style="font-size:11px">'+diffHtml+'</div>'
+        +'</div>'
+        +'<div style="font-size:12px;color:var(--t)">'+setsTxt+'</div>';
+      wrap.appendChild(row);
+
+      if(tyngste!=null) forrigeTyngste=tyngste;
+    });
+
+    sb.appendChild(wrap);
+  });
+}
+
+function renderLopelogg(){
+  const sb=document.getElementById('lopelogg-body');
+  sb.innerHTML='';
+
+  const h1=document.createElement('h2');
+  h1.style.cssText='font-family:"Fraunces",serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  h1.textContent='Løpelogg';
+  sb.appendChild(h1);
+
+  const sub=document.createElement('p');
+  sub.style.cssText='font-size:11px;color:var(--m);margin:0 0 20px;font-style:italic';
+  sub.textContent='Alle loggførte løpeøkter, gruppert per økttype. Endring i tempo, distanse og varighet vises mot forrige gang.';
+  sb.appendChild(sub);
+
+  const typeLabels={intervall:'Intervall', langtur:'Rolig langtur', roligLop:'Rolig løpetur/Gåtur'};
+  const typeOrder=['intervall','langtur','roligLop'];
+
+  function tempoTilSek(t){
+    if(!t) return null;
+    const p=t.split(':');
+    if(p.length!==2) return null;
+    const m=parseInt(p[0]), s=parseInt(p[1]);
+    if(!Number.isFinite(m)||!Number.isFinite(s)) return null;
+    return m*60+s;
+  }
+  function varTilSek(v){
+    if(!v) return null;
+    const p=v.split(':').map(Number);
+    if(p.length===3) return p[0]*3600+p[1]*60+p[2];
+    if(p.length===2) return p[0]*60+p[1];
+    return null;
+  }
+
+  function diffBadge(diff, unit, higherIsBetter, decimals){
+    if(diff==null) return '';
+    const rounded=Math.round(diff*Math.pow(10,decimals))/Math.pow(10,decimals);
+    if(rounded===0) return '<span style="color:var(--m)">– uendret</span>';
+    const positive=rounded>0;
+    const good=higherIsBetter?positive:!positive;
+    const arrow=positive?'▲':'▼';
+    const color=good?'#2a7a2a':'var(--or)';
+    const sign=positive?'+':'';
+    return '<span style="color:'+color+'">'+arrow+' '+sign+rounded+' '+unit+'</span>';
+  }
+
+  let harData=false;
+
+  typeOrder.forEach(type=>{
+    // Samle alle uker med faktisk logget data for denne økttypen
+    const ukerMedData=[];
+    for(let uke=1; uke<=W.length; uke++){
+      const sv=loggL[uke+'_'+type];
+      if(sv && (sv['var']||sv.km||sv.tempo||sv.sn||sv.fol)) ukerMedData.push(uke);
+    }
+    if(!ukerMedData.length) return;
+    harData=true;
+
+    const wrap=document.createElement('div');
+    wrap.style.cssText='margin-bottom:28px;background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden';
+
+    const head=document.createElement('div');
+    head.style.cssText='padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--b)';
+    head.innerHTML='<div style="font-weight:600;color:var(--t);font-size:14px">'+typeLabels[type]+'</div>';
+    wrap.appendChild(head);
+
+    let forrigeTempoSek=null, forrigeKm=null, forrigeVarSek=null;
+
+    ukerMedData.forEach(uke=>{
+      const w=W.find(x=>x.uke===uke);
+      const sv=loggL[uke+'_'+type];
+      const tempoStr = sv.tempo || (type==='intervall' && sv.drags ? calcSnittTempo(sv.drags,6) : null);
+      const tempoSek = tempoTilSek(tempoStr);
+      const km = parseFloat(sv.km);
+      const kmVal = Number.isFinite(km) ? km : null;
+      const varSek = varTilSek(sv['var']);
+
+      const row=document.createElement('div');
+      row.style.cssText='padding:12px 16px;border-bottom:1px solid var(--b)';
+
+      const badges=[];
+      if(tempoSek!=null){
+        const b=(forrigeTempoSek!=null)?diffBadge((tempoSek-forrigeTempoSek), 'sek/km', false, 0):'<span style="color:var(--m)">Første registrering</span>';
+        badges.push('Tempo: '+b);
+      }
+      if(kmVal!=null){
+        const b=(forrigeKm!=null)?diffBadge((kmVal-forrigeKm), 'km', true, 1):'<span style="color:var(--m)">Første registrering</span>';
+        badges.push('Distanse: '+b);
+      }
+      if(varSek!=null){
+        const b=(forrigeVarSek!=null)?diffBadge((varSek-forrigeVarSek)/60, 'min', true, 0):'<span style="color:var(--m)">Første registrering</span>';
+        badges.push('Varighet: '+b);
+      }
+
+      const detaljer=[];
+      if(sv['var']) detaljer.push('Varighet: '+sv['var']);
+      if(sv.km) detaljer.push('Distanse: '+sv.km+' km');
+      if(tempoStr) detaljer.push('Snitt tempo: '+tempoStr+'/km');
+      if(type==='intervall' && sv.drags){
+        const snittPulsDrag=calcSnittPuls(sv.drags,6);
+        const snittMaksDrag=calcSnittMaksPuls(sv.drags,6);
+        if(snittPulsDrag!=='–') detaljer.push('Snittpuls drag: '+snittPulsDrag);
+        if(snittMaksDrag!=='–') detaljer.push('Snitt makspuls drag: '+snittMaksDrag);
+      } else {
+        if(sv.sn) detaljer.push('Snittpuls: '+sv.sn+' bpm');
+        if(sv.mx) detaljer.push('Makspuls: '+sv.mx+' bpm');
+      }
+      if(sv.fol) detaljer.push('Følelse: '+sv.fol+'/5');
+
+      let dragHtml='';
+
+      row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:6px">'
+        +'<div style="font-weight:500;color:var(--t);font-size:12px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
+        +'<div style="font-size:11px;display:flex;gap:12px;flex-wrap:wrap">'+badges.join('&nbsp;&nbsp;·&nbsp;&nbsp;')+'</div>'
+        +'</div>'
+        +'<div style="font-size:12px;color:var(--t)">'+detaljer.join(' &nbsp;·&nbsp; ')+'</div>'
+        +dragHtml;
+      wrap.appendChild(row);
+
+      if(tempoSek!=null) forrigeTempoSek=tempoSek;
+      if(kmVal!=null) forrigeKm=kmVal;
+      if(varSek!=null) forrigeVarSek=varSek;
+    });
+
+    sb.appendChild(wrap);
+  });
+
+  if(!harData){
+    const empty=document.createElement('div');
+    empty.style.cssText='background:var(--s);border:1px solid var(--b);border-radius:8px;padding:28px 20px;color:var(--m);font-size:12px;text-align:center';
+    empty.innerHTML='<div style="font-size:24px;margin-bottom:10px">🏃</div>'
+      +'<div style="font-weight:500;color:var(--t);margin-bottom:6px">Ingen løpeøkter loggført ennå</div>'
+      +'<div>Registrer Intervall, Rolig langtur eller Rolig løpetur/Gåtur under <strong>Registrering</strong> for å se loggen her.</div>';
+    sb.appendChild(empty);
+  }
+}
+
 function renderLopeprogram(){
   const sb=document.getElementById('lopeprogram-body');
   sb.innerHTML='';
@@ -1324,9 +1478,6 @@ function renderReg(){
   // ── LØPEØKTER ──────────────────────────────────────────────────────────
   const lSection=document.createElement('div');
   lSection.innerHTML=`
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
-      <div style="font-size:11px;color:var(--m)">Planlagte økter denne uken – gjør dem når du vil. Dato settes automatisk til dagen du logger.</div>
-    </div>
     <h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Løpeøkter – Uke ${dU(w)}</h2>`;
 
   // Ukas løpeøkter (fleksible, dedup per type)
