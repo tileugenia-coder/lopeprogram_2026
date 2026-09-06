@@ -183,6 +183,7 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
   <button onclick="nav('progresjon',this)">Løpeprogresjon</button>
   <button onclick="nav('stats',this)">Statistikk</button>
   <button onclick="nav('styrke',this)">Styrkeprogram</button>
+  <button onclick="nav('lopeprogram',this)">Løpeprogram</button>
   <button onclick="nav('prognose',this)">Prognose</button>
 </nav>
 <main>
@@ -203,6 +204,10 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
 
 <div class="view" id="v-styrke">
   <div id="styrke-body" style="padding:8px 0"></div>
+</div>
+
+<div class="view" id="v-lopeprogram">
+  <div id="lopeprogram-body" style="padding:8px 0"></div>
 </div>
 
 
@@ -232,6 +237,8 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
   <div id="progresjon-body"></div>
 </div>
 </main>
+
+<button id="btn-til-toppen" onclick="scrollTilToppen()" style="position:fixed;bottom:20px;right:20px;z-index:50;background:var(--a);color:#fff;border:none;border-radius:99px;padding:10px 16px;font-family:'DM Mono',monospace;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;display:none">↑ Til toppen</button>
 <script>
 function nullstillUke(){
   const uv=document.getElementById('reg-uke').value;
@@ -317,28 +324,28 @@ function finnEldreStyrkedata(){
 }
 const ROLIG_PLAN={19:60,20:65,21:70,22:60,23:75,24:80,25:85,26:70,27:90,28:95,29:100,30:75};
 const INTERVALL_PLAN={
-  19:{opp:'10 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Bas'},
-  20:{opp:'10 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Bas'},
-  21:{opp:'10 min',hoved:'5x4 min',pause:'2 min',puls:'155-162',tot:'44 min',fokus:'Progresjon'},
-  22:{opp:'10 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Deload'},
-  23:{opp:'10 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Progresjon'},
-  24:{opp:'10 min',hoved:'5x5 min',pause:'2 min',puls:'158-163',tot:'53 min',fokus:'Progresjon'},
-  25:{opp:'10 min',hoved:'5x5 min',pause:'90 s',puls:'160-165',tot:'51 min',fokus:'Progresjon'},
-  26:{opp:'10 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Deload'},
-  27:{opp:'10 min',hoved:'3x8 min',pause:'2 min',puls:'160-166',tot:'48 min',fokus:'Spesifikk'},
-  28:{opp:'10 min',hoved:'3x8 min',pause:'90 s',puls:'160-166',tot:'47 min',fokus:'Spesifikk'},
-  29:{opp:'10 min',hoved:'2x12 min',pause:'3 min',puls:'162-166',tot:'47 min',fokus:'Spesifikk'},
-  30:{opp:'10 min',hoved:'20 min sammenhengende terskel',pause:'-',puls:'160-166',tot:'40 min',fokus:'Status'}
+  19:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Bas'},
+  20:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Bas'},
+  21:{opp:'15 min',hoved:'5x4 min',pause:'2 min',puls:'155-162',tot:'44 min',fokus:'Progresjon'},
+  22:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Deload'},
+  23:{opp:'15 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Progresjon'},
+  24:{opp:'15 min',hoved:'5x5 min',pause:'2 min',puls:'158-163',tot:'53 min',fokus:'Progresjon'},
+  25:{opp:'15 min',hoved:'5x5 min',pause:'90 s',puls:'160-165',tot:'51 min',fokus:'Progresjon'},
+  26:{opp:'15 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Deload'},
+  27:{opp:'15 min',hoved:'3x8 min',pause:'2 min',puls:'160-166',tot:'48 min',fokus:'Spesifikk'},
+  28:{opp:'15 min',hoved:'3x8 min',pause:'90 s',puls:'160-166',tot:'47 min',fokus:'Spesifikk'},
+  29:{opp:'15 min',hoved:'2x12 min',pause:'3 min',puls:'162-166',tot:'47 min',fokus:'Spesifikk'},
+  30:{opp:'15 min',hoved:'20 min sammenhengende terskel',pause:'-',puls:'160-166',tot:'40 min',fokus:'Status'}
 };
 function runOkter(uke){
   // Løpeprogrammeringen brukes ikke lenger – 3 faste + 3 valgfrie løpeøkter hver uke.
   const planMin=ROLIG_PLAN[uke];
   const iv=INTERVALL_PLAN[uke];
-  const ivTxt=iv?(`Planlagt: ${iv.opp} oppvarming, ${iv.hoved} hoveddel, ${iv.pause} pause\nPulsmål ${iv.puls} · Total tid ~${iv.tot} · Fokus: ${iv.fokus}`):'';
+  const ivTxt=iv?(`Planlagt: ${iv.opp} oppvarming, ${iv.hoved} hoveddel, ${iv.pause} pause\n<span style="white-space:nowrap">${iv.puls} bpm</span> · Fokus: ${iv.fokus}`):'';
   return [
     {k:'intervall', l:'Intervall', txt: ivTxt},
-    {k:'roligLop', l:'Rolig løpetur', txt: planMin?('Planlagt: '+planMin+' min'):''},
-    {k:'langtur', l:'Rolig langtur', txt:''},
+    {k:'langtur', l:'Rolig langtur', txt: planMin?(`Planlagt: ${planMin} min\nSone 1-2: 130–151 bpm`):''},
+    {k:'roligLop', l: uke>=19?'Rolig løpetur/Gåtur':'Rolig løpetur', txt: uke>=19?`Maks 30 min\n< 151 bpm`:''},
     {k:'valgfri1', l:'Valgfri økt 1', txt:''},
     {k:'valgfri2', l:'Valgfri økt 2', txt:''},
     {k:'valgfri3', l:'Valgfri økt 3', txt:''}
@@ -377,10 +384,24 @@ function nav(id,btn){
     if(rad) setTimeout(()=>rad.scrollIntoView({block:'start',behavior:'auto'}),0);
   }
   if(id==='styrke') renderStyrke();
+  if(id==='lopeprogram') renderLopeprogram();
   if(id==='stats') renderStats();
   if(id==='prognose') renderPrognose();
   if(id==='progresjon') renderProgresjonTab();
+  oppdaterTilToppenKnapp();
 }
+
+function scrollTilToppen(){
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function oppdaterTilToppenKnapp(){
+  const btn=document.getElementById('btn-til-toppen');
+  if(!btn) return;
+  const scrollet=window.scrollY>300;
+  btn.style.display=scrollet?'block':'none';
+}
+window.addEventListener('scroll', oppdaterTilToppenKnapp);
 
 function gw(n){
   document.getElementById('reg-uke').value=n;
@@ -462,7 +483,7 @@ function renderUkesplan(){
       const isValgfriChip=(o.k==='valgfri1'||o.k==='valgfri2'||o.k==='valgfri3');
       let status=runStatus(w.uke,o.k);
       if(isValgfriChip && w.uke<10 && status==='open') status='ikke';
-      html2+=chip(custom||runLabel[o.k]||o.l, status, 'var(--a)');
+      html2+=chip(custom||o.l||runLabel[o.k], status, 'var(--a)');
     }
     fasteLop.forEach(runChip);
     if(race) html2+=chip('🏁 '+race.navn+' '+race.km+' km', raceStatus(w.uke), 'var(--or)');
@@ -1186,11 +1207,6 @@ function renderStyrke(){
     sb.appendChild(wrap);
   }
 
-  const note=document.createElement('p');
-  note.style.cssText='font-size:11px;color:var(--m);margin:0 0 16px;font-style:italic';
-  note.textContent='Program A/B/C gjaldt uke 10–18. Fra uke 1 i det nye programmet (U37) gjelder nye øvelser for Styrke A og B – Styrke C er avsluttet. Uke 1–9 viser enda eldre historikk.';
-  sb.appendChild(note);
-
   buildTable('Styrke A (fra uke 1/U37)','var(--a)','var(--s2)',[
     ['1','Trap Bar Deadlift'],['2','Soft Broadjumps'],
     ['3','Hip Thrust'],['4','Landmine skater squat'],
@@ -1231,6 +1247,67 @@ function initReg(){
   sel.value=curUke;
   // Sync ukesoversikt to same week
   renderReg();
+}
+
+function renderLopeprogram(){
+  const sb=document.getElementById('lopeprogram-body');
+  sb.innerHTML='';
+
+  const h1=document.createElement('h2');
+  h1.style.cssText='font-family:"Fraunces",serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)';
+  h1.textContent='Løpeprogram (fra uke 1/U37)';
+  sb.appendChild(h1);
+
+  const wrap=document.createElement('div');
+  wrap.style.cssText='margin-bottom:32px;overflow-x:auto';
+  const tbl=document.createElement('table');
+  tbl.style.cssText='border-collapse:collapse;table-layout:fixed;width:100%;font-size:11px';
+
+  const cols=['Uke','Dato','Intervall','Rolig langtur','Rolig løpetur/Gåtur'];
+  const colWidths=['44px','76px','1fr','1fr','1fr'];
+  let hRow='<tr>';
+  cols.forEach((c,i)=>{
+    hRow+='<th style="width:'+colWidths[i]+';padding:6px 6px;background:var(--a);color:#fff;text-align:'+(i===0?'left':'center')+';white-space:nowrap'+(i===0?';position:sticky;left:0;z-index:2':'')+'">'+c+'</th>';
+  });
+  hRow+='</tr>';
+  const thead=document.createElement('thead');
+  thead.innerHTML=hRow;
+  tbl.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+  const newWeeks=W.filter(w=>w.uke>=19);
+  newWeeks.forEach((w,idx)=>{
+    const iv=INTERVALL_PLAN[w.uke];
+    const rolig=ROLIG_PLAN[w.uke];
+    const tr=document.createElement('tr');
+    const bg=idx%2===0?'var(--s2)':'var(--s)';
+    tr.style.background=bg;
+    const intervallHtml=iv
+      ?'<div>'+iv.hoved+'</div><div style="color:var(--m);font-size:10px;margin-top:2px;line-height:1.3">'+iv.opp+' oppv. · '+iv.pause+' pause · <span style="white-space:nowrap">'+iv.puls+' bpm</span> · '+iv.fokus+'</div>'
+      :'–';
+    const roligLopHtml='<div>Maks 30 min</div><div style="color:var(--m);font-size:10px;margin-top:2px">&lt; 151 bpm</div>';
+    const cells=[
+      {v:dU(w),align:'left'},
+      {v:w.dato.split(' – ').join('<br>-<br>'),align:'center'},
+      {v:intervallHtml,align:'center'},
+      {v:rolig?('<div>'+rolig+' min</div><div style="color:var(--m);font-size:10px;margin-top:2px">Sone 1-2: 130–151 bpm</div>'):'–',align:'center'},
+      {v:roligLopHtml,align:'center'}
+    ];
+    let row='';
+    cells.forEach((c,i)=>{
+      row+='<td style="padding:6px 6px;text-align:'+c.align+';white-space:'+(i>=2?'normal':'nowrap')+';overflow-wrap:break-word'+(i===0?';font-weight:500;position:sticky;left:0;background:'+bg+';z-index:1':'')+'">'+c.v+'</td>';
+    });
+    tr.innerHTML=row;
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+  wrap.appendChild(tbl);
+  sb.appendChild(wrap);
+
+  const note=document.createElement('p');
+  note.style.cssText='font-size:11px;color:var(--m);margin:0;font-style:italic';
+  note.textContent='Planlagt Rolig løpetur og Intervall vises kun for de ukene der planen er lagt inn ennå. Resten fylles inn etter hvert.';
+  sb.appendChild(note);
 }
 
 function renderReg(){
@@ -2332,9 +2409,9 @@ function renderProgresjonTab(){
   function fmtKm(km){ return km==null?'–':(Math.round(km*10)/10)+' km'; }
   function pctStr(d){ if(d==null) return '–'; const sign=d>0?'+':''; return sign+(Math.round(d*10)/10)+'%'; }
 
-  const typeLabel={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur'};
+  const typeLabel={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',langtur:'Langtur'};
   const typeColorMap={intervall:'#c0306a',roligLop:'#7030a0',langtur:'#c05020',race:'#2050a0'};
-  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur',race:'Løp'};
+  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',langtur:'Langtur',race:'Løp'};
   const chartTypes=['intervall','roligLop','langtur','race'];
 
   // 1) Bygg full liste over alle logget økter med faktiske data (kun faste løpeøkter + løp – valgfrie holdes utenfor)
@@ -2681,7 +2758,7 @@ function eksporterExcel(){
 
     const dayList=['man','tir','ons','tor','fre','lor','son'];
     const dayNames={man:'Mandag',tir:'Tirsdag',ons:'Onsdag',tor:'Torsdag',fre:'Fredag',lor:'Lørdag',son:'Søndag'};
-    const runLabelX={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Rolig langtur'};
+    const runLabelX={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',langtur:'Rolig langtur'};
 
     // ── 1) Løpeøkter (inkl. valgfrie og løp) ────────────────────────────
     const lopRows=[];
