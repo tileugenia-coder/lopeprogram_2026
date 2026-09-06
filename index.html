@@ -1159,7 +1159,7 @@ function renderStyrkelogg(){
 
   const sub=document.createElement('p');
   sub.style.cssText='font-size:11px;color:var(--m);margin:0 0 20px;font-style:italic';
-  sub.textContent='Alle loggførte styrkeøkter, gruppert per øvelse. Økning vises mot tyngste sett forrige gang øvelsen ble logget.';
+  sub.textContent='Loggførte styrkeøkter fra uke 1/U37 og utover, gruppert per øvelse. Økning vises mot tyngste sett forrige gang øvelsen ble logget. Eldre historikk (før uke 1/U37) er bevart, men vises ikke her.';
   sb.appendChild(sub);
 
   // ── Bygg safeName -> visningsnavn-oppslag fra alle program (gammelt + nytt)
@@ -1181,6 +1181,7 @@ function renderStyrkelogg(){
     const m=key.match(/^(\d+)_(A|B|C)_(.+)_s(\d)$/);
     if(!m) return;
     const uke=parseInt(m[1]), okt=m[2], safeName=m[3], sett=parseInt(m[4]);
+    if(uke<19) return; // Kun nytt program (uke 1/U37+) vises her – eldre data beholdes urørt i loggen
     const sv=loggS[key];
     if(!sv || (!sv.vekt && !sv.reps)) return;
     const gk=okt+'|'+safeName;
@@ -1236,28 +1237,26 @@ function renderStyrkelogg(){
       const row=document.createElement('div');
       row.style.cssText='padding:12px 16px;border-bottom:1px solid var(--b)';
 
-      let diffHtml='';
+      let diffChip='';
       if(tyngste!=null&&forrigeTyngste!=null){
         const diff=Math.round((tyngste-forrigeTyngste)*10)/10;
-        if(diff>0) diffHtml='<span style="color:#2a7a2a;font-weight:500">▲ +'+diff+' kg</span>';
-        else if(diff<0) diffHtml='<span style="color:var(--or)">▼ '+diff+' kg</span>';
-        else diffHtml='<span style="color:var(--m)">– uendret</span>';
+        if(diff>0) diffChip='<span style="display:inline-block;background:#e8f5e8;color:#2a7a2a;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap">▲ +'+diff+' kg</span>';
+        else if(diff<0) diffChip='<span style="display:inline-block;background:#fbe9e0;color:var(--or);padding:3px 9px;border-radius:99px;white-space:nowrap">▼ '+diff+' kg</span>';
+        else diffChip='<span style="display:inline-block;background:var(--bg);color:var(--m);padding:3px 9px;border-radius:99px;white-space:nowrap">– uendret</span>';
       } else if(tyngste!=null){
-        diffHtml='<span style="color:var(--m)">Første registrering</span>';
+        diffChip='<span style="display:inline-block;background:var(--bg);color:var(--m);padding:3px 9px;border-radius:99px;white-space:nowrap">Første registrering</span>';
       }
 
-      const setsTxt=settNumre.map(s=>{
+      const setChips=settNumre.map(s=>{
         const sv=setter[s];
         const vekt=sv.vekt!=null&&sv.vekt!==''?sv.vekt+' kg':'–';
         const reps=sv.reps!=null&&sv.reps!==''?sv.reps:'–';
-        return 'Sett '+s+': '+vekt+' × '+reps;
-      }).join(' &nbsp;·&nbsp; ');
+        return '<span style="display:inline-block;background:var(--bg);color:var(--t);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">Sett '+s+': '+vekt+' × '+reps+'</span>';
+      }).join('');
 
-      row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:4px">'
-        +'<div style="font-weight:500;color:var(--t);font-size:12px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
-        +'<div style="font-size:11px">'+diffHtml+'</div>'
-        +'</div>'
-        +'<div style="font-size:12px;color:var(--t)">'+setsTxt+'</div>';
+      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
+        +'<div style="margin-bottom:'+(diffChip?'8':'0')+'px">'+diffChip+'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+setChips+'</div>';
       wrap.appendChild(row);
 
       if(tyngste!=null) forrigeTyngste=tyngste;
@@ -1300,16 +1299,18 @@ function renderLopelogg(){
     return null;
   }
 
-  function diffBadge(diff, unit, higherIsBetter, decimals){
-    if(diff==null) return '';
+  function diffBadge(label, diff, unit, higherIsBetter, decimals){
+    const chip=(txt,bg,fg)=>'<span style="display:inline-block;background:'+bg+';color:'+fg+';padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">'+txt+'</span>';
+    if(diff==null) return chip(label+': Første registrering', 'var(--bg)', 'var(--m)');
     const rounded=Math.round(diff*Math.pow(10,decimals))/Math.pow(10,decimals);
-    if(rounded===0) return '<span style="color:var(--m)">– uendret</span>';
+    if(rounded===0) return chip(label+': – uendret', 'var(--bg)', 'var(--m)');
     const positive=rounded>0;
     const good=higherIsBetter?positive:!positive;
     const arrow=positive?'▲':'▼';
-    const color=good?'#2a7a2a':'var(--or)';
     const sign=positive?'+':'';
-    return '<span style="color:'+color+'">'+arrow+' '+sign+rounded+' '+unit+'</span>';
+    return good
+      ? chip(label+': '+arrow+' '+sign+rounded+' '+unit, '#e8f5e8', '#2a7a2a')
+      : chip(label+': '+arrow+' '+sign+rounded+' '+unit, '#fbe9e0', 'var(--or)');
   }
 
   let harData=false;
@@ -1347,42 +1348,29 @@ function renderLopelogg(){
       row.style.cssText='padding:12px 16px;border-bottom:1px solid var(--b)';
 
       const badges=[];
-      if(tempoSek!=null){
-        const b=(forrigeTempoSek!=null)?diffBadge((tempoSek-forrigeTempoSek), 'sek/km', false, 0):'<span style="color:var(--m)">Første registrering</span>';
-        badges.push('Tempo: '+b);
-      }
-      if(kmVal!=null){
-        const b=(forrigeKm!=null)?diffBadge((kmVal-forrigeKm), 'km', true, 1):'<span style="color:var(--m)">Første registrering</span>';
-        badges.push('Distanse: '+b);
-      }
-      if(varSek!=null){
-        const b=(forrigeVarSek!=null)?diffBadge((varSek-forrigeVarSek)/60, 'min', true, 0):'<span style="color:var(--m)">Første registrering</span>';
-        badges.push('Varighet: '+b);
-      }
+      if(tempoSek!=null) badges.push(diffBadge('Tempo', forrigeTempoSek!=null?(tempoSek-forrigeTempoSek):null, 'sek/km', false, 0));
+      if(kmVal!=null) badges.push(diffBadge('Distanse', forrigeKm!=null?(kmVal-forrigeKm):null, 'km', true, 1));
+      if(varSek!=null) badges.push(diffBadge('Varighet', forrigeVarSek!=null?(varSek-forrigeVarSek)/60:null, 'min', true, 0));
 
+      const detaljChip=(txt)=>'<span style="display:inline-block;background:var(--bg);color:var(--t);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">'+txt+'</span>';
       const detaljer=[];
-      if(sv['var']) detaljer.push('Varighet: '+sv['var']);
-      if(sv.km) detaljer.push('Distanse: '+sv.km+' km');
-      if(tempoStr) detaljer.push('Snitt tempo: '+tempoStr+'/km');
+      if(sv['var']) detaljer.push(detaljChip('Varighet: '+sv['var']));
+      if(sv.km) detaljer.push(detaljChip('Distanse: '+sv.km+' km'));
+      if(tempoStr) detaljer.push(detaljChip('Snitt tempo: '+tempoStr+'/km'));
       if(type==='intervall' && sv.drags){
         const snittPulsDrag=calcSnittPuls(sv.drags,6);
         const snittMaksDrag=calcSnittMaksPuls(sv.drags,6);
-        if(snittPulsDrag!=='–') detaljer.push('Snittpuls drag: '+snittPulsDrag);
-        if(snittMaksDrag!=='–') detaljer.push('Snitt makspuls drag: '+snittMaksDrag);
+        if(snittPulsDrag!=='–') detaljer.push(detaljChip('Snittpuls drag: '+snittPulsDrag));
+        if(snittMaksDrag!=='–') detaljer.push(detaljChip('Snitt makspuls drag: '+snittMaksDrag));
       } else {
-        if(sv.sn) detaljer.push('Snittpuls: '+sv.sn+' bpm');
-        if(sv.mx) detaljer.push('Makspuls: '+sv.mx+' bpm');
+        if(sv.sn) detaljer.push(detaljChip('Snittpuls: '+sv.sn+' bpm'));
+        if(sv.mx) detaljer.push(detaljChip('Makspuls: '+sv.mx+' bpm'));
       }
-      if(sv.fol) detaljer.push('Følelse: '+sv.fol+'/5');
+      if(sv.fol) detaljer.push(detaljChip('Følelse: '+sv.fol+'/5'));
 
-      let dragHtml='';
-
-      row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:6px">'
-        +'<div style="font-weight:500;color:var(--t);font-size:12px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
-        +'<div style="font-size:11px;display:flex;gap:12px;flex-wrap:wrap">'+badges.join('&nbsp;&nbsp;·&nbsp;&nbsp;')+'</div>'
-        +'</div>'
-        +'<div style="font-size:12px;color:var(--t)">'+detaljer.join(' &nbsp;·&nbsp; ')+'</div>'
-        +dragHtml;
+      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
+        +(badges.length?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+badges.join('')+'</div>':'')
+        +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+detaljer.join('')+'</div>';
       wrap.appendChild(row);
 
       if(tempoSek!=null) forrigeTempoSek=tempoSek;
