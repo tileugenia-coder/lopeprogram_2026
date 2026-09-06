@@ -1222,6 +1222,7 @@ function renderStyrkelogg(){
     wrap.appendChild(head);
 
     let forrigeTyngste=null;
+    const rows=[];
     ukeNumre.forEach(uke=>{
       const w=W.find(x=>x.uke===uke);
       const setter=ukesData[uke];
@@ -1257,10 +1258,11 @@ function renderStyrkelogg(){
       row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
         +'<div style="margin-bottom:'+(diffChip?'8':'0')+'px">'+diffChip+'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+setChips+'</div>';
-      wrap.appendChild(row);
+      rows.push(row);
 
       if(tyngste!=null) forrigeTyngste=tyngste;
     });
+    rows.reverse().forEach(r=>wrap.appendChild(r));
 
     sb.appendChild(wrap);
   });
@@ -1334,6 +1336,7 @@ function renderLopelogg(){
     wrap.appendChild(head);
 
     let forrigeTempoSek=null, forrigeKm=null, forrigeVarSek=null;
+    const rows=[];
 
     ukerMedData.forEach(uke=>{
       const w=W.find(x=>x.uke===uke);
@@ -1371,12 +1374,13 @@ function renderLopelogg(){
       row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
         +(badges.length?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+badges.join('')+'</div>':'')
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+detaljer.join('')+'</div>';
-      wrap.appendChild(row);
+      rows.push(row);
 
       if(tempoSek!=null) forrigeTempoSek=tempoSek;
       if(kmVal!=null) forrigeKm=kmVal;
       if(varSek!=null) forrigeVarSek=varSek;
     });
+    rows.reverse().forEach(r=>wrap.appendChild(r));
 
     sb.appendChild(wrap);
   });
