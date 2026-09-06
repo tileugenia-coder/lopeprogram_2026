@@ -181,8 +181,8 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
   <button class="active" onclick="nav('reg',this)">Registrering</button>
   <button onclick="nav('ukesplan',this)">Øktoversikt</button>
   <button onclick="nav('progresjon',this)">Løpeprogresjon</button>
-  <button onclick="nav('styrkelogg',this)">Styrkelogg</button>
   <button onclick="nav('lopelogg',this)">Løpelogg</button>
+  <button onclick="nav('styrkelogg',this)">Styrkelogg</button>
   <button onclick="nav('stats',this)">Statistikk</button>
   <button onclick="nav('lopeprogram',this)">Løpeprogram</button>
   <button onclick="nav('styrke',this)">Styrkeprogram</button>
@@ -1152,6 +1152,15 @@ function renderStyrkelogg(){
   const sb=document.getElementById('styrkelogg-body');
   sb.innerHTML='';
 
+  if(!document.getElementById('logg-details-style')){
+    const st=document.createElement('style');
+    st.id='logg-details-style';
+    st.textContent='details.logg-item summary::-webkit-details-marker{display:none}'
+      +'details.logg-item summary::marker{content:""}'
+      +'details.logg-item[open] .logg-chevron{transform:rotate(90deg);display:inline-block}';
+    document.head.appendChild(st);
+  }
+
   const h1=document.createElement('h2');
   h1.style.cssText='font-family:"Fraunces",serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--b)';
   h1.textContent='Styrkelogg';
@@ -1212,17 +1221,13 @@ function renderStyrkelogg(){
     const ukesData=bySafe[g.gk];
     const ukeNumre=Object.keys(ukesData).map(Number).sort((a,b)=>a-b);
 
-    const wrap=document.createElement('div');
-    wrap.style.cssText='margin-bottom:28px;background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden';
-
-    const head=document.createElement('div');
-    head.style.cssText='padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap';
-    head.innerHTML='<div style="font-weight:600;color:var(--t);font-size:14px">'+g.displayName+'</div>'
-      +'<div style="font-size:10px;color:var(--m)">Styrke '+g.okt+'</div>';
-    wrap.appendChild(head);
+    const wrap=document.createElement('details');
+    wrap.className='logg-item';
+    wrap.style.cssText='margin-bottom:12px;background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden';
 
     let forrigeTyngste=null;
     const rows=[];
+    let sisteChip='', sisteInfo='';
     ukeNumre.forEach(uke=>{
       const w=W.find(x=>x.uke===uke);
       const setter=ukesData[uke];
@@ -1260,9 +1265,28 @@ function renderStyrkelogg(){
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+setChips+'</div>';
       rows.push(row);
 
+      sisteChip=diffChip;
+      sisteInfo='Uke '+(w?dU(w):uke);
+
       if(tyngste!=null) forrigeTyngste=tyngste;
     });
-    rows.reverse().forEach(r=>wrap.appendChild(r));
+
+    const summary=document.createElement('summary');
+    summary.style.cssText='padding:12px 16px;background:var(--s2);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap';
+    summary.innerHTML='<div style="display:flex;align-items:center;gap:8px;min-width:0">'
+        +'<span class="logg-chevron" style="font-size:10px;color:var(--m);flex-shrink:0">▸</span>'
+        +'<div style="font-weight:600;color:var(--t);font-size:14px">'+g.displayName+'</div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--m)">'
+        +'<span>'+sisteInfo+'</span>'+sisteChip
+        +'<span style="color:var(--m)">Styrke '+g.okt+'</span>'
+      +'</div>';
+    wrap.appendChild(summary);
+
+    const body=document.createElement('div');
+    rows.reverse().forEach(r=>body.appendChild(r));
+    wrap.appendChild(body);
+
 
     sb.appendChild(wrap);
   });
@@ -1271,6 +1295,15 @@ function renderStyrkelogg(){
 function renderLopelogg(){
   const sb=document.getElementById('lopelogg-body');
   sb.innerHTML='';
+
+  if(!document.getElementById('logg-details-style')){
+    const st=document.createElement('style');
+    st.id='logg-details-style';
+    st.textContent='details.logg-item summary::-webkit-details-marker{display:none}'
+      +'details.logg-item summary::marker{content:""}'
+      +'details.logg-item[open] .logg-chevron{transform:rotate(90deg);display:inline-block}';
+    document.head.appendChild(st);
+  }
 
   const h1=document.createElement('h2');
   h1.style.cssText='font-family:"Fraunces",serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--b)';
@@ -1327,16 +1360,13 @@ function renderLopelogg(){
     if(!ukerMedData.length) return;
     harData=true;
 
-    const wrap=document.createElement('div');
-    wrap.style.cssText='margin-bottom:28px;background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden';
-
-    const head=document.createElement('div');
-    head.style.cssText='padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--b)';
-    head.innerHTML='<div style="font-weight:600;color:var(--t);font-size:14px">'+typeLabels[type]+'</div>';
-    wrap.appendChild(head);
+    const wrap=document.createElement('details');
+    wrap.className='logg-item';
+    wrap.style.cssText='margin-bottom:12px;background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden';
 
     let forrigeTempoSek=null, forrigeKm=null, forrigeVarSek=null;
     const rows=[];
+    let sisteBadges=[], sisteInfo='';
 
     ukerMedData.forEach(uke=>{
       const w=W.find(x=>x.uke===uke);
@@ -1376,11 +1406,28 @@ function renderLopelogg(){
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+detaljer.join('')+'</div>';
       rows.push(row);
 
+      sisteBadges=badges;
+      sisteInfo='Uke '+(w?dU(w):uke);
+
       if(tempoSek!=null) forrigeTempoSek=tempoSek;
       if(kmVal!=null) forrigeKm=kmVal;
       if(varSek!=null) forrigeVarSek=varSek;
     });
-    rows.reverse().forEach(r=>wrap.appendChild(r));
+
+    const summary=document.createElement('summary');
+    summary.style.cssText='padding:12px 16px;background:var(--s2);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap';
+    summary.innerHTML='<div style="display:flex;align-items:center;gap:8px;min-width:0">'
+        +'<span class="logg-chevron" style="font-size:10px;color:var(--m);flex-shrink:0">▸</span>'
+        +'<div style="font-weight:600;color:var(--t);font-size:14px">'+typeLabels[type]+'</div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--m);flex-wrap:wrap">'
+        +'<span>'+sisteInfo+'</span>'+sisteBadges.join('')
+      +'</div>';
+    wrap.appendChild(summary);
+
+    const body=document.createElement('div');
+    rows.reverse().forEach(r=>body.appendChild(r));
+    wrap.appendChild(body);
 
     sb.appendChild(wrap);
   });
