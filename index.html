@@ -1421,7 +1421,7 @@ function renderLopeprogram(){
   const colWidths=['44px','76px','1fr','1fr','1fr'];
   let hRow='<tr>';
   cols.forEach((c,i)=>{
-    hRow+='<th style="width:'+colWidths[i]+';padding:6px 6px;background:var(--a);color:#fff;text-align:'+(i===0?'left':'center')+';white-space:nowrap'+(i===0?';position:sticky;left:0;z-index:2':'')+'">'+c+'</th>';
+    hRow+='<th style="width:'+colWidths[i]+';padding:6px 6px;background:var(--a);color:#fff;text-align:'+(i===0?'left':'center')+';white-space:normal;word-break:normal;overflow-wrap:break-word;line-height:1.25'+(i===0?';position:sticky;left:0;z-index:2':'')+'">'+c+'</th>';
   });
   hRow+='</tr>';
   const thead=document.createElement('thead');
