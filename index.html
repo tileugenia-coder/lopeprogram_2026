@@ -2299,13 +2299,16 @@ function setSyncStatus(txt, col){
 }
 
 // Save ALL data to Firebase (simple overwrite — single user)
+let unsynced=false, dirtyGen=0;
 async function fbSave(){
+  const genAtSave=dirtyGen;
   setSyncStatus('● Lagrer...','var(--or)');
   try{
+    const ts=Date.now();
     const body={fields:{
       l:{stringValue:JSON.stringify(loggL)},
       s:{stringValue:JSON.stringify(loggS)},
-      ts:{integerValue:Date.now()}
+      ts:{integerValue:ts}
     }};
     const res=await fetch(FB_URL+'?key='+FB_KEY,{
       method:'PATCH',
@@ -2313,6 +2316,8 @@ async function fbSave(){
       body:JSON.stringify(body)
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
+    localStorage.setItem('hpm_ts',String(ts));   // egen lagring skal ikke oppfattes som nyere data fra skyen
+    if(dirtyGen===genAtSave){ unsynced=false; userTyping=false; }      // ingen nye endringer mens lagringen pågikk
     setSyncStatus('● Synkronisert','var(--a2)');
   }catch(e){
     setSyncStatus('● Feil: '+e.message,'var(--or)');
@@ -2353,11 +2358,40 @@ function autoSaveLocal(){
 }
 
 // Auto-save to localStorage 2 sec after last keystroke — catches unsaved input fields
-document.addEventListener('input',()=>{
+// Skriv verdien rett inn i loggen mens du taster (ikke først når du forlater feltet),
+// slik at innskrevet tekst ikke går tapt ved omtegning av siden
+function commitLive(el){
+  try{
+    if(!el||!el.closest||!el.closest('#reg-body')) return;
+    const tag=el.tagName;
+    if(tag!=='INPUT'&&tag!=='TEXTAREA') return;
+    if(el.type==='checkbox'||el.type==='date') return;
+    const h=el.getAttribute('onchange')||'';
+    if(!h||h.indexOf('renderReg')!==-1) return;           // disse tegner siden på nytt – tas ved blur som før
+    let m;
+    if((m=h.match(/^upL\('([^']+)','(var|tid)',this\.value\)/))){  // tid: lagre rått, normaliseres ved blur
+      if(!loggL[m[1]]) loggL[m[1]]={};
+      loggL[m[1]][m[2]]=el.value;
+    }else if((m=h.match(/^upL\('([^']+)','([^']+)',this\.value\)/))){
+      upL(m[1],m[2],el.value);
+    }else if((m=h.match(/^upS\('([^']+)','([^']+)',this\.value\)/))){
+      upS(m[1],m[2],el.value);
+    }else if((m=h.match(/^upLDrag\('([^']+)',(\d+),'([^']+)',this\.value\)/))){
+      upLDrag(m[1],parseInt(m[2]),m[3],el.value);
+    }else if(typeof el.onchange==='function'){
+      el.onchange.call(el);
+    }else{
+      return;
+    }
+    unsynced=true; dirtyGen++;
+  }catch(e){}
+}
+document.addEventListener('input',(ev)=>{
+  commitLive(ev.target);
   userTyping=true;
   clearTimeout(typingTimer);
   clearTimeout(autoSaveTimer);
-  typingTimer=setTimeout(()=>{ userTyping=false; },5000);
+  typingTimer=setTimeout(()=>{ userTyping=false; },30000);
   autoSaveTimer=setTimeout(()=>{ autoSaveLocal(); },2000);
 });
 
@@ -2376,8 +2410,10 @@ window.addEventListener('pagehide',()=>{
 
 function fbListen(){
   setInterval(async()=>{
-    // Don't overwrite while user is typing
-    if(userTyping) return;
+    // Ikke overskriv mens du skriver, har ulagrede endringer, eller står i et felt i Registrering
+    if(userTyping||unsynced) return;
+    const ae=document.activeElement;
+    if(ae&&ae.closest&&ae.closest('#reg-body')&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')) return;
     try{
       const res=await fetch(FB_URL+'?key='+FB_KEY);
       if(!res.ok) return;
