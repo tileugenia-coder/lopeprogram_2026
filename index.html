@@ -351,34 +351,43 @@ function finnEldreStyrkedata(){
   });
   return orphans.sort((a,b)=>a.uke-b.uke);
 }
-const ROLIG_PLAN={19:60,20:65,21:70,22:60,23:75,24:80,25:85,26:70,27:90,28:95,29:100,30:75};
+const ROLIG_PLAN={19:60,20:65,21:70,22:60,23:75,25:60,26:80,27:85,28:70,29:90,30:95,31:100,32:75};
+// Uker der Rolig langtur ikke er en del av planen, og uker med eget tillegg på Rolig løpetur
+const LANGTUR_UTEN={24:true};
+const ROLIGLOP_TILLEGG={24:'+ 6 SL'};
 const INTERVALL_PLAN={
   19:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Bas'},
   20:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Bas'},
   21:{opp:'15 min',hoved:'5x4 min',pause:'2 min',puls:'155-162',tot:'44 min',fokus:'Progresjon'},
   22:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Deload'},
   23:{opp:'15 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Progresjon'},
-  24:{opp:'15 min',hoved:'5x5 min',pause:'2 min',puls:'158-163',tot:'53 min',fokus:'Progresjon'},
-  25:{opp:'15 min',hoved:'5x5 min',pause:'90 s',puls:'160-165',tot:'51 min',fokus:'Progresjon'},
-  26:{opp:'15 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Deload'},
-  27:{opp:'15 min',hoved:'3x8 min',pause:'2 min',puls:'160-166',tot:'48 min',fokus:'Spesifikk'},
-  28:{opp:'15 min',hoved:'3x8 min',pause:'90 s',puls:'160-166',tot:'47 min',fokus:'Spesifikk'},
-  29:{opp:'15 min',hoved:'2x12 min',pause:'3 min',puls:'162-166',tot:'47 min',fokus:'Spesifikk'},
-  30:{opp:'15 min',hoved:'20 min sammenhengende terskel',pause:'-',puls:'160-166',tot:'40 min',fokus:'Status'}
+  24:{opp:'15 min',hoved:'5-3-3-2-1 min',pause:'2 min',pauseFull:'pause 2 min lett jogg',puls:'155-160',tot:'',fokus:'Taper'},
+  25:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'',fokus:'Rolig'},
+  26:{opp:'15 min',hoved:'5x5 min',pause:'2 min',puls:'158-163',tot:'53 min',fokus:'Progresjon'},
+  27:{opp:'15 min',hoved:'5x5 min',pause:'90 s',puls:'160-165',tot:'51 min',fokus:'Progresjon'},
+  28:{opp:'15 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Deload'},
+  29:{opp:'15 min',hoved:'3x8 min',pause:'2 min',puls:'160-166',tot:'48 min',fokus:'Spesifikk'},
+  30:{opp:'15 min',hoved:'3x8 min',pause:'90 s',puls:'160-166',tot:'47 min',fokus:'Spesifikk'},
+  31:{opp:'15 min',hoved:'2x12 min',pause:'3 min',puls:'162-166',tot:'47 min',fokus:'Spesifikk'},
+  32:{opp:'15 min',hoved:'20 min sammenhengende terskel',pause:'-',puls:'160-166',tot:'40 min',fokus:'Status'}
 };
 function runOkter(uke){
   // Løpeprogrammeringen brukes ikke lenger – 3 faste + 3 valgfrie løpeøkter hver uke.
   const planMin=ROLIG_PLAN[uke];
   const iv=INTERVALL_PLAN[uke];
-  const ivTxt=iv?(`Planlagt: ${iv.opp} oppvarming, ${iv.hoved} hoveddel, ${iv.pause} pause\n<span style="white-space:nowrap">${iv.puls} bpm</span> · Fokus: ${iv.fokus}`):'';
-  return [
+  const ivTxt=iv?(`Planlagt: ${iv.opp} oppvarming, ${iv.hoved} hoveddel, ${iv.pauseFull||(iv.pause+' pause')}\n<span style="white-space:nowrap">${iv.puls} bpm</span> · Fokus: ${iv.fokus}`):'';
+  const tillegg=ROLIGLOP_TILLEGG[uke];
+  const lt=loggL[uke+'_langtur']||{};
+  const langturLogget=!!(lt['var']||lt.km||lt.tempo||lt.sn||lt.mx||lt.fol||lt.kom||lt.ikkeUtfort);
+  const okter=[
     {k:'intervall', l:'Intervall', txt: ivTxt},
     {k:'langtur', l:'Rolig langtur', txt: planMin?(`Planlagt: ${planMin} min\nSone 1-2: 130–151 bpm`):''},
-    {k:'roligLop', l: uke>=19?'Rolig løpetur/Gåtur':'Rolig løpetur', txt: uke>=19?`Maks 30 min\n< 151 bpm`:''},
+    {k:'roligLop', l: tillegg?('Rolig løpetur '+tillegg):(uke>=19?'Rolig løpetur/Gåtur':'Rolig løpetur'), txt: uke>=19?`Maks 30 min\n< 151 bpm`:''},
     {k:'valgfri1', l:'Valgfri økt 1', txt:''},
     {k:'valgfri2', l:'Valgfri økt 2', txt:''},
     {k:'valgfri3', l:'Valgfri økt 3', txt:''}
   ];
+  return (LANGTUR_UTEN[uke]&&!langturLogget)?okter.filter(o=>o.k!=='langtur'):okter;
 }
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function gjeldendeUke(){
@@ -1584,14 +1593,14 @@ function renderLopeprogram(){
     const bg=idx%2===0?'var(--s2)':'var(--s)';
     tr.style.background=bg;
     const intervallHtml=iv
-      ?'<div>'+iv.hoved+'</div><div style="color:var(--m);font-size:10px;margin-top:2px;line-height:1.3">'+iv.opp+' oppv. · '+iv.pause+' pause · <span style="white-space:nowrap">'+iv.puls+' bpm</span> · '+iv.fokus+'</div>'
+      ?'<div>'+iv.hoved+'</div><div style="color:var(--m);font-size:10px;margin-top:2px;line-height:1.3">'+iv.opp+' oppv. · '+(iv.pauseFull||(iv.pause+' pause'))+' · <span style="white-space:nowrap">'+iv.puls+' bpm</span> · '+iv.fokus+'</div>'
       :'–';
-    const roligLopHtml='<div>Maks 30 min</div><div style="color:var(--m);font-size:10px;margin-top:2px">&lt; 151 bpm</div>';
+    const roligLopHtml='<div>Maks 30 min'+(ROLIGLOP_TILLEGG[w.uke]?' '+ROLIGLOP_TILLEGG[w.uke]:'')+'</div><div style="color:var(--m);font-size:10px;margin-top:2px">&lt; 151 bpm</div>';
     const cells=[
       {v:dU(w),align:'left'},
       {v:w.dato.split(' – ').join('<br>-<br>'),align:'center'},
       {v:intervallHtml,align:'center'},
-      {v:rolig?('<div>'+rolig+' min</div><div style="color:var(--m);font-size:10px;margin-top:2px">Sone 1-2: 130–151 bpm</div>'):'–',align:'center'},
+      {v:LANGTUR_UTEN[w.uke]?'Ingen':rolig?('<div>'+rolig+' min</div><div style="color:var(--m);font-size:10px;margin-top:2px">Sone 1-2: 130–151 bpm</div>'):'–',align:'center'},
       {v:roligLopHtml,align:'center'}
     ];
     let row='';
