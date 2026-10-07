@@ -299,6 +299,9 @@ const W=[{"uke": 1, "kaluke": "U19", "dato": "04.05 – 10.05", "man": "Hvile", 
 // Visningsnavn: lagringsnøkler bygges fortsatt av opprinnelig navn, så eksisterende registreringer påvirkes ikke
 const EX_ALIAS={'Launch to step up':'Walking lunges','Calf rises':'Calf rises Smith machine','Sa Cable Row Ss':'Standing sa cable row'};
 function exNavn(n){return EX_ALIAS[n]||n;}
+// Øvelser som måles i meter i stedet for reps (feltet 'reps' lagres som før – kun visningen endres)
+const EX_ENHET={'Bear Crawls':'m'};
+function erMeter(n){return EX_ENHET[n]==='m';}
 const RC=[{"uke": 1, "navn": "Backyard Ultra", "km": 18, "dato": "09.05.2026"}, {"uke": 7, "navn": "Sommernattsløpet", "km": 5, "dato": "20.06.2026"}, {"uke": 8, "navn": "EcoTrail Bergen", "km": 12, "dato": "27.06.2026"}, {"uke": 15, "navn": "Chase The Sun Queen Elizabeth Olympic Park", "km": 5, "dato": "12.08.2026"}, {"uke": 18, "navn": "Jentemila", "km": 5, "dato": "05.09.2026"}, {"uke": 19, "dispUke": 1, "navn": "Oslo Maraton", "km": 10, "dato": "12.09.2026"}, {"uke": 24, "dispUke": 6, "navn": "Hytteplanmila", "km": 10, "dato": "17.10.2026"}, {"uke": 52, "dispUke": 34, "navn": "Bergen City Marathon", "km": 21, "dato": "27.04.2027"}];
 function dU(w){return w?(w.dispUke||w.uke):'';}
 function numOrZero(v){const n=parseFloat(v);return Number.isFinite(n)?n:0;}
@@ -1199,15 +1202,26 @@ function initReg(){
 // Tall i Styrkelogg: komma som desimaltegn, alltid 2 desimaler. Godtar både 87,5 og 87.5 som innskrevet vekt.
 function kgNum(v){ const n=parseFloat(String(v).trim().replace(',','.')); return Number.isFinite(n)?n:null; }
 function kgFmt(n){ return n.toFixed(2).replace('.',','); }
+function repsFmt(n){ return Number.isInteger(n)?String(n):kgFmt(n); }
 // Total endring fra første registrering (kg og prosent), komma og 2 desimaler
-function totChip(forste,naa,fraUke){
+function totChip(forste,naa,fraUke,forsteReps,naaReps,isM){
+  const U=isM?'m':'kg', F=isM?repsFmt:kgFmt;
   const diff=Math.round((naa-forste)*100)/100;
   const pst=forste!==0?Math.round((naa-forste)/forste*10000)/100:null;
   const pstTxt=pst!=null?' ('+(pst>0?'+':pst<0?'−':'')+kgFmt(Math.abs(pst))+' %)':'';
   const base='display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;line-height:1.35;max-width:100%;';
   const lbl='Totalt siden Uke '+fraUke+': ';
-  if(diff>0) return '<span style="'+base+'background:#e8f5e8;color:#2a7a2a;font-weight:500">'+lbl+'▲ +'+kgFmt(diff)+' kg'+pstTxt+'</span>';
-  if(diff<0) return '<span style="'+base+'background:#fbe9e0;color:var(--or)">'+lbl+'▼ −'+kgFmt(Math.abs(diff))+' kg'+pstTxt+'</span>';
+  // Lik vekt som utgangspunktet: flere/færre reps teller som økning/nedgang
+  if(diff===0&&forsteReps!=null&&naaReps!=null&&naaReps!==forsteReps){
+    const rd=Math.round((naaReps-forsteReps)*100)/100;
+    const rp=forsteReps!==0?Math.round((naaReps-forsteReps)/forsteReps*10000)/100:null;
+    const rpTxt=rp!=null?' ('+(rp>0?'+':'−')+kgFmt(Math.abs(rp))+' %)':'';
+    return rd>0
+      ? '<span style="'+base+'background:#e8f5e8;color:#2a7a2a;font-weight:500">'+lbl+'▲ +'+repsFmt(rd)+' reps'+rpTxt+'</span>'
+      : '<span style="'+base+'background:#fbe9e0;color:var(--or)">'+lbl+'▼ −'+repsFmt(Math.abs(rd))+' reps'+rpTxt+'</span>';
+  }
+  if(diff>0) return '<span style="'+base+'background:#e8f5e8;color:#2a7a2a;font-weight:500">'+lbl+'▲ +'+F(diff)+' '+U+pstTxt+'</span>';
+  if(diff<0) return '<span style="'+base+'background:#fbe9e0;color:var(--or)">'+lbl+'▼ −'+F(Math.abs(diff))+' '+U+pstTxt+'</span>';
   return '<span style="'+base+'background:var(--bg);color:var(--m)">'+lbl+'uendret (0,00 %)</span>';
 }
 function renderStyrkelogg(){
@@ -1230,18 +1244,18 @@ function renderStyrkelogg(){
 
   const sub=document.createElement('p');
   sub.style.cssText='font-size:11px;color:var(--m);margin:0 0 20px;font-style:italic';
-  sub.textContent='Loggførte styrkeøkter fra uke 1/U37 og utover, gruppert per øvelse. Økning vises mot tyngste sett forrige gang øvelsen ble logget, og totalt (kg og prosent) siden første registrering. Eldre historikk (før uke 1/U37) er bevart, men vises ikke her.';
+  sub.textContent='Loggførte styrkeøkter fra uke 1/U37 og utover, gruppert per øvelse. Økning vises mot tyngste sett forrige gang øvelsen ble logget, og totalt (kg og prosent) siden første registrering. Er vekten den samme, regnes flere reps som økning. Eldre historikk (før uke 1/U37) er bevart, men vises ikke her.';
   sb.appendChild(sub);
 
   // ── Bygg safeName -> visningsnavn-oppslag fra alle program (gammelt + nytt)
-  const nameBySafe={};
+  const nameBySafe={}, origBySafe={};
   ['A','B','C'].forEach(okt=>{
     const src=strSrc(okt);
     Object.keys(src).forEach(uke=>{
       src[uke].forEach(ex=>{
         const name=ex.split(' – ')[0];
         const safe=name.replace(/[^a-zA-Z0-9]/g,'-');
-        nameBySafe[okt+'|'+safe]=exNavn(name);
+        nameBySafe[okt+'|'+safe]=exNavn(name); origBySafe[okt+'|'+safe]=name;
       });
     });
   });
@@ -1276,7 +1290,7 @@ function renderStyrkelogg(){
   const groups=groupKeys.map(gk=>{
     const [okt,safe]=gk.split('|');
     const displayName=nameBySafe[gk]||safe.replace(/-/g,' ');
-    return {gk, okt, safe, displayName};
+    return {gk, okt, safe, displayName, meter:erMeter(origBySafe[gk])};
   }).sort((a,b)=>a.displayName.localeCompare(b.displayName,'nb'));
 
   groups.forEach(g=>{
@@ -1287,7 +1301,7 @@ function renderStyrkelogg(){
     wrap.className='logg-item';
     wrap.style.cssText='margin-bottom:12px;background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden';
 
-    let forrigeTyngste=null, forsteTyngste=null, forsteUke='';
+    let forrigeTyngste=null, forsteTyngste=null, forsteUke='', forrigeReps=null, forsteReps=null;
     const rows=[];
     let sisteChip='', sisteInfo='', sisteTot='';
     ukeNumre.forEach(uke=>{
@@ -1298,21 +1312,34 @@ function renderStyrkelogg(){
       // Finn tyngste sett denne økten
       let tyngste=null;
       settNumre.forEach(s=>{
-        const v=kgNum(setter[s].vekt);
+        const v=g.meter?kgNum(setter[s].reps):kgNum(setter[s].vekt);   // meter-øvelser: lengste sett er målet
         if(v!=null&&(tyngste==null||v>tyngste)) tyngste=v;
+      });
+      // Reps på tyngste sett (flest reps blant sett med tyngste vekt) – brukes når vekten er lik
+      let repsTyngste=null;
+      if(tyngste!=null&&!g.meter) settNumre.forEach(s=>{
+        if(kgNum(setter[s].vekt)===tyngste){
+          const r=kgNum(setter[s].reps);
+          if(r!=null&&(repsTyngste==null||r>repsTyngste)) repsTyngste=r;
+        }
       });
 
       const row=document.createElement('div');
       row.style.cssText='padding:12px 16px;border-bottom:1px solid var(--b)';
 
-      if(tyngste!=null&&forsteTyngste==null){ forsteTyngste=tyngste; forsteUke=(w?dU(w):uke); }
-      const totHtml=(tyngste!=null&&forrigeTyngste!=null)?totChip(forsteTyngste,tyngste,forsteUke):'';
+      if(tyngste!=null&&forsteTyngste==null){ forsteTyngste=tyngste; forsteReps=repsTyngste; forsteUke=(w?dU(w):uke); }
+      const totHtml=(tyngste!=null&&forrigeTyngste!=null)?totChip(forsteTyngste,tyngste,forsteUke,forsteReps,repsTyngste,g.meter):'';
 
       let diffChip='';
       if(tyngste!=null&&forrigeTyngste!=null){
         const diff=Math.round((tyngste-forrigeTyngste)*100)/100;
-        if(diff>0) diffChip='<span style="display:inline-block;background:#e8f5e8;color:#2a7a2a;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▲ +'+kgFmt(diff)+' kg</span>';
-        else if(diff<0) diffChip='<span style="display:inline-block;background:#fbe9e0;color:var(--or);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▼ −'+kgFmt(Math.abs(diff))+' kg</span>';
+        if(diff>0) diffChip='<span style="display:inline-block;background:#e8f5e8;color:#2a7a2a;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▲ +'+(g.meter?repsFmt(diff)+' m':kgFmt(diff)+' kg')+'</span>';
+        else if(diff<0) diffChip='<span style="display:inline-block;background:#fbe9e0;color:var(--or);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▼ −'+(g.meter?repsFmt(Math.abs(diff))+' m':kgFmt(Math.abs(diff))+' kg')+'</span>';
+        else if(repsTyngste!=null&&forrigeReps!=null&&repsTyngste!==forrigeReps){
+          const rd=Math.round((repsTyngste-forrigeReps)*100)/100;
+          if(rd>0) diffChip='<span style="display:inline-block;background:#e8f5e8;color:#2a7a2a;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▲ +'+repsFmt(rd)+' reps (samme vekt)</span>';
+          else diffChip='<span style="display:inline-block;background:#fbe9e0;color:var(--or);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▼ −'+repsFmt(Math.abs(rd))+' reps (samme vekt)</span>';
+        }
         else diffChip='<span style="display:inline-block;background:var(--bg);color:var(--m);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">– uendret</span>';
       } else if(tyngste!=null){
         diffChip='<span style="display:inline-block;background:var(--bg);color:var(--m);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">Første registrering</span>';
@@ -1322,6 +1349,11 @@ function renderStyrkelogg(){
         const sv=setter[s];
         const vn=kgNum(sv.vekt);const vekt=sv.vekt!=null&&sv.vekt!==''?(vn!=null?kgFmt(vn):sv.vekt)+' kg':'–';
         const reps=sv.reps!=null&&sv.reps!==''?sv.reps:'–';
+        if(g.meter){
+          const m=(sv.reps!=null&&sv.reps!=='')?sv.reps+' m':'–';
+          const medVekt=(sv.vekt!=null&&sv.vekt!=='')?vekt+' × ':'';
+          return '<span style="display:inline-block;background:var(--bg);color:var(--t);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">Sett '+s+': '+medVekt+m+'</span>';
+        }
         return '<span style="display:inline-block;background:var(--bg);color:var(--t);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">Sett '+s+': '+vekt+' × '+reps+'</span>';
       }).join('');
 
@@ -1333,7 +1365,7 @@ function renderStyrkelogg(){
       sisteChip=diffChip; sisteTot=totHtml;
       sisteInfo='Uke '+(w?dU(w):uke);
 
-      if(tyngste!=null) forrigeTyngste=tyngste;
+      if(tyngste!=null){ forrigeTyngste=tyngste; forrigeReps=repsTyngste; }
     });
 
     const summary=document.createElement('summary');
@@ -1872,7 +1904,7 @@ function renderReg(){
       +`<div class="hpm-body"><div class="scardh" style="background:var(--s2)"><h3>Styrke ${okt} <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:var(--b);color:var(--m);">Planlagt denne uken</span></h3><span>Styrke ${okt}</span></div>`;
 
     const tbl=document.createElement('table');tbl.className='stbl';
-    tbl.innerHTML=`<thead><tr><th>Øvelse</th><th>Vekt (kg)</th><th>Reps / Sek</th></tr></thead>`;
+    tbl.innerHTML=`<thead><tr><th>Øvelse</th><th>Vekt (kg)</th><th>Reps / Sek / Meter</th></tr></thead>`;
     const tbody=document.createElement('tbody');
 
     ovs.forEach((ov,i)=>{
@@ -1893,7 +1925,8 @@ function renderReg(){
           if(psv.vekt||psv.reps){prevVekt=psv.vekt||'';prevReps=psv.reps||'';break;}
         }
         const hintVekt=prevVekt?`S:${prevVekt}kg`:'kg';
-        const hintReps=prevReps?`S:${prevReps}`:(isTime?'sek':'reps');
+        const isMeterEx=erMeter(name);
+        const hintReps=prevReps?`S:${prevReps}${isMeterEx?' m':''}`:(isMeterEx?'meter':(isTime?'sek':'reps'));
         const tr=document.createElement('tr');
         tr.innerHTML=`
           <td style="color:var(--m);padding-left:20px;white-space:nowrap">Sett ${s}</td>
@@ -3113,7 +3146,7 @@ function eksporterExcel(){
             if(!sv.vekt&&!sv.reps&&!sv.ikkeUtfort) continue;
             strRows.push({
               'Uke':uke,'Økt':'Styrke '+okt,'Øvelse':exNavn(name),'Sett':s,
-              'Vekt (kg)':sv.vekt||'','Reps/Sek':sv.reps||'','Ikke utført':sv.ikkeUtfort?'Ja':''
+              'Vekt (kg)':sv.vekt||'','Reps/Sek/Meter':sv.reps||'','Ikke utført':sv.ikkeUtfort?'Ja':''
             });
           }
         });
@@ -3146,7 +3179,7 @@ function eksporterExcel(){
     // ── 6) Eldre styrkedata (øvelser byttet ut/omdøpt) – ikke vist i appen ──
     const eldreStyrkeRows=finnEldreStyrkedata().map(o=>({
       'Uke':o.uke,'Økt':o.okt,'Øvelse (fra lagret nøkkel)':o.safeName.replace(/-/g,' '),
-      'Sett':o.sett,'Vekt (kg)':o.vekt||'','Reps/Sek':o.reps||''
+      'Sett':o.sett,'Vekt (kg)':o.vekt||'','Reps/Sek/Meter':o.reps||''
     }));
 
     const totalRows=lopRows.length+dragRowsX.length+strRows.length+strOktRows.length+sovnRows.length+eldreStyrkeRows.length;
@@ -3163,10 +3196,10 @@ function eksporterExcel(){
     }
     addSheet(lopRows, 'Løpeøkter', ['Uke','Periode','Type','Dato','Varighet','Distanse (km)','Snitt tempo','Snitt puls','Maks puls','Sykkel-watt','Følelse (1-5)','Kommentar','Ikke utført']);
     addSheet(dragRowsX, 'Intervall-drag', ['Uke','Drag','Tempo','Snitt puls','Maks puls']);
-    addSheet(strRows, 'Styrke', ['Uke','Økt','Øvelse','Sett','Vekt (kg)','Reps/Sek','Ikke utført']);
+    addSheet(strRows, 'Styrke', ['Uke','Økt','Øvelse','Sett','Vekt (kg)','Reps/Sek/Meter','Ikke utført']);
     addSheet(strOktRows, 'Styrke-økt', ['Uke','Økt','Dato','Varighet','Følelse (1-5)','Kommentar']);
     addSheet(sovnRows, 'Søvn', ['Uke','Dag','Varighet (tt:mm)','Hvilepuls','Kommentar']);
-    if(eldreStyrkeRows.length) addSheet(eldreStyrkeRows, 'Eldre styrkedata', ['Uke','Økt','Øvelse (fra lagret nøkkel)','Sett','Vekt (kg)','Reps/Sek']);
+    if(eldreStyrkeRows.length) addSheet(eldreStyrkeRows, 'Eldre styrkedata', ['Uke','Økt','Øvelse (fra lagret nøkkel)','Sett','Vekt (kg)','Reps/Sek/Meter']);
 
     const filnavn='Marias_treningsdagbok_eksport_'+todayISO()+'.xlsx';
     XLSX.writeFile(wb, filnavn);
