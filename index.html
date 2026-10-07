@@ -1204,15 +1204,17 @@ function kgNum(v){ const n=parseFloat(String(v).trim().replace(',','.')); return
 function kgFmt(n){ return n.toFixed(2).replace('.',','); }
 function repsFmt(n){ return Number.isInteger(n)?String(n):kgFmt(n); }
 // Total endring fra første registrering (kg og prosent), komma og 2 desimaler
-function totChip(forste,naa,fraUke,forsteReps,naaReps,isM){
-  const U=isM?'m':'kg', F=isM?repsFmt:kgFmt;
+function totChip(forste,naa,fraUke,forsteReps,naaReps,isM,enhet,forsteTot,naaTot){
+  const U=enhet||(isM?'m':'kg'), F=U==='kg'?kgFmt:repsFmt;
   const diff=Math.round((naa-forste)*100)/100;
   const pst=forste!==0?Math.round((naa-forste)/forste*10000)/100:null;
   const pstTxt=pst!=null?' ('+(pst>0?'+':pst<0?'−':'')+kgFmt(Math.abs(pst))+' %)':'';
   const base='display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;line-height:1.35;max-width:100%;';
   const lbl='Totalt siden Uke '+fraUke+': ';
   // Lik vekt som utgangspunktet: flere/færre reps teller som økning/nedgang
-  if(diff===0&&forsteReps!=null&&naaReps!=null&&naaReps!==forsteReps){
+  // Lik vekt: reps på tyngste sett, og hvis de er like, totalt antall reps i økten
+  if(U==='kg'&&diff===0&&!(forsteReps!=null&&naaReps!=null&&naaReps!==forsteReps)&&forsteTot!=null&&naaTot!=null&&naaTot!==forsteTot){ forsteReps=forsteTot; naaReps=naaTot; }
+  if(U==='kg'&&diff===0&&forsteReps!=null&&naaReps!=null&&naaReps!==forsteReps){
     const rd=Math.round((naaReps-forsteReps)*100)/100;
     const rp=forsteReps!==0?Math.round((naaReps-forsteReps)/forsteReps*10000)/100:null;
     const rpTxt=rp!=null?' ('+(rp>0?'+':'−')+kgFmt(Math.abs(rp))+' %)':'';
@@ -1290,7 +1292,9 @@ function renderStyrkelogg(){
   const groups=groupKeys.map(gk=>{
     const [okt,safe]=gk.split('|');
     const displayName=nameBySafe[gk]||safe.replace(/-/g,' ');
-    return {gk, okt, safe, displayName, meter:erMeter(origBySafe[gk])};
+    const meter=erMeter(origBySafe[gk]);
+    const harVekt=Object.values(bySafe[gk]).some(uk=>Object.values(uk).some(sv=>kgNum(sv.vekt)!=null));
+    return {gk, okt, safe, displayName, meter, utenVekt:meter||!harVekt, enhet:meter?'m':'reps'};
   }).sort((a,b)=>a.displayName.localeCompare(b.displayName,'nb'));
 
   groups.forEach(g=>{
@@ -1301,7 +1305,7 @@ function renderStyrkelogg(){
     wrap.className='logg-item';
     wrap.style.cssText='margin-bottom:12px;background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden';
 
-    let forrigeTyngste=null, forsteTyngste=null, forsteUke='', forrigeReps=null, forsteReps=null;
+    let forrigeTyngste=null, forsteTyngste=null, forsteUke='', forrigeReps=null, forsteReps=null, forrigeTot=null, forsteTot=null;
     const rows=[];
     let sisteChip='', sisteInfo='', sisteTot='';
     ukeNumre.forEach(uke=>{
@@ -1312,12 +1316,17 @@ function renderStyrkelogg(){
       // Finn tyngste sett denne økten
       let tyngste=null;
       settNumre.forEach(s=>{
+        if(g.utenVekt&&!g.meter) return;                      // øvelser uten vekt: summeres under
         const v=g.meter?kgNum(setter[s].reps):kgNum(setter[s].vekt);   // meter-øvelser: lengste sett er målet
         if(v!=null&&(tyngste==null||v>tyngste)) tyngste=v;
       });
+      // Totalt antall reps i økten (alle sett)
+      let totReps=null;
+      settNumre.forEach(s=>{const r=kgNum(setter[s].reps); if(r!=null) totReps=(totReps||0)+r;});
+      if(g.utenVekt&&!g.meter) tyngste=totReps;              // øvelse uten vekt: mål = totalt antall reps
       // Reps på tyngste sett (flest reps blant sett med tyngste vekt) – brukes når vekten er lik
       let repsTyngste=null;
-      if(tyngste!=null&&!g.meter) settNumre.forEach(s=>{
+      if(tyngste!=null&&!g.utenVekt) settNumre.forEach(s=>{
         if(kgNum(setter[s].vekt)===tyngste){
           const r=kgNum(setter[s].reps);
           if(r!=null&&(repsTyngste==null||r>repsTyngste)) repsTyngste=r;
@@ -1327,18 +1336,20 @@ function renderStyrkelogg(){
       const row=document.createElement('div');
       row.style.cssText='padding:12px 16px;border-bottom:1px solid var(--b)';
 
-      if(tyngste!=null&&forsteTyngste==null){ forsteTyngste=tyngste; forsteReps=repsTyngste; forsteUke=(w?dU(w):uke); }
-      const totHtml=(tyngste!=null&&forrigeTyngste!=null)?totChip(forsteTyngste,tyngste,forsteUke,forsteReps,repsTyngste,g.meter):'';
+      if(tyngste!=null&&forsteTyngste==null){ forsteTyngste=tyngste; forsteReps=repsTyngste; forsteTot=totReps; forsteUke=(w?dU(w):uke); }
+      const totHtml=(tyngste!=null&&forrigeTyngste!=null)?totChip(forsteTyngste,tyngste,forsteUke,forsteReps,repsTyngste,g.meter,g.utenVekt?g.enhet:'kg',forsteTot,totReps):'';
 
       let diffChip='';
       if(tyngste!=null&&forrigeTyngste!=null){
         const diff=Math.round((tyngste-forrigeTyngste)*100)/100;
-        if(diff>0) diffChip='<span style="display:inline-block;background:#e8f5e8;color:#2a7a2a;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▲ +'+(g.meter?repsFmt(diff)+' m':kgFmt(diff)+' kg')+'</span>';
-        else if(diff<0) diffChip='<span style="display:inline-block;background:#fbe9e0;color:var(--or);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▼ −'+(g.meter?repsFmt(Math.abs(diff))+' m':kgFmt(Math.abs(diff))+' kg')+'</span>';
-        else if(repsTyngste!=null&&forrigeReps!=null&&repsTyngste!==forrigeReps){
-          const rd=Math.round((repsTyngste-forrigeReps)*100)/100;
-          if(rd>0) diffChip='<span style="display:inline-block;background:#e8f5e8;color:#2a7a2a;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▲ +'+repsFmt(rd)+' reps (samme vekt)</span>';
-          else diffChip='<span style="display:inline-block;background:#fbe9e0;color:var(--or);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▼ −'+repsFmt(Math.abs(rd))+' reps (samme vekt)</span>';
+        if(diff>0) diffChip='<span style="display:inline-block;background:#e8f5e8;color:#2a7a2a;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▲ +'+(g.utenVekt?repsFmt(diff)+' '+g.enhet:kgFmt(diff)+' kg')+'</span>';
+        else if(diff<0) diffChip='<span style="display:inline-block;background:#fbe9e0;color:var(--or);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▼ −'+(g.utenVekt?repsFmt(Math.abs(diff))+' '+g.enhet:kgFmt(Math.abs(diff))+' kg')+'</span>';
+        else if(!g.utenVekt&&((repsTyngste!=null&&forrigeReps!=null&&repsTyngste!==forrigeReps)||(totReps!=null&&forrigeTot!=null&&totReps!==forrigeTot))){
+          const brukTot=!(repsTyngste!=null&&forrigeReps!=null&&repsTyngste!==forrigeReps);
+          const rd=Math.round(((brukTot?totReps:repsTyngste)-(brukTot?forrigeTot:forrigeReps))*100)/100;
+          const sfx=brukTot?' totalt (samme vekt)':' (samme vekt)';
+          if(rd>0) diffChip='<span style="display:inline-block;background:#e8f5e8;color:#2a7a2a;font-weight:500;padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▲ +'+repsFmt(rd)+' reps'+sfx+'</span>';
+          else diffChip='<span style="display:inline-block;background:#fbe9e0;color:var(--or);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">▼ −'+repsFmt(Math.abs(rd))+' reps'+sfx+'</span>';
         }
         else diffChip='<span style="display:inline-block;background:var(--bg);color:var(--m);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">– uendret</span>';
       } else if(tyngste!=null){
@@ -1349,8 +1360,8 @@ function renderStyrkelogg(){
         const sv=setter[s];
         const vn=kgNum(sv.vekt);const vekt=sv.vekt!=null&&sv.vekt!==''?(vn!=null?kgFmt(vn):sv.vekt)+' kg':'–';
         const reps=sv.reps!=null&&sv.reps!==''?sv.reps:'–';
-        if(g.meter){
-          const m=(sv.reps!=null&&sv.reps!=='')?sv.reps+' m':'–';
+        if(g.utenVekt){
+          const m=(sv.reps!=null&&sv.reps!=='')?sv.reps+' '+g.enhet:'–';
           const medVekt=(sv.vekt!=null&&sv.vekt!=='')?vekt+' × ':'';
           return '<span style="display:inline-block;background:var(--bg);color:var(--t);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">Sett '+s+': '+medVekt+m+'</span>';
         }
@@ -1365,7 +1376,7 @@ function renderStyrkelogg(){
       sisteChip=diffChip; sisteTot=totHtml;
       sisteInfo='Uke '+(w?dU(w):uke);
 
-      if(tyngste!=null){ forrigeTyngste=tyngste; forrigeReps=repsTyngste; }
+      if(tyngste!=null){ forrigeTyngste=tyngste; forrigeReps=repsTyngste; forrigeTot=totReps; }
     });
 
     const summary=document.createElement('summary');
