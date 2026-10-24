@@ -159,9 +159,6 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
   </div>
 
   <div class="hdr-sub">
-    <div>🏁 Hovedmål: 27.04.2027</div>
-    <div>Bergen City Marathon 21 km</div>
-    <div>2:00:00 (5:41 min/km)</div>
     <div class="cd" id="cd"></div>
     <div style="margin-top:8px;max-width:600px" id="progress-bar-wrap">
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--m);margin-bottom:5px">
@@ -182,7 +179,6 @@ body.guest #auth-banner { background: var(--s2); padding: 6px 12px; border-radiu
       </div>
       <div style="background:#d9c3e6;height:8px;border-radius:4px;overflow:hidden;position:relative">
         <div id="prog-fill2" style="background:var(--pu,#7b3fa0);height:100%;width:0%;border-radius:4px;transition:width .5s"></div>
-        <div title="Bergen City Marathon 27.04.2027" id="prog-mark2" style="position:absolute;top:0;bottom:0;width:2px;background:#fff;left:0"></div>
       </div>
     </div>
   </div>
@@ -2307,25 +2303,24 @@ function saveOkt(key, msgId){
     const end2=new Date('2027-09-26');
     const tot2=Math.ceil((end2-start)/86400000);
     const pct2=Math.min(100,Math.max(0,Math.round(passed/tot2*100)));
-    const f2=document.getElementById('prog-fill2'),l2=document.getElementById('prog-label2'),m2=document.getElementById('prog-mark2'),c2=document.getElementById('cd2');
+    const f2=document.getElementById('prog-fill2'),l2=document.getElementById('prog-label2'),c2=document.getElementById('cd2');
     if(f2) f2.style.width=pct2+'%';
-    if(m2) m2.style.left=(Math.ceil((end-start)/86400000)/tot2*100)+'%';
     const dl=Math.ceil((end2-now)/86400000);
     const wl=Math.ceil(dl/7);
     if(l2) l2.textContent='Berlin: '+pct2+'%'+(dl>0?' · '+wl+(wl===1?' uke':' uker')+' igjen':'');
     if(c2){
-      if(dl>0) c2.textContent='🏁 '+dl+(dl===1?' dag':' dager')+' igjen til Berlin Marathon';
-      else if(dl===0) c2.textContent='🏁 Berlin Marathon er i dag!';
-      else c2.textContent='🏁 Berlin Marathon er gjennomført';
+      if(dl>0) c2.textContent='🏁 '+dl+(dl===1?' dag':' dager')+' igjen til Berlin Marathon 42,195 km';
+      else if(dl===0) c2.textContent='🏁 Berlin Marathon 42,195 km er i dag!';
+      else c2.textContent='🏁 Berlin Marathon 42,195 km er gjennomført';
     }
   })();
 
   const cd=document.getElementById('cd');
   if(cd){
     const daysLeft=Math.ceil((end-now)/86400000);
-    if(daysLeft>0) cd.textContent='🏁 '+daysLeft+(daysLeft===1?' dag':' dager')+' igjen til Bergen City Marathon 21 km';
-    else if(daysLeft===0) cd.textContent='🏁 Bergen City Marathon 21 km er i dag!';
-    else cd.textContent='🏁 Bergen City Marathon 21 km er gjennomført';
+    if(daysLeft>0) cd.textContent='🏁 '+daysLeft+(daysLeft===1?' dag':' dager')+' igjen til Bergen City Marathon 21,1 km';
+    else if(daysLeft===0) cd.textContent='🏁 Bergen City Marathon 21,1 km er i dag!';
+    else cd.textContent='🏁 Bergen City Marathon 21,1 km er gjennomført';
   }
 })();
 
