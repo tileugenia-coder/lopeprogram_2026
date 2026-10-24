@@ -2288,7 +2288,7 @@ function saveOkt(key, msgId){
     const wl=Math.ceil(dl/7);
     if(l2) l2.textContent='Berlin: '+pct2+'%'+(dl>0?' · '+wl+(wl===1?' uke':' uker')+' igjen':'');
     if(c2){
-      if(dl>0) c2.textContent='🏁 '+dl+(dl===1?' dag':' dager')+' igjen til Berlin Marathon 42,195 km';
+      if(dl>0) c2.textContent='🏁 '+dl+(dl===1?' dag':' dager')+': Berlin Marathon 42,195 km';
       else if(dl===0) c2.textContent='🏁 Berlin Marathon 42,195 km er i dag!';
       else c2.textContent='🏁 Berlin Marathon 42,195 km er gjennomført';
     }
@@ -2297,7 +2297,7 @@ function saveOkt(key, msgId){
   const cd=document.getElementById('cd');
   if(cd){
     const daysLeft=Math.ceil((end-now)/86400000);
-    if(daysLeft>0) cd.textContent='🏁 '+daysLeft+(daysLeft===1?' dag':' dager')+' igjen til Bergen City Marathon 21,1 km';
+    if(daysLeft>0) cd.textContent='🏁 '+daysLeft+(daysLeft===1?' dag':' dager')+': Bergen City Marathon 21,1 km';
     else if(daysLeft===0) cd.textContent='🏁 Bergen City Marathon 21,1 km er i dag!';
     else cd.textContent='🏁 Bergen City Marathon 21,1 km er gjennomført';
   }
