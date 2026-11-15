@@ -407,6 +407,10 @@ function gjeldendeUke(){
   const diffDays=Math.floor((today-start)/(1000*60*60*24));
   return Math.min(W.length,Math.max(1,Math.floor(diffDays/7)+1));
 }
+function fmtDatoUtfort(iso){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');
+  return m?'<span style="color:var(--a);font-weight:400"> · Utført '+m[3]+'.'+m[2]+'.'+m[1]+'</span>':'';
+}
 function upLDato(k,v){if(!loggL[k])loggL[k]={};loggL[k].dato=v;}
 function upSDato(k,v){if(!loggS[k])loggS[k]={};loggS[k].dato=v;}
 function datoInput(store,key,fn){
@@ -559,9 +563,11 @@ function upL(k,f,v){
   if(!loggL[k])loggL[k]={};
   if(f==='var'||f==='tid') v=normalizeTime(v);
   loggL[k][f]=v;
+  if(f!=='dato'&&!loggL[k].dato) loggL[k].dato=todayISO();
 }
 function upLDrag(k,dragNum,field,val){
   if(!loggL[k]) loggL[k]={};
+  if(!loggL[k].dato) loggL[k].dato=todayISO();
   if(!loggL[k].drags) loggL[k].drags={};
   if(!loggL[k].drags[dragNum]) loggL[k].drags[dragNum]={};
   loggL[k].drags[dragNum][field]=val;
@@ -612,7 +618,12 @@ function calcSnittMaksPuls(drags, num){
   return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)+' bpm';
 }
 
-function upS(k,f,v){if(!loggS[k])loggS[k]={};loggS[k][f]=v;}
+function ensureDatoS(k){
+  const vk=k.split('_').slice(0,2).join('_')+'_varighet';
+  if(!loggS[vk])loggS[vk]={};
+  if(!loggS[vk].dato) loggS[vk].dato=todayISO();
+}
+function upS(k,f,v){if(!loggS[k])loggS[k]={};loggS[k][f]=v;ensureDatoS(k);}
 
 function setF(key,n,btn){
   if(!loggS[key])loggS[key]={};loggS[key].fol=n;
@@ -1373,7 +1384,7 @@ function renderStyrkelogg(){
         return '<span style="display:inline-block;background:var(--bg);color:var(--t);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">Sett '+s+': '+vekt+' × '+reps+'</span>';
       }).join('');
 
-      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
+      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+fmtDatoUtfort((loggS[uke+'_'+g.okt+'_varighet']||{}).dato)+'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:'+(diffChip||totHtml?'8':'0')+'px">'+diffChip+totHtml+'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+setChips+'</div>';
       rows.push(row);
@@ -1511,7 +1522,7 @@ function renderLopelogg(){
       }
       if(sv.fol) detaljer.push(detaljChip('Følelse: '+sv.fol+'/5'));
 
-      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+'</div>'
+      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+fmtDatoUtfort(sv.dato)+'</div>'
         +(badges.length?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+badges.join('')+'</div>':'')
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+detaljer.join('')+'</div>';
       rows.push(row);
@@ -1964,7 +1975,7 @@ function renderReg(){
     varInput.type='text';varInput.placeholder='tt:mm:ss';
     varInput.value=strVarSv.var||'';
     varInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
-    varInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].var=normalizeTime(this.value);};
+    varInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].var=normalizeTime(this.value);ensureDatoS(strVarSk);};
     varDivInp1.appendChild(varInput);
     varDiv.appendChild(varDivInp1);
 
@@ -1974,7 +1985,7 @@ function renderReg(){
     folInput.type='number';folInput.min='1';folInput.max='5';folInput.placeholder='1–5';
     folInput.value=strVarSv.fol||'';
     folInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
-    folInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].fol=this.value;};
+    folInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].fol=this.value;ensureDatoS(strVarSk);};
     varDivInp2.appendChild(folInput);
     varDiv.appendChild(varDivInp2);
 
@@ -1986,7 +1997,7 @@ function renderReg(){
     komInput.type='text';komInput.placeholder='Kommentar...';
     komInput.value=strVarSv.kom||'';
     komInput.style.cssText='background:var(--s);border:1px solid var(--b);color:var(--t);font-family:"DM Mono",monospace;font-size:13px;padding:6px 10px;border-radius:4px;width:100%';
-    komInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].kom=this.value;};
+    komInput.onchange=function(){if(!loggS[strVarSk])loggS[strVarSk]={};loggS[strVarSk].kom=this.value;ensureDatoS(strVarSk);};
     komDiv.appendChild(komInput);
     
     // Save row
