@@ -277,7 +277,7 @@ function nullstillUke(){
   const uke=parseInt(uv);
   if(!confirm('Nullstille all logging for uke '+uke+'?')) return;
   // Delete all running sessions
-  ['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3','race'].forEach(k=>{
+  ['intervall','roligLop','rolig2','langtur','valgfri1','valgfri2','valgfri3','race'].forEach(k=>{
     delete loggL[uke+'_'+k];
   });
   // Delete all strength sessions
@@ -310,8 +310,10 @@ function exNavn(n){return EX_ALIAS[n]||n;}
 // Øvelser som måles i meter i stedet for reps (feltet 'reps' lagres som før – kun visningen endres)
 const EX_ENHET={'Bear Crawls':'m'};
 function erMeter(n){return EX_ENHET[n]==='m';}
-const RC=[{"uke": 1, "navn": "Backyard Ultra", "km": 18, "dato": "09.05.2026"}, {"uke": 7, "navn": "Sommernattsløpet", "km": 5, "dato": "20.06.2026"}, {"uke": 8, "navn": "EcoTrail Bergen", "km": 12, "dato": "27.06.2026"}, {"uke": 15, "navn": "Chase The Sun Queen Elizabeth Olympic Park", "km": 5, "dato": "12.08.2026"}, {"uke": 18, "navn": "Jentemila", "km": 5, "dato": "05.09.2026"}, {"uke": 19, "dispUke": 1, "navn": "Oslo Maraton", "km": 10, "dato": "12.09.2026"}, {"uke": 24, "dispUke": 6, "navn": "Hytteplanmila", "km": 10, "dato": "17.10.2026"}, {"uke": 52, "dispUke": 34, "navn": "Bergen City Marathon", "km": 21, "dato": "27.04.2027"}];
+const RC=[{"uke": 1, "navn": "Backyard Ultra", "km": 18, "dato": "09.05.2026"}, {"uke": 7, "navn": "Sommernattsløpet", "km": 5, "dato": "20.06.2026"}, {"uke": 8, "navn": "EcoTrail Bergen", "km": 12, "dato": "27.06.2026"}, {"uke": 15, "navn": "Chase The Sun Queen Elizabeth Olympic Park", "km": 5, "dato": "12.08.2026"}, {"uke": 18, "navn": "Jentemila", "km": 5, "dato": "05.09.2026"}, {"uke": 19, "dispUke": 1, "navn": "Oslo Maraton", "km": 10, "dato": "12.09.2026"}, {"uke": 24, "dispUke": 6, "navn": "Hytteplanmila", "km": 10, "dato": "17.10.2026"}, {"uke": 41, "dispUke": 23, "navn": "Bislett Indoor Marathon", "km": 10, "dato": "12.02.2027"}, {"uke": 52, "dispUke": 34, "navn": "Bergen City Marathon", "km": 21, "dato": "27.04.2027"}];
 function dU(w){return w?(w.dispUke||w.uke):'';}
+function ukeFull(w){if(typeof w==='number')w=W.find(x=>x.uke===w);return w?('Uke '+dU(w)+(w.kaluke?' ('+w.kaluke+')':'')):'';}
+function ukeLbl2(w){return [ 'Uke '+dU(w), w.kaluke?'('+w.kaluke+')':'' ];}
 function numOrZero(v){const n=parseFloat(v);return Number.isFinite(n)?n:0;}
 
 // Løp gjennomført før treningsplanen startet
@@ -320,9 +322,9 @@ const PRE_RACE=[
   {navn:"Lørenløpet 5 km",     dato:"02.05.2026", km:5, tid:"32:28", sn:159, mx:170, tempo:"6:22"},
 ];
 
-const SA={"2": ["Smith squat – 3×8", "Dead bug – 3×10", "Romanian deadlift (RDL) – 3×8", "Pallof press – 3×10", "Bulgarian split squat – 3×10", "Single-leg RDL – 3×10", "Leg extension – 3×12", "Single-leg calf raise – 3×15"], "3": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "4": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "5": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "6": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "7": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "8": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "9": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "10": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "11": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "12": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "13": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "14": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "15": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "16": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "17": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "18": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "19": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "20": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "21": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "22": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "23": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "24": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "25": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Shoulder Taps – 3×maks reps", "Single Foot Calf Rises – 3×maks"], "26": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Shoulder Taps – 3×maks reps", "Single Foot Calf Rises – 3×maks"], "27": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Shoulder Taps – 3×maks reps", "Single Foot Calf Rises – 3×maks"], "28": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "29": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "30": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "31": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "32": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "33": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "34": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "35": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "36": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "37": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "38": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "39": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "40": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "41": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "42": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "43": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "44": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "45": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "46": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "47": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "48": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "49": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "50": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "51": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "52": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"]};
+const SA={"2": ["Smith squat – 3×8", "Dead bug – 3×10", "Romanian deadlift (RDL) – 3×8", "Pallof press – 3×10", "Bulgarian split squat – 3×10", "Single-leg RDL – 3×10", "Leg extension – 3×12", "Single-leg calf raise – 3×15"], "3": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "4": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "5": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "6": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "7": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "8": ["Smith squat – 2×6–12", "Dead bug – 2×6–12", "Romanian deadlift (RDL) – 2×6–12", "Pallof press – 2×6–12", "Bulgarian split squat – 2×6–12", "Single-leg RDL – 2×6–12", "Leg extension – 2×6–12", "Single-leg calf raise – 2×8–15"], "9": ["Smith squat – 3×6–12", "Dead bug – 3×6–12", "Romanian deadlift (RDL) – 3×6–12", "Pallof press – 3×6–12", "Bulgarian split squat – 3×6–12", "Single-leg RDL – 3×6–12", "Leg extension – 3×6–12", "Single-leg calf raise – 3×8–15"], "10": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "11": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "12": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "13": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "14": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "15": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "16": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "17": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "18": ["Markløft – 3×6–12", "Planke – 3×maks sek", "Utfall fra kasse – 3×6–12", "Supermann m/hold – 3×maks reps", "Lårcurl med ball – 3×8–16", "Clamshell med miniband – 3×8–16", "Valgfri tåhev – 3×maks reps"], "19": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "20": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "21": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "22": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "23": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "24": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Bear Crawls – 3×10m"], "25": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Shoulder Taps – 3×maks reps", "Single Foot Calf Rises – 3×maks"], "26": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Shoulder Taps – 3×maks reps", "Single Foot Calf Rises – 3×maks"], "27": ["Trap Bar Deadlift – 4×9–11 · Hvile 120s · RPE 7–8", "Soft Broadjumps – 4×6 · RPE 7–8", "Hip Thrust – 3×8–10 · Hvile 90s · RPE 7–8", "Landmine skater squat – 3×8/ben · Hvile 90s · RPE 7–8", "W-T-I – 3×8 · Hvile 60s", "Sa Cable Row Ss – 3×10/side · Hvile 60–75s · RPE 7–8", "Shoulder Taps – 3×maks reps", "Single Foot Calf Rises – 3×maks"], "28": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "29": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "30": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "31": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "32": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "33": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "34": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "35": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "36": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "37": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "38": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "39": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "40": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "41": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "42": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "43": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "44": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "45": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "46": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "47": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "48": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "49": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "50": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "51": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "52": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"]};
 
-const SB={"1": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "2": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "3": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "4": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "5": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "6": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "7": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "8": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "9": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "10": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "11": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "12": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "13": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "14": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "15": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "16": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "17": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "18": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "19": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "20": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "21": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "22": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "23": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "24": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "25": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8"], "26": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8"], "27": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "28": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "29": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "30": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "31": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "32": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "33": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "34": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "35": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "36": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "37": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "38": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "39": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "40": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "41": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "42": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "43": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "44": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "45": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "46": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "47": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "48": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "49": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "50": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "51": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "52": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"]};
+const SB={"1": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "2": ["Lat Pulldown – 3×8", "Single arm-shoulder press – 3×10", "Seated row – 3×12", "Plank – 3×maks sek", "Calf raise – 3×20", "Superman – 3×maks"], "3": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "4": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "5": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "6": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "7": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 2×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "8": ["Lat Pulldown – 2×6–12", "Single arm-shoulder press – 2×6–12", "Seated row – 2×6–12", "Plank – 3×maks sek", "Calf raise – 2×8–15", "Superman – 2×maks"], "9": ["Lat Pulldown – 3×6–12", "Single arm-shoulder press – 3×6–12", "Seated row – 3×6–12", "Plank – 3×maks sek", "Calf raise – 3×8–15", "Superman – 3×maks"], "10": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "11": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "12": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "13": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "14": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "15": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "16": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "17": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "18": ["Ettbeins knebøy mot benk – 3×6–12", "Bulgarsk utfall – 3×6–12", "Ett-bens markløft – 3×6–12", "Ett-bens hip thrust – 3×6–12", "Skrå planke med dip – 3×6–12", "Valgfri tåhev – 3×maks reps"], "19": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "20": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "21": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "22": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "23": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "24": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×10 · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×10/side · Hvile 60s · RPE 8"], "25": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8"], "26": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8"], "27": ["Launch to step up – 3×8–10/side · Hvile 90s · RPE 7", "Standing Cable Press – 3×10–12/side · Hvile 90s · RPE 8", "Seated Shoulder Press – 3×8–10 · Hvile 75s · RPE 8", "Half Kneeling Cable Chop – 3×12/side · Hvile 60s · RPE 8", "Calf rises – 3×10–12 · Hvile 60s · RPE 8", "Dynamic copenhagen folds – 3×maks reps · Hvile 60s · RPE 8", "Hamstring Ball Curls – 3×maks reps · Hvile 75s · RPE 8–9"], "28": ["Trap Bar Deadlift – 3×5 · Hvile 100+s · RPE 7", "Low box jump – 3×5 · Hvile 100+s · RPE 7", "Seated Hamstring Curl – 3×6 · Hvile 100+s · RPE 7", "Landmine skater squat – 3×4–6/side · Hvile 100+s · RPE 7", "Dumbbell Sa Row – 3×6/arm · Hvile 90–120s · RPE 7", "Back extensions – 3×6–10 · Hvile 90–120s · RPE 7", "Half kneeling dumbbell press – 3×6–8 · Hvile 90–120s · RPE 7", "Single Foot Calf Rises – 3×maks"], "29": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "30": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "31": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "32": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "33": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "34": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "35": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "36": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "37": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "38": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "39": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "40": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "41": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "42": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "43": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "44": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "45": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "46": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "47": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "48": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "49": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "50": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "51": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"], "52": ["Plate-elevated reverse lunge – 3×6–8 · Hvile 120s · RPE 7", "Single arm cable press – 3×8–10 · Hvile 120s · RPE 7", "RDL i smith machine – 3×6–8 · Hvile 120s · RPE 7", "Y raises – 3×maks reps · Hvile 120s · RPE 7", "Calf rises – 3×6–8 · Hvile 120s · RPE 7", "Copenhagen holds – 3×maks sek · Hvile 120s · RPE 7", "Standing Cable Chop – 3×8–10 · Hvile 120s · RPE 7"]};
 
 const SC={"10": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"], "11": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"], "12": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"], "13": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"], "14": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"], "15": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"], "16": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"], "17": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"], "18": ["Nedtrekk – 3×6–12", "Palloff press – 3×8–16", "Sittende skulderpress – 3×6–12", "Roing med manualer – 3×6–12", "Push-ups – 3×maks reps", "Valgfri tåhev – 3×maks reps"]};
 
@@ -359,46 +361,70 @@ function finnEldreStyrkedata(){
   });
   return orphans.sort((a,b)=>a.uke-b.uke);
 }
-const ROLIG_PLAN={19:60,20:65,21:70,22:60,23:75,25:60,26:80,27:85,28:70,29:90,30:95,31:100,32:75};
+const ROLIG_PLAN={19:60,20:65,21:70,22:60,23:75,25:60,26:80,27:85,28:70,29:85,30:90,31:95,32:80,33:95,34:100,35:105,36:90,37:105,38:110,39:115,40:100,41:115,42:120,43:125,44:110,45:115,46:120,47:125,48:110,49:130,50:90,51:60};
 // Uker der Rolig langtur ikke er en del av planen, og uker med eget tillegg på Rolig løpetur
-const LANGTUR_UTEN={24:true};
+const LANGTUR_UTEN={24:true,52:true};
 const ROLIGLOP_TILLEGG={24:'+ 6 SL'};
-const ROLIGLOP_EKSTRA={28:{l:'Rolig løpetur + STL',txt:'Planlagt: 10 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'}};
+const ROLIGLOP_EKSTRA={28:{l:'Rolig løpetur + STL',min:10,txt:'Planlagt: 10 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},29:{l:'Rolig løpetur + STL',min:10,txt:'Planlagt: 10 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},30:{l:'Rolig løpetur + STL',min:15,txt:'Planlagt: 15 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},31:{l:'Rolig løpetur + STL',min:20,txt:'Planlagt: 20 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},32:{l:'Rolig løpetur + STL',min:15,txt:'Planlagt: 15 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},33:{l:'Rolig løpetur + STL',min:20,txt:'Planlagt: 20 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},34:{l:'Rolig løpetur + STL',min:25,txt:'Planlagt: 25 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},35:{l:'Rolig løpetur + STL',min:30,txt:'Planlagt: 30 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},36:{l:'Rolig løpetur + STL',min:25,txt:'Planlagt: 25 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},37:{l:'Rolig løpetur + STL',min:30,txt:'Planlagt: 30 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},38:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},39:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},40:{l:'Rolig løpetur + STL',min:30,txt:'Planlagt: 30 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},41:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},42:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},43:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},44:{l:'Rolig løpetur + STL',min:30,txt:'Planlagt: 30 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},45:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},46:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},47:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},48:{l:'Rolig løpetur + STL',min:30,txt:'Planlagt: 30 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},49:{l:'Rolig løpetur + STL',min:35,txt:'Planlagt: 35 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},50:{l:'Rolig løpetur + STL',min:20,txt:'Planlagt: 20 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'},51:{l:'Rolig løpetur + STL',min:20,txt:'Planlagt: 20 min + 4 STL\n1 min pause · Sone 1-2: 130–151 bpm'}};
+const TOTAL_PLAN={27:143,28:136,29:158,30:168,31:178,32:151,33:179,34:189,35:199,36:167,37:202,38:212,39:217,40:194,41:232,42:242,43:255,44:216,45:247,46:255,47:254,48:217,49:254,50:186,51:129,52:25};
+const ROLIG2_PLAN={40:10,41:15,42:20,43:25,44:20,45:25,46:30,47:30,48:25,49:25,50:20};
 const INTERVALL_PLAN={
   19:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Bas'},
   20:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Bas'},
   21:{opp:'15 min',hoved:'5x4 min',pause:'2 min',puls:'155-162',tot:'44 min',fokus:'Progresjon'},
   22:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'38 min',fokus:'Deload'},
   23:{opp:'15 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Progresjon'},
-  24:{opp:'15 min',hoved:'6x2 min 30 sek',pause:'1 min 30 sek',pauseFull:'pause 1 min 30 sek, valgfri nedtrapping',puls:'155-160',tot:'',fokus:'Taper'},
+  24:{opp:'15 min',hoved:'6x2 min 30 sek',pause:'1 min 30 sek',pauseFull:'pause 1 min 30 sek',puls:'155-160',tot:'',fokus:'Taper'},
   25:{opp:'15 min',hoved:'4x4 min',pause:'2 min',puls:'155-160',tot:'',fokus:'Rolig'},
   26:{opp:'15 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'53 min',fokus:'Progresjon'},
   27:{opp:'15 min',hoved:'5x5 min',pause:'90 s',puls:'160-165',tot:'51 min',fokus:'Progresjon'},
   28:{opp:'15 min',hoved:'4x5 min',pause:'2 min',puls:'158-163',tot:'46 min',fokus:'Deload'},
-  29:{opp:'15 min',hoved:'3x8 min',pause:'2 min',puls:'160-166',tot:'48 min',fokus:'Spesifikk'},
-  30:{opp:'15 min',hoved:'3x8 min',pause:'90 s',puls:'160-166',tot:'47 min',fokus:'Spesifikk'},
-  31:{opp:'15 min',hoved:'2x12 min',pause:'3 min',puls:'162-166',tot:'47 min',fokus:'Spesifikk'},
-  32:{opp:'15 min',hoved:'20 min sammenhengende terskel',pause:'-',puls:'160-166',tot:'40 min',fokus:'Status'}
+  29:{"opp": "15 min", "hoved": "5x5 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Startuke: 15 min oppv. + intervaller + 10 min nedtr. Rolig tur 10 min (som uke 46)."},
+  30:{"opp": "15 min", "hoved": "5x5 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Blokk 1 (bygg)."},
+  31:{"opp": "15 min", "hoved": "5x5 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Toppen av blokk 1."},
+  32:{"opp": "15 min", "hoved": "4x5 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Deload", "merk": "Deload (hver 4. uke)."},
+  33:{"opp": "15 min", "hoved": "4x7 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Blokk 2: starter på forrige topp (langtur 95 min)."},
+  34:{"opp": "15 min", "hoved": "4x7 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Blokk 2."},
+  35:{"opp": "15 min", "hoved": "3x10 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Toppen av blokk 2."},
+  36:{"opp": "15 min", "hoved": "TEST: 5 km på tid", "pause": "", "puls": "", "tot": "", "fokus": "Deload", "merk": "Deload. TEST: 5 km på tid (erstatter intervalløkten, 15 min oppv. + 10 min nedtr.). Mål ca. 27:10 for 2:05 (5:26/km); avgjør HMT-mål."},
+  37:{"opp": "15 min", "hoved": "3x11 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Blokk 3. Terskel = komfortabelt hardt."},
+  38:{"opp": "15 min", "hoved": "3x11 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Blokk 3."},
+  39:{"opp": "15 min", "hoved": "3x11 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Toppen av blokk 3."},
+  40:{"opp": "15 min", "hoved": "2x11 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Deload", "merk": "Deload. L4 starter med 10 min rolig."},
+  41:{"opp": "15 min", "hoved": "3x11 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Blokk 4. L4 øker til 15 min.\n🏁 Fredag 12.02: Bislett Indoor Marathon 10 km."},
+  42:{"opp": "15 min", "hoved": "3x11 min i HMT", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Intervaller i halvmaratontempo (HMT). Langtur rolig."},
+  43:{"opp": "15 min", "hoved": "3x12 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Toppen av blokk 4."},
+  44:{"opp": "15 min", "hoved": "TEST: 5 km på tid", "pause": "", "puls": "", "tot": "", "fokus": "Deload", "merk": "Deload. TEST: 5 km på tid (erstatter intervalløkten, 15 min oppv. + 10 min nedtr.). Sammenlign med januar og juster HMT-tempo."},
+  45:{"opp": "15 min", "hoved": "2x20 min i HMT", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Blokk 5: intervaller i HMT (2×20 min). Langtur rolig, 10 min under forrige topp for å dempe hoppet."},
+  46:{"opp": "15 min", "hoved": "3x12 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Blokk 5. Langtur: siste 15 min i HMT."},
+  47:{"opp": "15 min", "hoved": "3x10 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Bygg", "merk": "Toppen av blokk 5. Langtur: siste 20 min i HMT."},
+  48:{"opp": "15 min", "hoved": "2x10 min i HMT", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Deload", "merk": "Deload."},
+  49:{"opp": "15 min", "hoved": "3x10 min terskel", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Topp", "merk": "Siste lange langtur: 130 min med 2×20 min i HMT, 3 uker før løpet."},
+  50:{"opp": "15 min", "hoved": "4x5 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Nedtrapping", "merk": "Nedtrapping."},
+  51:{"opp": "15 min", "hoved": "3x5 min", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Nedtrapping", "merk": "Nedtrapping. Langturen tas senest torsdag/fredag."},
+  52:{"opp": "15 min rolig", "hoved": "4x1 min aktivering", "pause": "2 min", "puls": "155-171", "tot": "", "fokus": "Løpsuke", "merk": "Løp tirsdag 27.04 (ca. 21,1 km kommer i tillegg). Mandag: 15 min rolig + 4×1 min aktivering."}
 };
 function runOkter(uke){
   // Løpeprogrammeringen brukes ikke lenger – 3 faste + 3 valgfrie løpeøkter hver uke.
   const planMin=ROLIG_PLAN[uke];
   const iv=INTERVALL_PLAN[uke];
-  const ivTxt=iv?(`Planlagt: ${iv.opp} oppvarming, ${iv.hoved} hoveddel, ${iv.pauseFull||(iv.pause+' pause')}\n<span style="white-space:nowrap">${iv.puls} bpm</span> · Fokus: ${iv.fokus}`):'';
+  const ivPause=iv?(iv.pauseFull||(iv.pause&&iv.pause!=='-'?iv.pause+' pause':'')):'';
+  const ivTxt=iv?('Planlagt: '+[iv.hoved,(iv.opp&&iv.opp!=='15 min'?iv.opp+' oppv.':''),ivPause,(iv.puls?'<span style="white-space:nowrap">'+iv.puls+' bpm</span>':'')].filter(Boolean).join(' · ')):'';
   const tillegg=ROLIGLOP_TILLEGG[uke];
   const lt=loggL[uke+'_langtur']||{};
   const langturLogget=!!(lt['var']||lt.km||lt.tempo||lt.sn||lt.mx||lt.fol||lt.kom||lt.ikkeUtfort);
   const okter=[
     {k:'intervall', l:'Intervall', txt: ivTxt},
-    {k:'langtur', l:'Rolig langtur', txt: planMin?(`Planlagt: ${planMin} min\nSone 1-2: 130–151 bpm`):''},
-    {k:'roligLop', l: ROLIGLOP_EKSTRA[uke]?ROLIGLOP_EKSTRA[uke].l:(tillegg?('Rolig løpetur '+tillegg):(uke>=19?'Rolig løpetur/Gåtur':'Rolig løpetur')), txt: ROLIGLOP_EKSTRA[uke]?ROLIGLOP_EKSTRA[uke].txt:(uke>=19?`Maks 30 min\n< 151 bpm`:'')},
+    {k:'langtur', l:'Rolig langtur', txt: planMin?(`Planlagt: ${planMin} min\n${uke>=29?'100-151 bpm':'Sone 1-2: 130–151 bpm'}`):''},
+    {k:'roligLop', l: ROLIGLOP_EKSTRA[uke]?ROLIGLOP_EKSTRA[uke].l:(tillegg?('Rolig løpetur '+tillegg):(uke>=19?'Rolig løpetur/Gåtur':'Rolig løpetur')), txt: ROLIGLOP_EKSTRA[uke]?(uke>=29?ROLIGLOP_EKSTRA[uke].txt.replace('Sone 1-2: 130–151 bpm','100-151 bpm'):ROLIGLOP_EKSTRA[uke].txt):(uke>=19?`Maks 30 min\n< 151 bpm`:'')},
+    {k:'rolig2', l:'Rolig løpetur', txt: ROLIG2_PLAN[uke]?('Planlagt: '+ROLIG2_PLAN[uke]+' min\n100-151 bpm'):''},
     {k:'valgfri1', l:'Valgfri økt 1', txt:''},
     {k:'valgfri2', l:'Valgfri økt 2', txt:''},
     {k:'valgfri3', l:'Valgfri økt 3', txt:''}
   ];
   const rl=loggL[uke+'_roligLop']||{};
   const roligLopLogget=!!(rl['var']||rl.km||rl.tempo||rl.sn||rl.mx||rl.fol||rl.kom||rl.ikkeUtfort);
-  return okter.filter(o=>!(o.k==='langtur'&&LANGTUR_UTEN[uke]&&!langturLogget)&&!(o.k==='roligLop'&&uke>=19&&!roligLopLogget&&!ROLIGLOP_EKSTRA[uke]));
+  return okter.filter(o=>!(o.k==='langtur'&&LANGTUR_UTEN[uke]&&!langturLogget)&&!(o.k==='roligLop'&&uke>=19&&!roligLopLogget&&!ROLIGLOP_EKSTRA[uke])&&!(o.k==='rolig2'&&!ROLIG2_PLAN[uke]&&!(()=>{const r2=loggL[uke+'_rolig2']||{};return !!(r2['var']||r2.km||r2.tempo||r2.sn||r2.mx||r2.fol||r2.kom||r2.ikkeUtfort);})()));
 }
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function gjeldendeUke(){
@@ -471,7 +497,7 @@ function renderUkesplan(){
   g.style.gridTemplateColumns='clamp(64px,20vw,92px) 1fr';
   g.innerHTML='';
 
-  const runLabel={intervall:'Intervall',roligLop:'Rolig løpetur',langtur:'Langtur'};
+  const runLabel={intervall:'Intervall',roligLop:'Rolig løpetur',rolig2:'Rolig løpetur',langtur:'Langtur'};
 
   function runStatus(uke,k){
     const sv=loggL[uke+'_'+k]||{};
@@ -521,7 +547,7 @@ function renderUkesplan(){
     c1.onclick=()=>gw(w.uke);
     const [datoFra,datoTil]=w.dato.split(' – ');
     c1.innerHTML='<div>Uke '+dU(w)+'</div>'
-      +'<div style="font-size:9px;color:var(--m);font-weight:400;margin-top:2px">'+w.kaluke+'</div>'
+      +'<div style="font-size:9px;color:var(--m);font-weight:400;margin-top:2px">('+w.kaluke+')</div>'
       +'<div style="font-size:9px;color:var(--m);font-weight:400">'+datoFra+'</div>'
       +'<div style="font-size:9px;color:var(--m);font-weight:400">-</div>'
       +'<div style="font-size:9px;color:var(--m);font-weight:400">'+datoTil+'</div>';
@@ -542,7 +568,7 @@ function renderUkesplan(){
       html2+=chip(custom||o.l||runLabel[o.k], status, 'var(--a)');
     }
     fasteLop.forEach(runChip);
-    if(race) html2+=chip('🏁 '+race.navn+' '+race.km+' km', raceStatus(w.uke), 'var(--or)');
+    if(race) html2+=chip('🏁 '+race.navn+' '+String(race.km).replace('.',',')+' km', raceStatus(w.uke), 'var(--or)');
     strOkter(w.uke).forEach(okt=>{ html2+=chip('Styrke '+okt, strStatus(w.uke,okt), 'var(--pu)'); });
     valgfrie.forEach(runChip);
     if(!html2) html2='<span style="font-size:11px;color:var(--m);font-style:italic">Hvileuke</span>';
@@ -645,7 +671,7 @@ function renderRaces(){
   RC.forEach(r=>{
     const mainUke=RC[RC.length-1].uke;
     const d=document.createElement('div');d.className='rcard'+(r.uke===mainUke?' main':'');
-    d.innerHTML=`<div class="rdate">${r.dato}</div><div><div class="rname">${r.navn}${r.uke===mainUke?' ★ HOVEDMÅL':''}</div><div class="rkm">${r.km} km</div></div><div class="ruke">Uke ${dU(r)||r.uke}</div>`;
+    d.innerHTML=`<div class="rdate">${r.dato}</div><div><div class="rname">${r.navn}${r.uke===mainUke?' ★ HOVEDMÅL':''}</div><div class="rkm">${String(r.km).replace('.',',')} km</div></div><div class="ruke">Uke ${dU(r)||r.uke}${r.kaluke?' ('+r.kaluke+')':(W.find(x=>x.uke===r.uke)?' ('+W.find(x=>x.uke===r.uke).kaluke+')':'')}</div>`;
     list.appendChild(d);
   });
 }
@@ -655,7 +681,7 @@ function renderStats(){
   if(!sb){console.error('stats-body not found');return;}
   sb.innerHTML='';
 
-  const loktKeys=['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3','race'];
+  const loktKeys=['intervall','roligLop','rolig2','langtur','valgfri1','valgfri2','valgfri3','race'];
   let totalKm=0,totalUtfort=0,totalIkke=0,totalSecs=0;
   let utfortLop=0,utfortStyrke=0,utfortValgfri=0;
   let ikkeLop=0,ikkeStyrke=0,ikkeValgfri=0;
@@ -685,14 +711,14 @@ function renderStats(){
       }
       if(sv.km) totalKm+=numOrZero(sv.km);
       // Snitt puls fra rolig løpetur og langtur
-      if((k==='roligLop'||k==='langtur')&&sv.sn) roligPulsList.push(parseFloat(sv.sn));
+      if((k==='roligLop'||k==='rolig2'||k==='langtur')&&sv.sn) roligPulsList.push(parseFloat(sv.sn));
       if(sv.fol) folList.push(parseFloat(sv.fol));
       // Intervall puls fra drag-tabellen
       if(k==='intervall'&&sv.drags){
         Object.values(sv.drags).forEach(d=>{if(d.puls) intervallPulsList.push(parseFloat(d.puls));});
       }
       // Snitt tempo fra rolig løpetur og langtur (format mm:ss)
-      if((k==='roligLop'||k==='langtur')&&sv.tempo){
+      if((k==='roligLop'||k==='rolig2'||k==='langtur')&&sv.tempo){
         const parts=sv.tempo.split(':');
         if(parts.length===2){
           const secs=parseInt(parts[0])*60+parseInt(parts[1]);
@@ -735,9 +761,9 @@ function renderStats(){
   const folData2=[];
   W.forEach(w=>{
     let list=[];
-    ['roligLop','langtur'].forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if(sv.sn)list.push(parseFloat(sv.sn));});
+    ['roligLop','rolig2','langtur'].forEach(k=>{const sv=loggL[w.uke+'_'+k]||{};if(sv.sn)list.push(parseFloat(sv.sn));});
     if(list.length) pulsData.push({uke:w.uke,puls:Math.round(list.reduce((a,b)=>a+b,0)/list.length)});
-    const folList2=['roligLop','langtur','intervall','valgfri1','valgfri2','valgfri3'].map(k=>loggL[w.uke+'_'+k]||{}).filter(sv=>sv.fol).map(sv=>parseFloat(sv.fol));
+    const folList2=['roligLop','rolig2','langtur','intervall','valgfri1','valgfri2','valgfri3'].map(k=>loggL[w.uke+'_'+k]||{}).filter(sv=>sv.fol).map(sv=>parseFloat(sv.fol));
     if(folList2.length) folData2.push({uke:w.uke,fol:Math.round(folList2.reduce((a,b)=>a+b,0)/folList2.length*10)/10});
   });
 
@@ -784,7 +810,7 @@ function renderStats(){
   W.forEach(w=>{
     if(!sovnByUke[w.uke]) return;
     const folUke=[];
-    ['roligLop','langtur','intervall','valgfri1','valgfri2','valgfri3'].forEach(k=>{
+    ['roligLop','rolig2','langtur','intervall','valgfri1','valgfri2','valgfri3'].forEach(k=>{
       const sv=loggL[w.uke+'_'+k]||{};
       if(sv.fol) folUke.push(parseFloat(sv.fol));
     });
@@ -797,7 +823,7 @@ function renderStats(){
   // Streak: consecutive weeks with at least one logged session
   let streak=0, streakActive=true;
   const loggedWeekNums=W.map(w=>{
-    const loktK=['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3','race'];
+    const loktK=['intervall','roligLop','rolig2','langtur','valgfri1','valgfri2','valgfri3','race'];
     return loktK.some(k=>{const sv=loggL[w.uke+'_'+k]||{};return sv['var']||sv.tid||sv.sn||sv.km;});
   });
   for(let i=loggedWeekNums.length-1;i>=0;i--){
@@ -856,7 +882,7 @@ function renderStats(){
       if(sv.km) km+=numOrZero(sv.km);
       if(sv.ikkeUtfort) ikke++;
     });
-    return{uke:w.uke,disp:dU(w),km:Math.round(km*10)/10,ikke};
+    return{uke:w.uke,disp:dU(w),kal:w.kaluke,km:Math.round(km*10)/10,ikke};
   });
   const maxKm=Math.max(...kmData.map(d=>d.km).filter(Number.isFinite),1);
 
@@ -873,7 +899,7 @@ function renderStats(){
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
     bar.innerHTML='<div style="font-size:9px;color:var(--m);height:30px;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;display:flex;align-items:center;justify-content:center">'+(d.km>0?d.km:d.ikke>0?'✗':'')+'</div>'
       +'<div style="width:100%;background:'+col+';border-radius:2px 2px 0 0;height:'+Math.max(pct,d.km>0||d.ikke>0?2:0)+'%;min-height:'+(d.km>0||d.ikke>0?'3px':'0')+'"></div>'
-      +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.disp+'</div>';
+      +'<div style="font-size:8px;color:var(--m);text-align:center;line-height:1.15">'+d.disp+'<br>'+d.kal+'</div>';
     barInner.appendChild(bar);
   });
   barWrap.appendChild(barInner);
@@ -905,7 +931,7 @@ function renderStats(){
     const hh=Math.floor(mins/60);
     const mm=(mins%60).toString().padStart(2,'0');
     const label=mins>0?(hh>0?hh+':'+mm:'0:'+mm):'';
-    return{uke:w.uke,disp:dU(w),mins,label};
+    return{uke:w.uke,disp:dU(w),kal:w.kaluke,mins,label};
   });
   const maxMins=Math.max(...timeData.map(d=>d.mins),1);
   const timeWrap=document.createElement('div');
@@ -919,7 +945,7 @@ function renderStats(){
     bar.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px';
     bar.innerHTML='<div style="font-size:9px;color:var(--m);height:30px;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;display:flex;align-items:center;justify-content:center">'+(d.label||'')+'</div>'
       +'<div style="width:100%;background:'+(d.mins>0?'var(--a2)':'var(--b)')+';height:'+pct+'%;border-radius:2px 2px 0 0;min-height:'+(d.mins>0?'2px':'0')+'"></div>'
-      +'<div style="font-size:8px;color:var(--m);text-align:center">U'+d.disp+'</div>';
+      +'<div style="font-size:8px;color:var(--m);text-align:center;line-height:1.15">'+d.disp+'<br>'+d.kal+'</div>';
     timeInner.appendChild(bar);
   });
   timeWrap.appendChild(timeInner);
@@ -940,7 +966,7 @@ function renderStats(){
     let secsList=[];
     loktKeys.forEach(k=>{
       const sv=loggL[w.uke+'_'+k]||{};
-      if((k==='roligLop'||k==='langtur')&&sv.tempo){
+      if((k==='roligLop'||k==='rolig2'||k==='langtur')&&sv.tempo){
         const p=sv.tempo.split(':');
         if(p.length===2){const s=parseInt(p[0])*60+parseInt(p[1]);if(!isNaN(s))secsList.push(s);}
       }
@@ -966,7 +992,7 @@ function renderStats(){
     if(window._chartTempo) window._chartTempo.destroy();
     window._chartTempo=new Chart(document.getElementById('chartTempo'),{
       type:'line',
-      data:{labels:W.map(w=>'U'+(w.dispUke||w.uke)),
+      data:{labels:W.map(w=>ukeLbl2(w)),
         datasets:[{label:'Snitt tempo (rolig)',data:allTempoData,borderColor:'#7030A0',backgroundColor:'rgba(112,48,160,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#7030A0',borderWidth:2,spanGaps:false}]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const v=c.parsed.y;if(!v)return'';const m=Math.floor(v/60),s=(v%60).toString().padStart(2,'0');return 'Tempo: '+m+':'+s+' min/km';}}}},
@@ -1009,7 +1035,7 @@ function renderStats(){
     if(window._chartSovn) window._chartSovn.destroy();
     window._chartSovn=new Chart(document.getElementById('chartSovn'),{
       type:'line',
-      data:{labels:W.map(w=>'U'+(w.dispUke||w.uke)),
+      data:{labels:W.map(w=>ukeLbl2(w)),
         datasets:[{label:'Snitt søvn (timer)',data:allSovnData,borderColor:'#2a7abf',backgroundColor:'rgba(42,122,191,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#2a7abf',borderWidth:2,spanGaps:false}]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Snitt søvn: '+c.parsed.y+'t'}}},
@@ -1071,7 +1097,7 @@ function renderStats(){
     window._chartTriple=new Chart(document.getElementById('chartTriple'),{
       type:'line',
       data:{
-        labels:W.map(w=>'U'+(w.dispUke||w.uke)),
+        labels:W.map(w=>ukeLbl2(w)),
         datasets:[
           {label:'Snitthvilepuls',data:triHvile,borderColor:'#C0306A',backgroundColor:'transparent',fill:false,tension:0.4,pointRadius:4,pointBackgroundColor:'#C0306A',borderWidth:2,spanGaps:false,yAxisID:'y'},
           {label:'Snittpuls (rolig)',data:triPuls,borderColor:'#7030A0',backgroundColor:'transparent',fill:false,tension:0.4,pointRadius:3,pointBackgroundColor:'#7030A0',borderWidth:2,borderDash:[5,4],spanGaps:false,yAxisID:'y'},
@@ -1143,8 +1169,9 @@ function renderStyrke(){
   const sb=document.getElementById('styrke-body');
   sb.innerHTML='';
   const uker=Array.from({length:W.length},(_,i)=>i+1);
-  const ukeLabel={};W.forEach(w=>{ukeLabel[w.uke]=w.dispUke||w.uke;});
+  const ukeLabel={},kalLabel={};W.forEach(w=>{ukeLabel[w.uke]='Uke '+(w.dispUke||w.uke);kalLabel[w.uke]=w.kaluke;});
 
+  const nuUkeS=gjeldendeUke();
   function buildTable(title, color, lightColor, exercises, data, ukerParam){
     const tableUker=ukerParam||uker;
     const wrap=document.createElement('div');
@@ -1161,7 +1188,7 @@ function renderStyrke(){
     const thead=document.createElement('thead');
     let hRow='<tr><th style="text-align:left;padding:6px 10px;background:'+color+';color:#fff;position:sticky;left:0;z-index:2;white-space:nowrap">Øvelse</th>';
     tableUker.forEach(u=>{
-      hRow+='<th style="padding:6px 6px;background:'+lightColor+';color:var(--t);text-align:center;white-space:nowrap">U'+(ukeLabel[u]||u)+'</th>';
+      hRow+='<th'+(u===nuUkeS?' data-nu="1"':'')+' style="padding:6px 6px;background:'+(u===nuUkeS?'#f4a6c2':lightColor)+';color:var(--t);text-align:center;white-space:nowrap'+(u===nuUkeS?';font-weight:700':'')+'">'+(ukeLabel[u]||u)+'<div style="font-size:9px;font-weight:400">('+(kalLabel[u]||'')+')</div></th>';
     });
     hRow+='</tr>';
     thead.innerHTML=hRow;
@@ -1178,7 +1205,7 @@ function renderStyrke(){
         for(const o of ovs){
           if(o.split(' – ')[0]===name||(alt&&o.split(' – ')[0]===alt)){plan=o.split(' – ').slice(1).join(' – ');break;}
         }
-        row+='<td style="padding:6px 6px;text-align:center;white-space:nowrap">'+(plan||'–')+'</td>';
+        row+='<td style="padding:6px 3px;text-align:center;white-space:nowrap'+(u===nuUkeS?';background:rgba(244,166,194,.45);font-weight:600':'')+'">'+(plan||'–')+'</td>';
       });
       tr.innerHTML=row;
       tbody.appendChild(tr);
@@ -1186,6 +1213,14 @@ function renderStyrke(){
     tbl.appendChild(tbody);
     wrap.appendChild(tbl);
     sb.appendChild(wrap);
+    // Scroll automatisk til inneværende uke (ved siden av den faste Øvelse-kolonnen)
+    const scrollNu=()=>{
+      const th=tbl.querySelector('th[data-nu]');
+      if(!th||!wrap.offsetParent) return;
+      const first=tbl.querySelector('thead th');
+      wrap.scrollLeft=Math.max(0,th.offsetLeft-first.offsetWidth-6);
+    };
+    scrollNu(); setTimeout(scrollNu,0); setTimeout(scrollNu,150);
   }
 
   buildTable('Styrke A (fra uke 1/U37)','var(--a)','var(--s2)',[
@@ -1197,9 +1232,12 @@ function renderStyrke(){
   ],SA,Array.from({length:34},(_,i)=>i+19));
 
   buildTable('Styrke B (fra uke 1/U37)','var(--pu)','var(--s2)',[
-    ['1','Launch to step up'],['2','Standing Cable Press'],
-    ['3','Seated Shoulder Press'],['4','Half Kneeling Cable Chop'],
-    ['5','Calf rises'],['6','Dynamic copenhagen folds'],['7','Hamstring Ball Curls']
+    ['1','Plate-elevated reverse lunge'],['2','Single arm cable press'],
+    ['3','RDL i smith machine'],['4','Y raises'],
+    ['5','Calf rises'],['6','Copenhagen holds'],['7','Standing Cable Chop'],
+    ['t.o.m. U10','Launch to step up'],['t.o.m. U10','Standing Cable Press'],
+    ['t.o.m. U10','Seated Shoulder Press'],['t.o.m. U10','Half Kneeling Cable Chop'],
+    ['t.o.m. U10','Dynamic copenhagen folds'],['t.o.m. U10','Hamstring Ball Curls']
   ],SB,Array.from({length:34},(_,i)=>i+19));
   const nb=document.createElement('p');
   nb.style.cssText='font-size:11px;color:var(--m);margin:8px 0 0;font-style:italic';
@@ -1311,9 +1349,26 @@ function renderStyrkelogg(){
     const meter=erMeter(origBySafe[gk]);
     const harVekt=Object.values(bySafe[gk]).some(uk=>Object.values(uk).some(sv=>kgNum(sv.vekt)!=null));
     return {gk, okt, safe, displayName, meter, utenVekt:meter||!harVekt, enhet:meter?'m':'reps'};
-  }).sort((a,b)=>a.displayName.localeCompare(b.displayName,'nb'));
+  });
+
+  // ── Aktive øvelser (i programmet denne uka) øverst, øvrige nederst
+  const aktiveSet=new Set();
+  const nuUkeS=gjeldendeUke();
+  ['A','B','C'].forEach(okt=>{
+    const lst=(strSrc(okt)||{})[nuUkeS];
+    if(Array.isArray(lst)) lst.forEach(ex=>aktiveSet.add(okt+'|'+ex.split(' – ')[0].replace(/[^a-zA-Z0-9]/g,'-')));
+  });
+  groups.forEach(g=>{g.aktiv=aktiveSet.has(g.gk);});
+  groups.sort((a,b)=>(b.aktiv-a.aktiv)||a.displayName.localeCompare(b.displayName,'nb'));
+  let sisteAktiv=null;
+  const secHead=(txt,sub)=>{const h=document.createElement('div');h.style.cssText='font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--m);font-weight:600;margin:6px 0 10px;padding-bottom:4px;border-bottom:1px solid var(--b)';h.innerHTML=txt+(sub?' <span style="text-transform:none;letter-spacing:0;font-weight:400">· '+sub+'</span>':'');return h;};
 
   groups.forEach(g=>{
+    if(sisteAktiv!==g.aktiv){
+      sisteAktiv=g.aktiv;
+      sb.appendChild(g.aktiv?secHead('Aktive øvelser','i programmet nå'):secHead('Ikke aktive øvelser','ikke i programmet nå'));
+      if(!g.aktiv) sb.lastChild.style.marginTop='24px';
+    }
     const ukesData=bySafe[g.gk];
     const ukeNumre=Object.keys(ukesData).map(Number).sort((a,b)=>a-b);
 
@@ -1352,7 +1407,7 @@ function renderStyrkelogg(){
       const row=document.createElement('div');
       row.style.cssText='padding:12px 16px;border-bottom:1px solid var(--b)';
 
-      if(tyngste!=null&&forsteTyngste==null){ forsteTyngste=tyngste; forsteReps=repsTyngste; forsteTot=totReps; forsteUke=(w?dU(w):uke); }
+      if(tyngste!=null&&forsteTyngste==null){ forsteTyngste=tyngste; forsteReps=repsTyngste; forsteTot=totReps; forsteUke=(w?(dU(w)+' ('+w.kaluke+')'):uke); }
       const totHtml=(tyngste!=null&&forrigeTyngste!=null)?totChip(forsteTyngste,tyngste,forsteUke,forsteReps,repsTyngste,g.meter,g.utenVekt?g.enhet:'kg',forsteTot,totReps):'';
 
       let diffChip='';
@@ -1384,13 +1439,13 @@ function renderStyrkelogg(){
         return '<span style="display:inline-block;background:var(--bg);color:var(--t);padding:3px 9px;border-radius:99px;white-space:nowrap;font-size:11px">Sett '+s+': '+vekt+' × '+reps+'</span>';
       }).join('');
 
-      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+fmtDatoUtfort((loggS[uke+'_'+g.okt+'_varighet']||{}).dato)+'</div>'
+      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">'+(w?ukeFull(w):'Uke '+uke)+(w?' · '+w.dato:'')+fmtDatoUtfort((loggS[uke+'_'+g.okt+'_varighet']||{}).dato)+'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:'+(diffChip||totHtml?'8':'0')+'px">'+diffChip+totHtml+'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+setChips+'</div>';
       rows.push(row);
 
       sisteChip=diffChip; sisteTot=totHtml;
-      sisteInfo='Uke '+(w?dU(w):uke);
+      sisteInfo=(w?ukeFull(w):'Uke '+uke);
 
       if(tyngste!=null){ forrigeTyngste=tyngste; forrigeReps=repsTyngste; forrigeTot=totReps; }
     });
@@ -1436,8 +1491,8 @@ function renderLopelogg(){
 
   h1.style.marginBottom='20px';
 
-  const typeLabels={intervall:'Intervall', langtur:'Rolig langtur', roligLop:'Rolig løpetur/Gåtur'};
-  const typeOrder=['intervall','langtur','roligLop'];
+  const typeLabels={intervall:'Intervall', langtur:'Rolig langtur', roligLop:'Rolig løpetur/Gåtur', rolig2:'Rolig løpetur'};
+  const typeOrder=['intervall','langtur','roligLop','rolig2'];
 
   function tempoTilSek(t){
     if(!t) return null;
@@ -1522,13 +1577,13 @@ function renderLopelogg(){
       }
       if(sv.fol) detaljer.push(detaljChip('Følelse: '+sv.fol+'/5'));
 
-      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">Uke '+(w?dU(w):uke)+(w?' · '+w.dato:'')+fmtDatoUtfort(sv.dato)+'</div>'
+      row.innerHTML='<div style="font-weight:500;color:var(--t);font-size:12px;margin-bottom:6px">'+(w?ukeFull(w):'Uke '+uke)+(w?' · '+w.dato:'')+fmtDatoUtfort(sv.dato)+'</div>'
         +(badges.length?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+badges.join('')+'</div>':'')
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+detaljer.join('')+'</div>';
       rows.push(row);
 
       sisteBadges=badges;
-      sisteInfo='Uke '+(w?dU(w):uke);
+      sisteInfo=(w?ukeFull(w):'Uke '+uke);
 
       if(tempoSek!=null) forrigeTempoSek=tempoSek;
       if(kmVal!=null) forrigeKm=kmVal;
@@ -1572,55 +1627,62 @@ function renderLopeprogram(){
   h1.textContent='Løpeprogram (fra uke 1/U37)';
   sb.appendChild(h1);
 
+  if(!document.getElementById('lp-style')){
+    const st=document.createElement('style');st.id='lp-style';
+    st.textContent='.lp-dd{display:block}.lp-ds{display:none}.lp-fd{display:none}'
+      +'@media(min-width:560px){.lp-dd{display:inline}.lp-ds{display:inline}.lp-fd{display:inline}.lp-fm{display:none}}@media(max-width:559px){.lp-tbl td,.lp-tbl th{padding-left:1px!important;padding-right:1px!important}.lp-tbl{font-size:10px!important}.lp-wrap{margin-left:-20px;margin-right:-20px}}'
+      +'.lp-tbl th{position:sticky;top:0;z-index:3}.lp-tbl td,.lp-tbl th{vertical-align:middle;border-right:1px solid rgba(192,48,106,.22)}.lp-tbl td:last-child,.lp-tbl th:last-child{border-right:0}.lp-tbl th{border-right-color:rgba(255,255,255,.35)}.lp-tbl tbody td{border-bottom:1px solid rgba(192,48,106,.08)}';
+    document.head.appendChild(st);
+  }
+  const nuUke=gjeldendeUke();
+  const faseCol={Bygg:'#c0306a',Deload:'#0e8a96',Topp:'#c05020',Nedtrapping:'#7030a0',Løpsuke:'#2050a0'};
   const wrap=document.createElement('div');
-  wrap.style.cssText='margin-bottom:32px;overflow-x:auto';
+  wrap.className='lp-wrap';wrap.style.cssText='margin-bottom:20px;overflow-x:auto;max-width:640px;border:1px solid var(--b);border-radius:10px';
   const tbl=document.createElement('table');
-  tbl.style.cssText='border-collapse:collapse;table-layout:fixed;width:100%;font-size:11px';
-
-  const cols=['Uke','Dato','Intervall','Rolig langtur'];
-  const colWidths=['44px','76px','1fr','1fr'];
-  let hRow='<tr>';
-  cols.forEach((c,i)=>{
-    hRow+='<th style="width:'+colWidths[i]+';padding:6px 6px;background:var(--a);color:#fff;text-align:'+(i===0?'left':'center')+';white-space:normal;word-break:normal;overflow-wrap:break-word;line-height:1.25'+(i===0?';position:sticky;left:0;z-index:2':'')+'">'+c+'</th>';
-  });
-  hRow+='</tr>';
-  const thead=document.createElement('thead');
-  thead.innerHTML=hRow;
-  tbl.appendChild(thead);
-
+  tbl.className='lp-tbl';
+  tbl.style.cssText='border-collapse:collapse;width:100%;font-size:11px';
+  const cw=[24,40,34,30,32,0,52,52,52];
+  const cg='<colgroup>'+cw.map(x=>x?'<col style="width:'+x+'px">':'<col>').join('')+'</colgroup>';
+  const cols=['Uke','Dato','Fase','Tot.<br>(min)','Endr.','Intervall','Langtur<br>(min)','Tur+STL<br>(min)','Tur<br>(min)'];
+  tbl.innerHTML=cg+'<thead><tr>'+cols.map((c,i)=>'<th style="padding:9px 3px;background:var(--a);color:#fff;font-size:9px;font-weight:500;line-height:1.25;text-align:'+('center')+';white-space:nowrap'+(i===0?';position:sticky;left:0;z-index:4':'')+'">'+c+'</th>').join('')+'</tr></thead>';
   const tbody=document.createElement('tbody');
-  const newWeeks=W.filter(w=>w.uke>=19);
-  newWeeks.forEach((w,idx)=>{
+  let curRow=null;
+  W.filter(w=>w.uke>=19).forEach((w,idx)=>{
     const iv=INTERVALL_PLAN[w.uke];
     const rolig=ROLIG_PLAN[w.uke];
+    const eks=ROLIGLOP_EKSTRA[w.uke];
+    const r2=ROLIG2_PLAN[w.uke];
+    const tot=TOTAL_PLAN[w.uke], forrige=TOTAL_PLAN[w.uke-1];
+    let endr='–';
+    if(tot!=null&&forrige){const p=Math.round((tot/forrige-1)*100);
+      endr=p>0?'<span style="color:#2a7a2a">+'+p+'%</span>':p<0?'<span style="color:var(--or)">−'+Math.abs(p)+'%</span>':'0%';}
+    const fase=iv&&iv.fokus, fc=faseCol[fase]||'transparent';
+    const erNaa=w.uke===nuUke;
+    const bg=erNaa?'#fbd5e1':(idx%2===0?'var(--s2)':'var(--s)');
     const tr=document.createElement('tr');
-    const bg=idx%2===0?'var(--s2)':'var(--s)';
     tr.style.background=bg;
-    const intervallHtml=iv
-      ?'<div>'+iv.hoved+'</div><div style="color:var(--m);font-size:10px;margin-top:2px;line-height:1.3">'+iv.opp+' oppv. · '+(iv.pauseFull||(iv.pause+' pause'))+' · <span style="white-space:nowrap">'+iv.puls+' bpm</span> · '+iv.fokus+'</div>'
-      :'–';
-    const roligLopHtml='<div>Maks 30 min'+(ROLIGLOP_TILLEGG[w.uke]?' '+ROLIGLOP_TILLEGG[w.uke]:'')+'</div><div style="color:var(--m);font-size:10px;margin-top:2px">&lt; 151 bpm</div>';
-    const cells=[
-      {v:dU(w),align:'left'},
-      {v:w.dato.split(' – ').join('<br>-<br>'),align:'center'},
-      {v:intervallHtml,align:'center'},
-      {v:(LANGTUR_UTEN[w.uke]?'Ingen':rolig?('<div>'+rolig+' min</div><div style="color:var(--m);font-size:10px;margin-top:2px">Sone 1-2: 130–151 bpm</div>'):'–')+(ROLIGLOP_EKSTRA[w.uke]?'<div style="margin-top:6px">'+ROLIGLOP_EKSTRA[w.uke].l+'</div><div style="color:var(--m);font-size:10px;margin-top:2px">10 min + 4 STL · 1 min pause · Sone 1-2: 130–151 bpm</div>':''),align:'center'}
-    ];
-    let row='';
-    cells.forEach((c,i)=>{
-      row+='<td style="padding:6px 6px;text-align:'+c.align+';white-space:'+(i>=2?'normal':'nowrap')+';overflow-wrap:break-word'+(i===0?';font-weight:500;position:sticky;left:0;background:'+bg+';z-index:1':'')+'">'+c.v+'</td>';
-    });
-    tr.innerHTML=row;
+    if(erNaa) curRow=tr;
+    const ivDet=iv?[(iv.opp!=='15 min'?iv.opp+' oppv.':''),(iv.pauseFull||(iv.pause&&iv.pause!=='-'?iv.pause+' pause':'')),(iv.puls?iv.puls+' bpm':'')].filter(Boolean).join(' · '):'';
+    const Zs=(w.uke<29?'130–151':'100-151')+' bpm';
+    const dpart=w.dato.split(' – ');
+    const td=(v,al,extra)=>'<td style="padding:8px 2px;text-align:'+al+';'+(extra||'')+'">'+v+'</td>';
+    tr.innerHTML=
+      td(dU(w)+'<div style="font-size:8px;font-weight:400;color:var(--m)">'+w.kaluke+'</div>','center','font-weight:500;position:sticky;left:0;z-index:2;background:'+bg+';box-shadow:inset 3px 0 0 '+fc+';padding-left:7px;padding-right:4px')
+     +td('<span class="lp-dd">'+dpart[0]+'</span><span class="lp-ds"> – </span><span class="lp-dd">'+dpart[1]+'</span>','center','white-space:nowrap;color:var(--m)')
+     +td(fase?'<span style="color:'+(faseCol[fase]||'var(--m)')+';font-weight:500"><span class="lp-fm">'+(({Nedtrapping:'Nedtr.',Løpsuke:'Løp',Progresjon:'Progr.'})[fase]||fase)+'</span><span class="lp-fd">'+fase+'</span></span>':'–','center','white-space:nowrap;font-size:9px')
+     +td(tot!=null?'<b>'+tot+'</b>':'–','center','white-space:nowrap')
+     +td(endr,'center','white-space:nowrap')
+     +td(iv?('<div style="font-weight:500">'+iv.hoved+'</div>'+(w.uke===41?'<div style="font-size:10px;font-weight:600;color:var(--a);margin-top:2px">🏁 Fre 12.02: Bislett Indoor Marathon 10 km</div>':'')+'<div style="color:var(--m);font-size:10px;margin-top:1px;line-height:1.3">'+ivDet+'</div>'):'–','center')
+     +td(LANGTUR_UTEN[w.uke]?'Ingen':(rolig?rolig+'<div style="color:var(--m);font-size:8px;white-space:nowrap">'+Zs+'</div>':'–'),'center','white-space:nowrap')
+     +td(eks?eks.min+'<div style="color:var(--m);font-size:9px">+ 4 STL<br><span style="font-size:8px">'+Zs+'</span></div>':'–','center','white-space:nowrap')
+     +td(r2?r2+'<div style="color:var(--m);font-size:8px;white-space:nowrap">'+Zs+'</div>':'–','center','white-space:nowrap');
     tbody.appendChild(tr);
   });
   tbl.appendChild(tbody);
   wrap.appendChild(tbl);
   sb.appendChild(wrap);
+  if(curRow) setTimeout(()=>{ if(curRow.offsetParent) curRow.scrollIntoView({block:'center',behavior:'auto'}); },0);
 
-  const note=document.createElement('p');
-  note.style.cssText='font-size:11px;color:var(--m);margin:0;font-style:italic';
-  note.textContent='Planlagt Intervall og Rolig langtur (pluss ekstraøkter i enkelte uker) vises kun for de ukene der planen er lagt inn ennå. Resten fylles inn etter hvert.';
-  sb.appendChild(note);
 }
 
 function renderReg(){
@@ -1637,7 +1699,7 @@ function renderReg(){
   // ── LØPEØKTER ──────────────────────────────────────────────────────────
   const lSection=document.createElement('div');
   lSection.innerHTML=`
-    <h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Løpeøkter – Uke ${dU(w)}</h2>`;
+    <h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--a);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Løpeøkter – ${ukeFull(w)}</h2>`;
 
   // Ukas løpeøkter (fleksible, dedup per type)
   const loktMap=runOkter(uke);
@@ -1645,7 +1707,7 @@ function renderReg(){
   // ── VALGFRIE ØKTER (egen seksjon, plasseres etter styrke) ───────────────
   const vSection=document.createElement('div');
   vSection.style.marginTop='28px';
-  vSection.innerHTML=`<h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--a2);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Valgfrie økter – Uke ${dU(w)}</h2>`;
+  vSection.innerHTML=`<h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--a2);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Valgfrie økter – ${ukeFull(w)}</h2>`;
 
   // Vis alle 3 løpeøkter – ingen programmert innhold styrer lenger visning
   loktMap.forEach(o=>{
@@ -1829,7 +1891,7 @@ function renderReg(){
   // ── STYRKEØKTER ─────────────────────────────────────────────────────────
   const sSection=document.createElement('div');
   sSection.style.marginTop='28px';
-  sSection.innerHTML=`<h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--pu);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Styrkeøkter – Uke ${dU(w)}</h2>`;
+  sSection.innerHTML=`<h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:var(--pu);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Styrkeøkter – ${ukeFull(w)}</h2>`;
 
   // Check if today is a race day (Lørdag = lor)
   const todayRace=RC.find(r=>r.uke===uke);
@@ -1869,7 +1931,7 @@ function renderReg(){
       </div>
       <div class="hpm-body">
       <div class="scardh" style="background:var(--s2)">
-        <h3 style="color:var(--or)">🏁 ${todayRace.navn} – ${todayRace.km} km <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:var(--b);color:var(--m)">Løp · ${todayRace.dato}</span></h3>
+        <h3 style="color:var(--or)">🏁 ${todayRace.navn} – ${String(todayRace.km).replace('.',',')} km <span style="font-size:10px;padding:2px 7px;border-radius:99px;background:var(--b);color:var(--m)">Løp · ${todayRace.dato}</span></h3>
         <span>${todayRace.dato}</span>
       </div>
       <div style="padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
@@ -2067,7 +2129,7 @@ function renderReg(){
   // ── SØVNREGISTRERING (egen seksjon, plasseres sist) ──────────────────────
   const sovnSection=document.createElement('div');
   sovnSection.style.marginTop='28px';
-  sovnSection.innerHTML=`<h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:#2a7abf;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Søvnregistrering – Uke ${dU(w)}</h2>`;
+  sovnSection.innerHTML=`<h2 style="font-family:'Fraunces',serif;font-size:18px;font-weight:900;color:#2a7abf;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b)">Søvnregistrering – ${ukeFull(w)}</h2>`;
 
   const sovnCard = document.createElement('div');
   sovnCard.className = 'scard';
@@ -2294,7 +2356,7 @@ function saveOkt(key, msgId){
   const fill=document.getElementById('prog-fill');
   const label=document.getElementById('prog-label');
   if(fill) fill.style.width=pct+'%';
-  if(label) label.textContent='Uke '+uke+' av 34 · '+pct+'%'+(uke<34?' · '+(34-uke)+(34-uke===1?' uke':' uker')+' igjen':' · Løpsuke!');
+  if(label) label.textContent=pct+'%'+(uke<34?' · '+(34-uke)+(34-uke===1?' uke':' uker')+' igjen':' · Løpsuke!');
 
   (function(){
     const end2=new Date('2027-09-26');
@@ -2304,7 +2366,7 @@ function saveOkt(key, msgId){
     if(f2) f2.style.width=pct2+'%';
     const dl=Math.ceil((end2-now)/86400000);
     const wl=Math.ceil(dl/7);
-    if(l2) l2.textContent='Berlin: '+pct2+'%'+(dl>0?' · '+wl+(wl===1?' uke':' uker')+' igjen':'');
+    if(l2) l2.textContent=pct2+'%'+(dl>0?' · '+wl+(wl===1?' uke':' uker')+' igjen':'');
     if(c2){
       if(dl>0) c2.textContent='🏁 '+dl+(dl===1?' dag':' dager')+': Berlin Marathon 42,195 km';
       else if(dl===0) c2.textContent='🏁 Berlin Marathon 42,195 km er i dag!';
@@ -2772,16 +2834,16 @@ function renderProgresjonTab(){
   function fmtKm(km){ return km==null?'–':(Math.round(km*10)/10)+' km'; }
   function pctStr(d){ if(d==null) return '–'; const sign=d>0?'+':''; return sign+(Math.round(d*10)/10)+'%'; }
 
-  const typeLabel={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',langtur:'Langtur'};
-  const typeColorMap={intervall:'#c0306a',roligLop:'#7030a0',langtur:'#c05020',race:'#2050a0'};
-  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',langtur:'Langtur',race:'Løp'};
-  const chartTypes=['intervall','roligLop','langtur','race'];
+  const typeLabel={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',rolig2:'Rolig løpetur',langtur:'Langtur'};
+  const typeColorMap={intervall:'#c0306a',roligLop:'#7030a0',rolig2:'#0e8a96',langtur:'#c05020',race:'#2050a0'};
+  const typeNameMap={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',rolig2:'Rolig løpetur',langtur:'Langtur',race:'Løp'};
+  const chartTypes=['intervall','roligLop','rolig2','langtur','race'];
 
   // 1) Bygg full liste over alle logget økter med faktiske data (kun faste løpeøkter + løp – valgfrie holdes utenfor)
   const entries=[];
   for(let uke=1;uke<=W.length;uke++){
     const w=W.find(x=>x.uke===uke);
-    ['intervall','roligLop','langtur'].forEach(k=>{
+    ['intervall','roligLop','rolig2','langtur'].forEach(k=>{
       const sv=loggL[uke+'_'+k]||{};
       const tempoStr=sv.tempo || (k==='intervall' && sv.drags ? calcSnittTempo(sv.drags,6) : null);
       const tempoSek=tSek(tempoStr);
@@ -2940,7 +3002,7 @@ function renderProgresjonTab(){
     if(chartInst) chartInst.destroy();
     chartInst=new Chart(document.getElementById('progTabChart'),{
       type:'line',
-      data:{labels:W.map(w=>'U'+(w.dispUke||w.uke)),datasets:seriesFor(curMetric)},
+      data:{labels:W.map(w=>ukeLbl2(w)),datasets:seriesFor(curMetric)},
       options:{
         responsive:true,maintainAspectRatio:false,
         plugins:{
@@ -3005,7 +3067,7 @@ function renderProgresjonTab(){
       const [,m,d]=e.dato.split('-');
       datoDel=d+'.'+m;
     }
-    return '<div style="font-weight:500;color:var(--t)">Uke '+(W.find(x=>x.uke===e.uke)?dU(W.find(x=>x.uke===e.uke)):e.uke)+'</div>'+(datoDel?'<div style="font-size:10px;color:var(--m)">'+datoDel+'</div>':'');
+    return '<div style="font-weight:500;color:var(--t)">'+(W.find(x=>x.uke===e.uke)?ukeFull(e.uke):'Uke '+e.uke)+'</div>'+(datoDel?'<div style="font-size:10px;color:var(--m)">'+datoDel+'</div>':'');
   }
   const sorted=entries.slice().reverse();
   const ukerMedData=[...new Set(sorted.map(e=>e.uke))]; // allerede nyeste-først pga. reverse()
@@ -3030,7 +3092,7 @@ function renderProgresjonTab(){
       divTr.style.cursor=erGammel?'pointer':'default';
       divTr.innerHTML='<td colspan="5" style="padding:10px 8px 4px;font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b)">'
         +(erGammel?'<span class="progr-uke-arrow" style="display:inline-block;width:10px">▸</span> ':'')
-        +'Uke '+(W.find(x=>x.uke===e.uke)?dU(W.find(x=>x.uke===e.uke)):e.uke)+(W.find(x=>x.uke===e.uke)?' · '+W.find(x=>x.uke===e.uke).dato:'')
+        +(W.find(x=>x.uke===e.uke)?ukeFull(e.uke):'Uke '+e.uke)+(W.find(x=>x.uke===e.uke)?' · '+W.find(x=>x.uke===e.uke).dato:'')
         +(erGammel?' <span style="color:var(--m);font-weight:400;text-transform:none;letter-spacing:normal">('+antallIUke+' økt'+(antallIUke===1?'':'er')+' – trykk for å vise)</span>':'')
         +'</td>';
       if(erGammel){
@@ -3122,13 +3184,13 @@ function eksporterExcel(){
 
     const dayList=['man','tir','ons','tor','fre','lor','son'];
     const dayNames={man:'Mandag',tir:'Tirsdag',ons:'Onsdag',tor:'Torsdag',fre:'Fredag',lor:'Lørdag',son:'Søndag'};
-    const runLabelX={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',langtur:'Rolig langtur'};
+    const runLabelX={intervall:'Intervall',roligLop:'Rolig løpetur/Gåtur',rolig2:'Rolig løpetur',langtur:'Rolig langtur'};
 
     // ── 1) Løpeøkter (inkl. valgfrie og løp) ────────────────────────────
     const lopRows=[];
     for(let uke=1;uke<=W.length;uke++){
       const w=W.find(x=>x.uke===uke)||{};
-      ['intervall','roligLop','langtur','valgfri1','valgfri2','valgfri3'].forEach(type=>{
+      ['intervall','roligLop','rolig2','langtur','valgfri1','valgfri2','valgfri3'].forEach(type=>{
         const sv=loggL[uke+'_'+type];
         if(!sv) return;
         const harData=sv['var']||sv.km||sv.tempo||sv.sn||sv.mx||sv.fol||sv.kom||sv.watt||sv.ikkeUtfort;
@@ -3136,7 +3198,7 @@ function eksporterExcel(){
         const isValgfri=(type==='valgfri1'||type==='valgfri2'||type==='valgfri3');
         const typeNavn=isValgfri?(sv.type||('Valgfri økt '+type.slice(-1))):runLabelX[type];
         lopRows.push({
-          'Uke':uke,'Periode':w.dato||'','Type':typeNavn,'Dato':sv.dato||'',
+          'Uke':ukeFull(uke)||uke,'Periode':w.dato||'','Type':typeNavn,'Dato':sv.dato||'',
           'Varighet':sv['var']||'','Distanse (km)':sv.km||'','Snitt tempo':sv.tempo||'',
           'Snitt puls':sv.sn||'','Maks puls':sv.mx||'','Sykkel-watt':isValgfri?(sv.watt||''):'',
           'Følelse (1-5)':sv.fol||'','Kommentar':sv.kom||'','Ikke utført':sv.ikkeUtfort?'Ja':''
@@ -3148,7 +3210,7 @@ function eksporterExcel(){
         const harData=sv.tid||sv.km||sv.sn||sv.mx||sv.fol||sv.kom||sv.ikkeUtfort;
         if(harData){
           lopRows.push({
-            'Uke':uke,'Periode':w.dato||'','Type':'Løp: '+race.navn,'Dato':sv.dato||race.dato||'',
+            'Uke':ukeFull(uke)||uke,'Periode':w.dato||'','Type':'Løp: '+race.navn,'Dato':sv.dato||race.dato||'',
             'Varighet':sv.tid||'','Distanse (km)':sv.km||race.km||'','Snitt tempo':sv.tempo||'',
             'Snitt puls':sv.sn||'','Maks puls':sv.mx||'','Sykkel-watt':'',
             'Følelse (1-5)':sv.fol||'','Kommentar':sv.kom||'','Ikke utført':sv.ikkeUtfort?'Ja':''
@@ -3165,7 +3227,7 @@ function eksporterExcel(){
       Object.keys(sv.drags).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(dnum=>{
         const d=sv.drags[dnum];
         if(!d.tempo&&!d.puls&&!d.makspuls) return;
-        dragRowsX.push({'Uke':uke,'Drag':parseInt(dnum),'Tempo':d.tempo||'','Snitt puls':d.puls||'','Maks puls':d.makspuls||''});
+        dragRowsX.push({'Uke':ukeFull(uke)||uke,'Drag':parseInt(dnum),'Tempo':d.tempo||'','Snitt puls':d.puls||'','Maks puls':d.makspuls||''});
       });
     }
 
@@ -3184,7 +3246,7 @@ function eksporterExcel(){
             if(!sv) continue;
             if(!sv.vekt&&!sv.reps&&!sv.ikkeUtfort) continue;
             strRows.push({
-              'Uke':uke,'Økt':'Styrke '+okt,'Øvelse':exNavn(name),'Sett':s,
+              'Uke':ukeFull(uke)||uke,'Økt':'Styrke '+okt,'Øvelse':exNavn(name),'Sett':s,
               'Vekt (kg)':sv.vekt||'','Reps/Sek/Meter':sv.reps||'','Ikke utført':sv.ikkeUtfort?'Ja':''
             });
           }
@@ -3199,7 +3261,7 @@ function eksporterExcel(){
         const sv=loggS[uke+'_'+okt+'_varighet'];
         if(!sv) return;
         if(!sv.dato&&!sv['var']&&!sv.fol&&!sv.kom) return;
-        strOktRows.push({'Uke':uke,'Økt':'Styrke '+okt,'Dato':sv.dato||'','Varighet':sv['var']||'','Følelse (1-5)':sv.fol||'','Kommentar':sv.kom||''});
+        strOktRows.push({'Uke':ukeFull(uke)||uke,'Økt':'Styrke '+okt,'Dato':sv.dato||'','Varighet':sv['var']||'','Følelse (1-5)':sv.fol||'','Kommentar':sv.kom||''});
       });
     }
 
@@ -3211,7 +3273,7 @@ function eksporterExcel(){
       dayList.forEach(d=>{
         const v=sv['var_'+d], p=sv['puls_'+d], k=sv['kom_'+d];
         if(!v&&!p&&!k) return;
-        sovnRows.push({'Uke':uke,'Dag':dayNames[d],'Varighet (tt:mm)':v||'','Hvilepuls':p||'','Kommentar':k||''});
+        sovnRows.push({'Uke':ukeFull(uke)||uke,'Dag':dayNames[d],'Varighet (tt:mm)':v||'','Hvilepuls':p||'','Kommentar':k||''});
       });
     }
 
